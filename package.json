@@ -2,7 +2,12 @@
   "name": "@noverlink/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "prepare": "husky",
+    "test": "nx run-many -t test --parallel=3",
+    "lint": "nx run-many -t lint --parallel=3",
+    "format": "nx format:write"
+  },
   "private": true,
   "devDependencies": {
     "@eslint/js": "^9.8.0",
@@ -26,9 +31,11 @@
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-sonarjs": "^3.0.5",
+    "husky": "^9.1.7",
     "jest": "^30.0.2",
     "jest-environment-node": "^30.0.2",
     "jest-util": "^30.0.2",
+    "lint-staged": "^16.2.4",
     "nx": "21.6.4",
     "prettier": "^2.6.2",
     "ts-jest": "^29.4.0",

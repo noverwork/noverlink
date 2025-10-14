@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Run lint-staged on staged files only
+# This will run prettier, eslint, and typecheck on affected projects
+npx lint-staged
