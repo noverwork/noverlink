@@ -3,10 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "prepare": "husky",
-    "test": "nx run-many -t test --parallel=3",
-    "lint": "nx run-many -t lint --parallel=3",
-    "format": "nx format:write"
+    "typecheck": "nx run-many --target=typecheck --all --exclude=source",
+    "typecheck:affected": "nx affected --target=typecheck",
+    "lint": "nx run-many --target=lint --all --exclude=source",
+    "lint:affected": "nx affected --target=lint",
+    "test": "nx run-many --target=test --all --exclude=source --output-style=stream ",
+    "test:affected": "nx affected --target=test",
+    "format": "prettier . -c --ignore-unknown",
+    "prepare": "husky"
   },
   "private": true,
   "devDependencies": {
