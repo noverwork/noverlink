@@ -1,12 +1,18 @@
 {
   "mcpServers": {
-    "nx-mcp": {
-      "type": "stdio",
-      "command": "npx",
+    "azure-cli": {
+      "command": "docker",
       "args": [
-        "nx",
-        "mcp"
-      ]
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "AZURE_CREDENTIALS",
+        "ghcr.io/jdubois/azure-cli-mcp:latest"
+      ],
+      "env": {
+        "AZURE_CREDENTIALS": "{\"clientId\":\"4ca0c928-595c-46b8-a72b-67f840db4356\",\"clientSecret\":\"1GV8Q~US2xWj4UP5REn-RP6ZBVpd4Bu5fvogYcJ8\",\"subscriptionId\":\"0ccc57b0-db78-4256-a035-a386587e013c\",\"tenantId\":\"fa806627-91ea-4252-bd49-caa7d4e7badc\"}"
+      }
     }
   }
 }
