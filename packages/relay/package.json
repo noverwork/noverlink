@@ -1,0 +1,50 @@
+{
+  "name": "@noverlink/relay",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "outputs": ["{workspaceRoot}/packages/relay/target"],
+        "options": {
+          "command": "cargo build --release",
+          "cwd": "packages/relay"
+        },
+        "configurations": {
+          "development": {
+            "command": "cargo build"
+          }
+        }
+      },
+      "serve": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo run",
+          "cwd": "packages/relay"
+        }
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo test",
+          "cwd": "packages/relay"
+        }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo clippy -- -D warnings",
+          "cwd": "packages/relay"
+        }
+      },
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo clean",
+          "cwd": "packages/relay"
+        }
+      }
+    }
+  }
+}
