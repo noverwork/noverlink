@@ -25,8 +25,9 @@
     }
   },
   "dependencies": {
-    "tslib": "^2.3.0",
+    "@noverlink/interfaces": "0.0.1",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
-    "@noverlink/interfaces": "0.0.1"
+    "tslib": "^2.3.0"
   }
 }

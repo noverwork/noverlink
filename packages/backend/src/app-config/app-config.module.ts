@@ -1,6 +1,6 @@
-import { Environment, validateObject } from '@jowua/shared';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { Environment, validateObject } from '@noverlink/shared';
 import path from 'path';
 
 import { PROJECT_ROOT } from '../app';

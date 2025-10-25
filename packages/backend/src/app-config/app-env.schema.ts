@@ -1,4 +1,4 @@
-import { Environment } from '@jowua/shared';
+import { Environment } from '@noverlink/shared';
 import {
   IsEnum,
   IsIP,

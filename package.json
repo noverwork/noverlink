@@ -104,6 +104,7 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.7",
     "@nestjs/platform-express": "^11.1.7",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "class-validator": "^0.14.2",
     "next": "~15.2.4",
     "react": "19.0.0",

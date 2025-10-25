@@ -1,6 +1,6 @@
-import { Environment } from '@jowua/shared';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Environment } from '@noverlink/shared';
 
 import { EnvField } from './env.constant';
 
