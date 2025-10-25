@@ -15,10 +15,18 @@
     }
   },
   "nx": {
-    "name": "shared"
+    "name": "shared",
+    "targets": {
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
   },
   "dependencies": {
     "tslib": "^2.3.0",
-    "class-validator": "^0.14.2"
+    "class-validator": "^0.14.2",
+    "@noverlink/interfaces": "0.0.1"
   }
 }

@@ -10,9 +10,6 @@
       "path": "./packages/frontend"
     },
     {
-      "path": "./packages"
-    },
-    {
       "path": "./packages/shared"
     },
     {
