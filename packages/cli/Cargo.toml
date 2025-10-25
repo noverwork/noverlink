@@ -2,5 +2,16 @@
 name = "noverlink-cli"
 version = "0.1.0"
 edition = "2021"
+description = "Command-line tool for creating Noverlink tunnels"
+license = "MIT"
+repository = "https://github.com/noverlink/noverlink"
+readme = "../../README.md"
+keywords = ["tunnel", "proxy", "cli", "ngrok", "networking"]
+categories = ["command-line-utilities", "network-programming"]
+
+[lints]
+workspace = true
 
 [dependencies]
+clap = { version = "4.5", features = ["derive"] }
+anyhow = "1.0"

@@ -67,6 +67,7 @@
     "jest-environment-jsdom": "^30.0.2",
     "jest-environment-node": "^30.0.2",
     "jest-util": "^30.0.2",
+    "jsonc-eslint-parser": "^2.1.0",
     "lint-staged": "^16.2.4",
     "nx": "21.6.4",
     "prettier": "^2.6.2",
@@ -78,12 +79,15 @@
     "webpack-cli": "^5.1.4"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages"
   ],
   "dependencies": {
-    "@nestjs/common": "^11.0.0",
-    "@nestjs/core": "^11.0.0",
-    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/common": "^11.1.7",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.7",
+    "@nestjs/platform-express": "^11.1.7",
+    "class-validator": "^0.14.2",
     "next": "~15.2.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",

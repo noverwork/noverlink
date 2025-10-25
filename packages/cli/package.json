@@ -6,43 +6,50 @@
     "targets": {
       "build": {
         "executor": "nx:run-commands",
-        "outputs": ["{workspaceRoot}/packages/cli/target"],
+        "outputs": ["{workspaceRoot}/target"],
         "options": {
-          "command": "cargo build --release",
-          "cwd": "packages/cli"
+          "command": "cargo build --package noverlink-cli --release",
+          "cwd": "{projectRoot}/../.."
         },
         "configurations": {
           "development": {
-            "command": "cargo build"
+            "command": "cargo build --package noverlink-cli"
           }
         }
       },
       "serve": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "cargo run",
-          "cwd": "packages/cli"
+          "command": "cargo run --package noverlink-cli",
+          "cwd": "{projectRoot}/../.."
         }
       },
       "test": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "cargo test",
-          "cwd": "packages/cli"
+          "command": "cargo test --package noverlink-cli",
+          "cwd": "{projectRoot}/../.."
         }
       },
       "lint": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "cargo clippy -- -D warnings",
-          "cwd": "packages/cli"
+          "command": "cargo clippy --package noverlink-cli --all-targets --all-features -- -D warnings",
+          "cwd": "{projectRoot}/../.."
+        }
+      },
+      "lint:fix": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo clippy --package noverlink-cli --all-targets --all-features --fix --allow-dirty --allow-staged",
+          "cwd": "{projectRoot}/../.."
         }
       },
       "clean": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "cargo clean",
-          "cwd": "packages/cli"
+          "command": "cargo clean --package noverlink-cli",
+          "cwd": "{projectRoot}/../.."
         }
       }
     }

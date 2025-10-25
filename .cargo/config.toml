@@ -1,0 +1,28 @@
+# Cargo configuration for Noverlink workspace
+
+[build]
+# Use all available CPU cores for compilation
+jobs = 8
+
+[target.x86_64-unknown-linux-gnu]
+# Use mold linker if available (much faster than ld)
+# Install: sudo apt install mold
+# linker = "clang"
+# rustflags = ["-C", "link-arg=-fuse-ld=mold"]
+
+[alias]
+# Convenient aliases
+# cargo lint - Run clippy with strict settings
+lint = "clippy --all-targets --all-features -- -D warnings"
+
+# cargo fix-all - Auto-fix all clippy warnings
+fix-all = "clippy --all-targets --all-features --fix --allow-dirty --allow-staged"
+
+# cargo check-fast - Quick check without running clippy
+check-fast = "check --all-targets"
+
+# cargo test-all - Run all tests
+test-all = "test --all-features --workspace"
+
+# cargo build-release - Optimized release build
+build-release = "build --release --workspace"

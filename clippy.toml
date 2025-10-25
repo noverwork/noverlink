@@ -1,0 +1,13 @@
+# Clippy configuration for Noverlink
+# Strategy: Use defaults, enforce with -D warnings in CI/lint
+
+# Minimum Supported Rust Version
+msrv = "1.70"
+
+# Valid identifiers in docs (project-specific terms)
+doc-valid-idents = [
+    "WebSocket", "TCP", "UDP", "HTTP", "HTTPS",
+    "TLS", "QUIC", "CLI", "API", "JSON",
+    "URL", "URI", "IPv4", "IPv6",
+    "NestJS", "Next.js", "TypeScript", "JavaScript",
+]

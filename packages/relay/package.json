@@ -6,43 +6,57 @@
     "targets": {
       "build": {
         "executor": "nx:run-commands",
-        "outputs": ["{workspaceRoot}/packages/relay/target"],
+        "outputs": ["{workspaceRoot}/target"],
         "options": {
-          "command": "cargo build --release",
-          "cwd": "packages/relay"
+          "command": "cargo build --package relay --release",
+          "cwd": "{projectRoot}/../.."
         },
         "configurations": {
           "development": {
-            "command": "cargo build"
+            "command": "cargo build --package relay"
           }
         }
       },
       "serve": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "cargo run",
-          "cwd": "packages/relay"
+          "command": "WS_PORT=8444 HTTP_PORT=8080 cargo run --package relay",
+          "cwd": "{projectRoot}/../.."
         }
       },
       "test": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "cargo test",
-          "cwd": "packages/relay"
+          "command": "cargo test --package relay",
+          "cwd": "{projectRoot}/../.."
         }
       },
       "lint": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "cargo clippy -- -D warnings",
-          "cwd": "packages/relay"
+          "command": "cargo clippy --package relay --all-targets --all-features -- -D warnings",
+          "cwd": "{projectRoot}/../.."
+        }
+      },
+      "lint:fix": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo clippy --package relay --all-targets --all-features --fix --allow-dirty --allow-staged -- -D warnings",
+          "cwd": "{projectRoot}/../.."
+        }
+      },
+      "check": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo check --package relay",
+          "cwd": "{projectRoot}/../.."
         }
       },
       "clean": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "cargo clean",
-          "cwd": "packages/relay"
+          "command": "cargo clean --package relay",
+          "cwd": "{projectRoot}/../.."
         }
       }
     }

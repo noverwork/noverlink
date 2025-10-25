@@ -8,6 +8,15 @@
     },
     {
       "path": "./packages/frontend"
+    },
+    {
+      "path": "./packages"
+    },
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./packages/interfaces"
     }
   ]
 }
