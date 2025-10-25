@@ -1,58 +1,114 @@
-export default function Index() {
+export default function Dashboard() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-4xl mx-auto p-8">
-        <div className="bg-white rounded-lg shadow-xl p-8 mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to Noverlink
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Tailwind CSS v4 and shadcn/ui are now configured and ready to use!
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-              <h3 className="font-semibold text-blue-900 mb-2">Tailwind v4</h3>
-              <p className="text-sm text-blue-700">
-                Using the latest @tailwindcss/postcss plugin with modern configuration
-              </p>
-            </div>
-
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-              <h3 className="font-semibold text-purple-900 mb-2">shadcn/ui</h3>
-              <p className="text-sm text-purple-700">
-                Component library configured and ready to add components
-              </p>
-            </div>
-
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-              <h3 className="font-semibold text-green-900 mb-2">Next.js 15</h3>
-              <p className="text-sm text-green-700">
-                App router with React 19 and modern tooling
-              </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900">Noverlink</h1>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">Dashboard</span>
             </div>
           </div>
         </div>
+      </header>
 
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Next Steps
-          </h2>
-          <ul className="space-y-3 text-gray-700">
-            <li className="flex items-start">
-              <span className="text-blue-500 mr-2">→</span>
-              <span>Add shadcn components: <code className="bg-gray-100 px-2 py-1 rounded text-sm">npx shadcn@latest add button</code></span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-blue-500 mr-2">→</span>
-              <span>Start building your tunnel control panel</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-blue-500 mr-2">→</span>
-              <span>Integrate with the NestJS backend</span>
-            </li>
-          </ul>
-        </div>
+      {/* Main Layout */}
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="w-64 min-h-[calc(100vh-73px)] bg-white border-r border-gray-200">
+          <nav className="p-4">
+            <ul className="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-gray-900 bg-gray-100 rounded-md font-medium"
+                >
+                  Overview
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-md"
+                >
+                  Tunnels
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-md"
+                >
+                  Settings
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+              Dashboard
+            </h2>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="text-sm font-medium text-gray-600 mb-2">
+                  Active Tunnels
+                </div>
+                <div className="text-3xl font-bold text-gray-900">0</div>
+              </div>
+
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="text-sm font-medium text-gray-600 mb-2">
+                  Total Requests
+                </div>
+                <div className="text-3xl font-bold text-gray-900">0</div>
+              </div>
+
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="text-sm font-medium text-gray-600 mb-2">
+                  Bandwidth Used
+                </div>
+                <div className="text-3xl font-bold text-gray-900">0 GB</div>
+              </div>
+            </div>
+
+            {/* Empty State */}
+            <div className="bg-white rounded-lg border border-gray-200 p-12">
+              <div className="text-center">
+                <div className="text-gray-400 mb-4">
+                  <svg
+                    className="mx-auto h-12 w-12"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No active tunnels
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Get started by creating your first tunnel
+                </p>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
+                  Create Tunnel
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
