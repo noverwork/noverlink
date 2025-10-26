@@ -57,14 +57,19 @@ impl TunnelRegistry {
     }
 
     /// Generate a random subdomain (6 alphanumeric characters)
-    pub fn generate_random_subdomain(&self) -> String {
+    ///
+    /// Uses timestamp + atomic counter for uniqueness across threads.
+    /// This is a static method as it doesn't depend on registry state.
+    pub fn generate_random_subdomain() -> String {
         use std::sync::atomic::{AtomicU64, Ordering};
         static COUNTER: AtomicU64 = AtomicU64::new(0);
 
         // Use timestamp + counter for uniqueness
+        // System time should always be after UNIX_EPOCH on any modern system
+        #[allow(clippy::expect_used)]
         let timestamp = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
+            .expect("System time is before UNIX_EPOCH")
             .as_secs();
         let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
 
@@ -135,6 +140,8 @@ impl TunnelRegistry {
 }
 
 /// Encode a number as base36 (lowercase)
+/// This function is infallible for all valid u64 values
+#[allow(clippy::expect_used, clippy::indexing_slicing)]
 fn base36_encode(mut num: u64) -> String {
     const CHARS: &[u8] = b"0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -144,10 +151,14 @@ fn base36_encode(mut num: u64) -> String {
 
     let mut result = Vec::new();
     while num > 0 {
-        result.push(CHARS[(num % 36) as usize]);
+        // SAFETY: num % 36 is always < 36, which fits in usize
+        let index = usize::try_from(num % 36).expect("num % 36 is always < 36, fits in usize");
+        // SAFETY: index is always < 36, and CHARS has exactly 36 elements
+        result.push(CHARS[index]);
         num /= 36;
     }
 
     result.reverse();
-    String::from_utf8(result).unwrap()
+    // SAFETY: result only contains ASCII characters from CHARS
+    String::from_utf8(result).expect("base36 encoding only uses ASCII characters")
 }

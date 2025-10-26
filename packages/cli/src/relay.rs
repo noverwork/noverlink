@@ -34,6 +34,7 @@ pub struct RelayConnection {
 
 impl RelayConnection {
     /// Connect to relay server and register tunnel
+    #[allow(clippy::too_many_lines)]
     pub async fn connect(url: &str, domain: Option<String>, local_port: u16) -> Result<Self> {
         info!("Connecting to relay: {}", url);
 
@@ -75,7 +76,7 @@ impl RelayConnection {
                     WebSocketMessage::Error { message } => {
                         bail!("Registration failed: {}", message);
                     }
-                    _ => continue,
+                    _ => {}
                 }
             }
         };
@@ -138,13 +139,12 @@ impl RelayConnection {
                             break;
                         }
                     }
-                    WebSocketMessage::Ping => {
-                        // Pings are handled by sending task
-                    }
                     WebSocketMessage::Error { message } => {
                         error!("Relay error: {}", message);
                     }
-                    _ => {}
+                    _ => {
+                        // Ignore Ping and other messages
+                    }
                 }
             }
         });
@@ -206,7 +206,7 @@ impl RelayConnection {
         }
     }
 
-    /// Send response back to relay (direct method, prefer using ResponseSender for background tasks)
+    /// Send response back to relay (direct method, prefer using `ResponseSender` for background tasks)
     #[allow(dead_code)]
     pub async fn send_response(&self, request_id: u64, response: Vec<u8>) -> Result<()> {
         let outgoing = OutgoingResponse {

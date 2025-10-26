@@ -15,6 +15,7 @@ use noverlink_shared::WebSocketMessage;
 use crate::registry::{TunnelMessage, TunnelRegistry};
 
 /// Handle incoming CLI WebSocket connection
+#[allow(clippy::too_many_lines)]
 pub async fn handle_cli_connection(
     stream: TcpStream,
     registry: Arc<TunnelRegistry>,
@@ -63,7 +64,7 @@ pub async fn handle_cli_connection(
         None => {
             // Generate random subdomain
             loop {
-                let subdomain = registry.generate_random_subdomain();
+                let subdomain = TunnelRegistry::generate_random_subdomain();
                 if registry.is_domain_available(&subdomain) {
                     break subdomain;
                 }

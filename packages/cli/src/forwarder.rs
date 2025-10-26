@@ -46,7 +46,10 @@ async fn read_http_response(stream: &mut TcpStream) -> Result<Vec<u8>> {
                 break;
             }
             Ok(n) => {
-                buffer.extend_from_slice(&chunk[..n]);
+                // SAFETY: chunk.get(..n) is safe because n is returned from read() and is <= chunk.len()
+                if let Some(slice) = chunk.get(..n) {
+                    buffer.extend_from_slice(slice);
+                }
 
                 // Check if we have complete response
                 if is_complete_http_response(&buffer) {
@@ -77,9 +80,11 @@ fn is_complete_http_response(buffer: &[u8]) -> bool {
     };
 
     // Parse content-length from headers
-    let headers_str = match std::str::from_utf8(&buffer[..headers_end]) {
-        Ok(s) => s,
-        Err(_) => return false,
+    let Some(header_slice) = buffer.get(..headers_end) else {
+        return false;
+    };
+    let Ok(headers_str) = std::str::from_utf8(header_slice) else {
+        return false;
     };
 
     // Look for Content-Length header
@@ -132,7 +137,7 @@ mod tests {
     #[test]
     fn test_find_headers_end() {
         let req = b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nHello";
-        assert_eq!(find_headers_end(req), Some(29));
+        assert_eq!(find_headers_end(req), Some(34));
 
         let incomplete = b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\n";
         assert_eq!(find_headers_end(incomplete), None);

@@ -14,8 +14,10 @@ pub enum WebSocketMessage {
     /// The CLI sends this message when establishing a new tunnel.
     /// If domain is None, the relay will assign a random subdomain.
     Register {
+        /// Requested subdomain (e.g., "myapp"). If None, relay assigns random subdomain.
         #[serde(skip_serializing_if = "Option::is_none")]
         domain: Option<String>,
+        /// Local port on CLI side to forward traffic to
         local_port: u16,
     },
 
@@ -23,7 +25,9 @@ pub enum WebSocketMessage {
     ///
     /// Sent by the relay after successfully registering a tunnel.
     Ack {
+        /// Assigned subdomain (e.g., "myapp" or "abc123")
         domain: String,
+        /// Full public URL for the tunnel (e.g., `<http://abc123.localhost:8080>`)
         url: String,
     },
 
@@ -32,8 +36,10 @@ pub enum WebSocketMessage {
     /// The relay forwards an incoming HTTP request to the CLI.
     /// The payload is base64-encoded raw HTTP bytes.
     Request {
+        /// Unique identifier for this request, used to match with response
         request_id: u64,
-        payload: String, // base64 encoded HTTP request
+        /// Base64-encoded raw HTTP request bytes
+        payload: String,
     },
 
     /// CLI → Relay: Return HTTP response
@@ -41,14 +47,17 @@ pub enum WebSocketMessage {
     /// The CLI sends back the HTTP response from localhost.
     /// The payload is base64-encoded raw HTTP bytes.
     Response {
+        /// Request ID matching the original Request message
         request_id: u64,
-        payload: String, // base64 encoded HTTP response
+        /// Base64-encoded raw HTTP response bytes
+        payload: String,
     },
 
     /// Error message
     ///
     /// Can be sent by either party to indicate an error condition.
     Error {
+        /// Human-readable error description
         message: String,
     },
 
