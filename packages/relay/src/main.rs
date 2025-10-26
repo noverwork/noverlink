@@ -44,8 +44,13 @@ async fn main() -> Result<()> {
         .parse::<u16>()
         .map_err(|_| anyhow::anyhow!("HTTP_PORT must be a valid port number (1-65535)"))?;
 
+    let base_domain = env::var("BASE_DOMAIN")
+        .map_err(|_| anyhow::anyhow!("BASE_DOMAIN environment variable is required"))?;
+
+    info!("Base domain: {}", base_domain);
+
     // Shared tunnel registry
-    let registry = Arc::new(TunnelRegistry::new());
+    let registry = Arc::new(TunnelRegistry::new(base_domain));
 
     // Start WebSocket server for CLI connections
     let ws_addr = format!("0.0.0.0:{}", ws_port);

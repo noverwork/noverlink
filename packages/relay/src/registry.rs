@@ -37,15 +37,23 @@ pub struct TunnelRegistry {
     next_request_id: std::sync::atomic::AtomicU64,
     /// Map: `request_id` -> response channel
     pending_requests: DashMap<u64, mpsc::Sender<Vec<u8>>>,
+    /// Base domain for constructing full URLs
+    base_domain: String,
 }
 
 impl TunnelRegistry {
-    pub fn new() -> Self {
+    pub fn new(base_domain: String) -> Self {
         Self {
             tunnels: DashMap::new(),
             next_request_id: std::sync::atomic::AtomicU64::new(1),
             pending_requests: DashMap::new(),
+            base_domain,
         }
+    }
+
+    /// Get full URL for a subdomain
+    pub fn get_full_url(&self, subdomain: &str) -> String {
+        format!("http://{}.{}", subdomain, self.base_domain)
     }
 
     /// Generate a random subdomain (6 alphanumeric characters)
@@ -123,12 +131,6 @@ impl TunnelRegistry {
             }
         }
         false
-    }
-}
-
-impl Default for TunnelRegistry {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

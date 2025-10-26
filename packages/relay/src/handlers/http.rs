@@ -49,8 +49,12 @@ async fn handle_http_request(mut stream: TcpStream, registry: Arc<TunnelRegistry
 
     info!("HTTP request for host: {} from {}", host, peer);
 
-    // Find tunnel for this domain
-    let Some(tunnel) = registry.get(&host) else {
+    // Extract subdomain (first part before first dot)
+    // e.g., "yzn0.localhost" -> "yzn0"
+    let subdomain = host.split('.').next().unwrap_or(&host).to_string();
+
+    // Find tunnel for this subdomain
+    let Some(tunnel) = registry.get(&subdomain) else {
         send_no_tunnel_response(&mut stream, &host).await?;
         return Ok(());
     };

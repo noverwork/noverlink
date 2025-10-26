@@ -79,10 +79,10 @@ pub async fn handle_cli_connection(
     // Register tunnel
     let _tunnel = registry.register(final_domain.clone(), request_tx, local_port);
 
-    // Send acknowledgment
+    // Send acknowledgment with full URL
     let ack = WebSocketMessage::Ack {
         domain: final_domain.clone(),
-        url: format!("http://{}", final_domain),
+        url: registry.get_full_url(&final_domain),
     };
     let ack_json = serde_json::to_string(&ack)?;
     ws_sink
