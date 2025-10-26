@@ -217,12 +217,11 @@ async fn forward_to_tunnel(
     let request_id = registry.next_request_id();
 
     // Register pending request in registry
-    registry.register_pending_request(request_id, response_tx.clone());
+    registry.register_pending_request(request_id, response_tx);
 
     let tunnel_msg = TunnelMessage {
         request_id,
         request_data,
-        response_tx,
     };
 
     if let Err(e) = tunnel.request_tx.send(tunnel_msg).await {

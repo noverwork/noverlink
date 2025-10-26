@@ -12,9 +12,6 @@ pub struct TunnelMessage {
     pub request_id: u64,
     /// Raw HTTP request bytes
     pub request_data: Vec<u8>,
-    /// Channel to send response back
-    #[allow(dead_code)] // Will be used when response flow is implemented
-    pub response_tx: mpsc::Sender<Vec<u8>>,
 }
 
 /// Represents a tunnel from CLI to relay
@@ -67,11 +64,13 @@ impl TunnelRegistry {
         petname::petname(2, "-").unwrap_or_else(|| {
             // Fallback to timestamp-based subdomain if petname fails
             use std::time::{SystemTime, UNIX_EPOCH};
+            // SAFETY: System time should always be after UNIX_EPOCH on any modern system
+            #[allow(clippy::expect_used)]
             let timestamp = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
-                .unwrap()
+                .expect("System time is before UNIX_EPOCH")
                 .as_millis();
-            format!("tunnel-{}", timestamp % 100000)
+            format!("tunnel-{}", timestamp % 100_000)
         })
     }
 
