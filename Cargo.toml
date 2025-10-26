@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
     "packages/cli",
-    "packages/relay",
+    "packages/relay", "packages/rs-shared",
 ]
 
 [workspace.package]

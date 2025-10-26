@@ -1,9 +1,10 @@
 //! Noverlink Relay Server
 //!
 //! WebSocket-based tunnel relay for exposing local services to the internet.
+//!
+//! Simple, single-relay architecture for MVP.
 
 mod handlers;
-mod protocol;
 mod registry;
 
 use std::env;
@@ -30,7 +31,7 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    info!("Starting Noverlink Relay (WebSocket)");
+    info!("Starting Noverlink Relay");
 
     // Read config from env (all required, no defaults)
     let ws_port = env::var("WS_PORT")

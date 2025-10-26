@@ -10,7 +10,8 @@ use tokio::sync::mpsc;
 use tokio_tungstenite::accept_async;
 use tracing::{error, info, warn};
 
-use crate::protocol::WebSocketMessage;
+use noverlink_shared::WebSocketMessage;
+
 use crate::registry::{TunnelMessage, TunnelRegistry};
 
 /// Handle incoming CLI WebSocket connection
@@ -43,25 +44,52 @@ pub async fn handle_cli_connection(
         return Ok(());
     };
 
-    info!("Tunnel registration: {} -> localhost:{}", domain, local_port);
+    // Determine domain: use provided or generate random
+    let final_domain = match domain {
+        Some(d) => {
+            // Check if domain is available
+            if !registry.is_domain_available(&d) {
+                let error_msg = WebSocketMessage::Error {
+                    message: format!("Domain '{}' is already taken", d),
+                };
+                let json = serde_json::to_string(&error_msg)?;
+                ws_sink
+                    .send(tokio_tungstenite::tungstenite::Message::Text(json))
+                    .await?;
+                return Ok(());
+            }
+            d
+        }
+        None => {
+            // Generate random subdomain
+            loop {
+                let subdomain = registry.generate_random_subdomain();
+                if registry.is_domain_available(&subdomain) {
+                    break subdomain;
+                }
+            }
+        }
+    };
+
+    info!("Tunnel registration: {} -> localhost:{}", final_domain, local_port);
 
     // Create channel for sending requests to CLI
     let (request_tx, mut request_rx) = mpsc::channel::<TunnelMessage>(100);
 
     // Register tunnel
-    let _tunnel = registry.register(domain.clone(), request_tx, local_port);
+    let _tunnel = registry.register(final_domain.clone(), request_tx, local_port);
 
     // Send acknowledgment
     let ack = WebSocketMessage::Ack {
-        domain: domain.clone(),
-        url: format!("http://{}", domain),
+        domain: final_domain.clone(),
+        url: format!("http://{}", final_domain),
     };
     let ack_json = serde_json::to_string(&ack)?;
     ws_sink
         .send(tokio_tungstenite::tungstenite::Message::Text(ack_json))
         .await?;
 
-    info!("Tunnel established: {}", domain);
+    info!("Tunnel established: {}", final_domain);
 
     // Main message loop
     loop {
@@ -121,8 +149,8 @@ pub async fn handle_cli_connection(
     }
 
     // Cleanup
-    registry.remove(&domain);
-    info!("Tunnel closed: {}", domain);
+    registry.remove(&final_domain);
+    info!("Tunnel closed: {}", final_domain);
 
     Ok(())
 }

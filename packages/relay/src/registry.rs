@@ -48,6 +48,31 @@ impl TunnelRegistry {
         }
     }
 
+    /// Generate a random subdomain (6 alphanumeric characters)
+    pub fn generate_random_subdomain(&self) -> String {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static COUNTER: AtomicU64 = AtomicU64::new(0);
+
+        // Use timestamp + counter for uniqueness
+        let timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
+
+        // Generate pseudo-random subdomain
+        // Format: base36(timestamp) + base36(counter)
+        let ts_part = base36_encode(timestamp % 46656); // 36^3
+        let counter_part = base36_encode(counter % 1296); // 36^2
+
+        format!("{}{}", ts_part, counter_part)
+    }
+
+    /// Check if domain is available
+    pub fn is_domain_available(&self, domain: &str) -> bool {
+        !self.tunnels.contains_key(domain)
+    }
+
     /// Register a new tunnel
     pub fn register(
         &self,
@@ -105,4 +130,22 @@ impl Default for TunnelRegistry {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// Encode a number as base36 (lowercase)
+fn base36_encode(mut num: u64) -> String {
+    const CHARS: &[u8] = b"0123456789abcdefghijklmnopqrstuvwxyz";
+
+    if num == 0 {
+        return "0".to_string();
+    }
+
+    let mut result = Vec::new();
+    while num > 0 {
+        result.push(CHARS[(num % 36) as usize]);
+        num /= 36;
+    }
+
+    result.reverse();
+    String::from_utf8(result).unwrap()
 }

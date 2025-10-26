@@ -13,15 +13,32 @@ categories = ["network-programming", "web-programming"]
 workspace = true
 
 [dependencies]
+# Shared types
+noverlink-shared = { path = "../rs-shared" }
+
+# Runtime
 tokio = { version = "1", features = ["rt-multi-thread", "net", "signal", "macros", "sync", "io-util", "fs", "time"] }
+
+# WebSocket
 tokio-tungstenite = "0.24"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-anyhow = "1.0"
-dashmap = "6.0"
+futures-util = "0.3"
+
+# Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-httparse = "1.9"
-futures-util = "0.3"
 base64 = "0.22"
+
+# HTTP
+httparse = "1.9"
+
+# Utilities
+anyhow = "1.0"
+dashmap = "6.0"
 dotenvy = "0.15"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Database (for future multi-relay support)
+redis = { version = "0.27", features = ["tokio-comp", "aio"] }
