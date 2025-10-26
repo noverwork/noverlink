@@ -56,29 +56,23 @@ impl TunnelRegistry {
         format!("http://{}.{}", subdomain, self.base_domain)
     }
 
-    /// Generate a random subdomain (6 alphanumeric characters)
+    /// Generate a random human-readable subdomain
     ///
-    /// Uses timestamp + atomic counter for uniqueness across threads.
+    /// Generates names like "happy-cat", "blue-moon", "lazy-dog"
+    /// using the petname library for memorable, unique subdomains.
     /// This is a static method as it doesn't depend on registry state.
     pub fn generate_random_subdomain() -> String {
-        use std::sync::atomic::{AtomicU64, Ordering};
-        static COUNTER: AtomicU64 = AtomicU64::new(0);
-
-        // Use timestamp + counter for uniqueness
-        // System time should always be after UNIX_EPOCH on any modern system
-        #[allow(clippy::expect_used)]
-        let timestamp = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .expect("System time is before UNIX_EPOCH")
-            .as_secs();
-        let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
-
-        // Generate pseudo-random subdomain
-        // Format: base36(timestamp) + base36(counter)
-        let ts_part = base36_encode(timestamp % 46656); // 36^3
-        let counter_part = base36_encode(counter % 1296); // 36^2
-
-        format!("{}{}", ts_part, counter_part)
+        // Generate 2-word petname with dash separator (e.g., "happy-cat")
+        // Using 2 words for balance between uniqueness and brevity
+        petname::petname(2, "-").unwrap_or_else(|| {
+            // Fallback to timestamp-based subdomain if petname fails
+            use std::time::{SystemTime, UNIX_EPOCH};
+            let timestamp = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_millis();
+            format!("tunnel-{}", timestamp % 100000)
+        })
     }
 
     /// Check if domain is available
@@ -137,28 +131,4 @@ impl TunnelRegistry {
         }
         false
     }
-}
-
-/// Encode a number as base36 (lowercase)
-/// This function is infallible for all valid u64 values
-#[allow(clippy::expect_used, clippy::indexing_slicing)]
-fn base36_encode(mut num: u64) -> String {
-    const CHARS: &[u8] = b"0123456789abcdefghijklmnopqrstuvwxyz";
-
-    if num == 0 {
-        return "0".to_string();
-    }
-
-    let mut result = Vec::new();
-    while num > 0 {
-        // SAFETY: num % 36 is always < 36, which fits in usize
-        let index = usize::try_from(num % 36).expect("num % 36 is always < 36, fits in usize");
-        // SAFETY: index is always < 36, and CHARS has exactly 36 elements
-        result.push(CHARS[index]);
-        num /= 36;
-    }
-
-    result.reverse();
-    // SAFETY: result only contains ASCII characters from CHARS
-    String::from_utf8(result).expect("base36 encoding only uses ASCII characters")
 }
