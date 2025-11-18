@@ -95,17 +95,57 @@ pub async fn handle_cli_connection(
     // Main message loop
     loop {
         tokio::select! {
-            // Receive request from HTTP handler → send to CLI
+            // Receive message from HTTP handler → send to CLI
             Some(tunnel_msg) = request_rx.recv() => {
-                let request_msg = WebSocketMessage::Request {
-                    request_id: tunnel_msg.request_id,
-                    payload: base64_encode(&tunnel_msg.request_data),
-                };
+                match tunnel_msg {
+                    TunnelMessage::HttpRequest { request_id, request_data } => {
+                        let request_msg = WebSocketMessage::Request {
+                            request_id,
+                            payload: base64_encode(&request_data),
+                        };
 
-                let json = serde_json::to_string(&request_msg)?;
-                if let Err(e) = ws_sink.send(tokio_tungstenite::tungstenite::Message::Text(json)).await {
-                    error!("Failed to send request to CLI: {}", e);
-                    break;
+                        let json = serde_json::to_string(&request_msg)?;
+                        if let Err(e) = ws_sink.send(tokio_tungstenite::tungstenite::Message::Text(json)).await {
+                            error!("Failed to send HTTP request to CLI: {}", e);
+                            break;
+                        }
+                    }
+
+                    TunnelMessage::WebSocketUpgrade { connection_id, request_data } => {
+                        let upgrade_msg = WebSocketMessage::WebSocketUpgrade {
+                            connection_id,
+                            initial_request: base64_encode(&request_data),
+                        };
+
+                        let json = serde_json::to_string(&upgrade_msg)?;
+                        if let Err(e) = ws_sink.send(tokio_tungstenite::tungstenite::Message::Text(json)).await {
+                            error!("Failed to send WebSocket upgrade to CLI: {}", e);
+                            break;
+                        }
+                        info!("Sent WebSocket upgrade request to CLI");
+                    }
+
+                    TunnelMessage::WebSocketFrame { connection_id, frame_data } => {
+                        let frame_msg = WebSocketMessage::WebSocketFrame {
+                            connection_id,
+                            data: base64_encode(&frame_data),
+                        };
+
+                        let json = serde_json::to_string(&frame_msg)?;
+                        if let Err(e) = ws_sink.send(tokio_tungstenite::tungstenite::Message::Text(json)).await {
+                            error!("Failed to send WebSocket frame to CLI: {}", e);
+                            break;
+                        }
+                    }
+
+                    TunnelMessage::WebSocketClose { connection_id } => {
+                        let close_msg = WebSocketMessage::WebSocketClose { connection_id };
+
+                        let json = serde_json::to_string(&close_msg)?;
+                        if let Err(e) = ws_sink.send(tokio_tungstenite::tungstenite::Message::Text(json)).await {
+                            error!("Failed to send WebSocket close to CLI: {}", e);
+                        }
+                    }
                 }
             }
 
@@ -130,6 +170,40 @@ pub async fn handle_cli_connection(
                                         }
                                     }
                                 }
+
+                                WebSocketMessage::WebSocketReady { connection_id, upgrade_response } => {
+                                    match base64_decode(&upgrade_response) {
+                                        Ok(response_data) => {
+                                            if registry.send_websocket_upgrade_response(&connection_id, response_data).await {
+                                                info!("WebSocket upgrade response sent for {}", connection_id);
+                                            } else {
+                                                warn!("Failed to send WebSocket upgrade response for {}", connection_id);
+                                            }
+                                        }
+                                        Err(e) => {
+                                            error!("Failed to decode WebSocket upgrade response: {}", e);
+                                        }
+                                    }
+                                }
+
+                                WebSocketMessage::WebSocketFrame { connection_id, data } => {
+                                    match base64_decode(&data) {
+                                        Ok(frame_data) => {
+                                            if !registry.send_websocket_frame(&connection_id, frame_data).await {
+                                                warn!("Failed to send WebSocket frame for {}", connection_id);
+                                            }
+                                        }
+                                        Err(e) => {
+                                            error!("Failed to decode WebSocket frame: {}", e);
+                                        }
+                                    }
+                                }
+
+                                WebSocketMessage::WebSocketClose { connection_id } => {
+                                    info!("WebSocket close received for {}", connection_id);
+                                    registry.remove_websocket(&connection_id);
+                                }
+
                                 _ => {
                                     warn!("Unexpected message from CLI: {:?}", ws_msg);
                                 }

@@ -59,6 +59,17 @@ async fn handle_http_request(mut stream: TcpStream, registry: Arc<TunnelRegistry
         return Ok(());
     };
 
+    // Check if this is a WebSocket upgrade request
+    let headers_slice = buf.get(..headers_end + 4).ok_or_else(|| {
+        anyhow::anyhow!("Headers end position out of bounds")
+    })?;
+
+    if is_websocket_upgrade(headers_slice) {
+        info!("WebSocket upgrade request detected for {}", host);
+        let full_request = buf[..headers_end + 4].to_vec();
+        return handle_websocket_proxy(stream, tunnel, &registry, full_request, &subdomain).await;
+    }
+
     // Read full request including body
     let full_request = read_full_request(&mut stream, buf, headers_end).await?;
 
@@ -204,6 +215,131 @@ async fn read_full_request(
     Ok(buf)
 }
 
+/// Handle WebSocket proxy connection
+async fn handle_websocket_proxy(
+    mut stream: TcpStream,
+    tunnel: Arc<crate::registry::Tunnel>,
+    registry: &Arc<TunnelRegistry>,
+    upgrade_request: Vec<u8>,
+    subdomain: &str,
+) -> Result<()> {
+    // Generate unique connection ID
+    let connection_id = registry.next_ws_connection_id();
+    info!("Starting WebSocket proxy: {} for {}", connection_id, subdomain);
+
+    // Register pending WebSocket and get channels
+    let (mut upgrade_response_rx, mut frame_rx) = registry.register_pending_websocket(connection_id.clone());
+
+    // Send WebSocket upgrade request to CLI
+    let upgrade_msg = TunnelMessage::WebSocketUpgrade {
+        connection_id: connection_id.clone(),
+        request_data: upgrade_request,
+    };
+
+    if let Err(e) = tunnel.request_tx.send(upgrade_msg).await {
+        error!("Failed to send WebSocket upgrade to CLI: {}", e);
+        stream
+            .write_all(b"HTTP/1.1 502 Bad Gateway\r\n\r\nCLI not responding\r\n")
+            .await?;
+        return Ok(());
+    }
+
+    // Wait for 101 Switching Protocols response from CLI
+    let upgrade_response = match timeout(Duration::from_secs(30), upgrade_response_rx.recv()).await {
+        Ok(Some(response)) => response,
+        Ok(None) => {
+            error!("WebSocket upgrade response channel closed");
+            stream
+                .write_all(b"HTTP/1.1 502 Bad Gateway\r\n\r\nCLI disconnected\r\n")
+                .await?;
+            registry.remove_websocket(&connection_id);
+            return Ok(());
+        }
+        Err(_) => {
+            error!("WebSocket upgrade timeout");
+            stream
+                .write_all(b"HTTP/1.1 504 Gateway Timeout\r\n\r\nUpgrade timeout\r\n")
+                .await?;
+            registry.remove_websocket(&connection_id);
+            return Ok(());
+        }
+    };
+
+    // Send 101 response to browser
+    stream.write_all(&upgrade_response).await?;
+    stream.flush().await?;
+    info!("WebSocket handshake complete: {}", connection_id);
+
+    // Now do bidirectional forwarding
+    let (mut read_half, mut write_half) = stream.into_split();
+    let tunnel_clone = Arc::clone(&tunnel);
+    let connection_id_clone = connection_id.clone();
+
+    // Task 1: Browser → Relay → CLI
+    let browser_to_cli = tokio::spawn(async move {
+        let mut buf = vec![0u8; 8192];
+        loop {
+            match read_half.read(&mut buf).await {
+                Ok(0) => {
+                    info!("Browser closed WebSocket: {}", connection_id_clone);
+                    break;
+                }
+                Ok(n) => {
+                    let frame_data = buf[..n].to_vec();
+
+                    let frame_msg = TunnelMessage::WebSocketFrame {
+                        connection_id: connection_id_clone.clone(),
+                        frame_data,
+                    };
+
+                    if tunnel_clone.request_tx.send(frame_msg).await.is_err() {
+                        warn!("Failed to send WebSocket frame to CLI");
+                        break;
+                    }
+                }
+                Err(e) => {
+                    warn!("Error reading from browser WebSocket: {}", e);
+                    break;
+                }
+            }
+        }
+
+        // Send close message
+        let close_msg = TunnelMessage::WebSocketClose {
+            connection_id: connection_id_clone.clone(),
+        };
+        let _ = tunnel_clone.request_tx.send(close_msg).await;
+    });
+
+    // Task 2: CLI → Relay → Browser
+    let connection_id_clone2 = connection_id.clone();
+    let cli_to_browser = tokio::spawn(async move {
+        while let Some(frame_data) = frame_rx.recv().await {
+            if write_half.write_all(&frame_data).await.is_err() {
+                warn!("Failed to write WebSocket frame to browser");
+                break;
+            }
+        }
+        info!("CLI closed WebSocket: {}", connection_id_clone2);
+    });
+
+    // Wait for either direction to close
+    tokio::select! {
+        _ = browser_to_cli => {
+            info!("Browser-to-CLI forwarding ended");
+        }
+        _ = cli_to_browser => {
+            info!("CLI-to-browser forwarding ended");
+        }
+    }
+
+    // Cleanup
+    registry.remove_websocket(&connection_id);
+    info!("WebSocket proxy closed: {}", connection_id);
+
+    Ok(())
+}
+
 /// Forward request to tunnel and handle response
 async fn forward_to_tunnel(
     stream: &mut TcpStream,
@@ -219,7 +355,7 @@ async fn forward_to_tunnel(
     // Register pending request in registry
     registry.register_pending_request(request_id, response_tx);
 
-    let tunnel_msg = TunnelMessage {
+    let tunnel_msg = TunnelMessage::HttpRequest {
         request_id,
         request_data,
     };
@@ -232,7 +368,8 @@ async fn forward_to_tunnel(
         return Ok(());
     }
 
-    match timeout(Duration::from_secs(30), response_rx.recv()).await {
+    // Wait for response from CLI (7 minutes, matching ngrok)
+    match timeout(Duration::from_secs(420), response_rx.recv()).await {
         Ok(Some(response_data)) => {
             stream.write_all(&response_data).await?;
             stream.flush().await?;
@@ -258,6 +395,40 @@ fn find_headers_end(buf: &[u8]) -> Option<usize> {
     buf.windows(4).position(|w| w == b"\r\n\r\n")
 }
 
+/// Check if HTTP request is a WebSocket upgrade request
+///
+/// Returns true if all three conditions are met:
+/// 1. Header "Upgrade: websocket" is present
+/// 2. Header "Connection: Upgrade" is present
+/// 3. Header "Sec-WebSocket-Key" is present
+fn is_websocket_upgrade(headers_buf: &[u8]) -> bool {
+    let Ok(headers_str) = std::str::from_utf8(headers_buf) else {
+        return false;
+    };
+
+    let mut has_upgrade = false;
+    let mut has_connection_upgrade = false;
+    let mut has_ws_key = false;
+
+    for line in headers_str.lines() {
+        let lower = line.to_lowercase();
+
+        if lower.starts_with("upgrade:") && lower.contains("websocket") {
+            has_upgrade = true;
+        }
+
+        if lower.starts_with("connection:") && lower.contains("upgrade") {
+            has_connection_upgrade = true;
+        }
+
+        if lower.starts_with("sec-websocket-key:") {
+            has_ws_key = true;
+        }
+    }
+
+    has_upgrade && has_connection_upgrade && has_ws_key
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -269,5 +440,34 @@ mod tests {
 
         let incomplete = b"GET / HTTP/1.1\r\nHost: example.com\r\n";
         assert_eq!(find_headers_end(incomplete), None);
+    }
+
+    #[test]
+    fn test_is_websocket_upgrade() {
+        let ws_request = b"GET /chat HTTP/1.1\r\n\
+            Host: example.com\r\n\
+            Upgrade: websocket\r\n\
+            Connection: Upgrade\r\n\
+            Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\
+            Sec-WebSocket-Version: 13\r\n\
+            \r\n";
+
+        assert!(is_websocket_upgrade(ws_request));
+
+        // Regular HTTP request
+        let http_request = b"GET / HTTP/1.1\r\n\
+            Host: example.com\r\n\
+            \r\n";
+
+        assert!(!is_websocket_upgrade(http_request));
+
+        // Missing Sec-WebSocket-Key
+        let incomplete_ws = b"GET /chat HTTP/1.1\r\n\
+            Host: example.com\r\n\
+            Upgrade: websocket\r\n\
+            Connection: Upgrade\r\n\
+            \r\n";
+
+        assert!(!is_websocket_upgrade(incomplete_ws));
     }
 }
