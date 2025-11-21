@@ -70,6 +70,48 @@ pub enum WebSocketMessage {
     ///
     /// Response to a Ping message.
     Pong,
+
+    /// Relay → CLI: New WebSocket connection incoming
+    ///
+    /// Notifies CLI that a client wants to establish a WebSocket connection.
+    /// Includes the initial HTTP upgrade request that CLI should forward to localhost.
+    WebSocketUpgrade {
+        /// Unique connection ID for this WebSocket session
+        connection_id: String,
+        /// Base64-encoded initial HTTP upgrade request
+        initial_request: String,
+    },
+
+    /// CLI → Relay: WebSocket ready for proxying
+    ///
+    /// CLI confirms it has established connection to localhost WebSocket
+    /// and received 101 Switching Protocols response. Includes the response
+    /// for Relay to forward to the client.
+    WebSocketReady {
+        /// Connection ID matching the WebSocketUpgrade message
+        connection_id: String,
+        /// Base64-encoded 101 response from localhost
+        upgrade_response: String,
+    },
+
+    /// Bidirectional: WebSocket frame data
+    ///
+    /// Used to forward WebSocket frames between Relay and CLI.
+    /// Direction is implicit based on sender (Relay→CLI = downstream, CLI→Relay = upstream).
+    WebSocketFrame {
+        /// Connection ID
+        connection_id: String,
+        /// Base64-encoded frame data (raw WebSocket frame bytes)
+        data: String,
+    },
+
+    /// Either party: Close WebSocket connection
+    ///
+    /// Sent when either side closes the WebSocket connection.
+    WebSocketClose {
+        /// Connection ID
+        connection_id: String,
+    },
 }
 
 #[cfg(test)]
@@ -153,5 +195,55 @@ mod tests {
 
         assert!(ping_json.contains("\"type\":\"ping\""));
         assert!(pong_json.contains("\"type\":\"pong\""));
+    }
+
+    #[test]
+    fn test_websocket_upgrade() {
+        let msg = WebSocketMessage::WebSocketUpgrade {
+            connection_id: "ws-abc123".to_string(),
+            initial_request: "R0VUIC8gSFRUUC8xLjENCg==".to_string(), // base64: GET / HTTP/1.1
+        };
+
+        let json = serde_json::to_string(&msg).unwrap();
+        assert!(json.contains("\"type\":\"websocketupgrade\""));
+        assert!(json.contains("\"connection_id\":\"ws-abc123\""));
+        assert!(json.contains("\"initial_request\""));
+    }
+
+    #[test]
+    fn test_websocket_ready() {
+        let msg = WebSocketMessage::WebSocketReady {
+            connection_id: "ws-abc123".to_string(),
+            upgrade_response: "SFRUUC8xLjEgMTAxIA==".to_string(), // base64: HTTP/1.1 101
+        };
+
+        let json = serde_json::to_string(&msg).unwrap();
+        assert!(json.contains("\"type\":\"websocketready\""));
+        assert!(json.contains("\"connection_id\":\"ws-abc123\""));
+        assert!(json.contains("\"upgrade_response\""));
+    }
+
+    #[test]
+    fn test_websocket_frame() {
+        let msg = WebSocketMessage::WebSocketFrame {
+            connection_id: "ws-abc123".to_string(),
+            data: "SGVsbG8gV29ybGQ=".to_string(), // base64: Hello World
+        };
+
+        let json = serde_json::to_string(&msg).unwrap();
+        assert!(json.contains("\"type\":\"websocketframe\""));
+        assert!(json.contains("\"connection_id\":\"ws-abc123\""));
+        assert!(json.contains("\"data\""));
+    }
+
+    #[test]
+    fn test_websocket_close() {
+        let msg = WebSocketMessage::WebSocketClose {
+            connection_id: "ws-abc123".to_string(),
+        };
+
+        let json = serde_json::to_string(&msg).unwrap();
+        assert!(json.contains("\"type\":\"websocketclose\""));
+        assert!(json.contains("\"connection_id\":\"ws-abc123\""));
     }
 }

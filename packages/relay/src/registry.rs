@@ -6,12 +6,38 @@ use dashmap::DashMap;
 use tokio::sync::mpsc;
 use tracing::{info, warn};
 
-/// Message sent to tunnel for proxying HTTP requests
-pub struct TunnelMessage {
-    /// Request ID for tracking
-    pub request_id: u64,
-    /// Raw HTTP request bytes
-    pub request_data: Vec<u8>,
+/// Message sent to tunnel for proxying
+#[derive(Debug, Clone)]
+pub enum TunnelMessage {
+    /// HTTP request-response message
+    HttpRequest {
+        /// Request ID for tracking
+        request_id: u64,
+        /// Raw HTTP request bytes
+        request_data: Vec<u8>,
+    },
+
+    /// WebSocket upgrade request
+    WebSocketUpgrade {
+        /// Connection ID for this WebSocket
+        connection_id: String,
+        /// Raw HTTP upgrade request
+        request_data: Vec<u8>,
+    },
+
+    /// WebSocket frame to forward to CLI
+    WebSocketFrame {
+        /// Connection ID
+        connection_id: String,
+        /// Frame data
+        frame_data: Vec<u8>,
+    },
+
+    /// Close WebSocket connection
+    WebSocketClose {
+        /// Connection ID
+        connection_id: String,
+    },
 }
 
 /// Represents a tunnel from CLI to relay
@@ -36,6 +62,12 @@ pub struct TunnelRegistry {
     pending_requests: DashMap<u64, mpsc::Sender<Vec<u8>>>,
     /// Base domain for constructing full URLs
     base_domain: String,
+    /// WebSocket connection ID counter
+    next_ws_connection_id: std::sync::atomic::AtomicU64,
+    /// Map: `connection_id` -> (response_channel, frame_channel)
+    /// response_channel: for sending the 101 upgrade response back
+    /// frame_channel: for sending WebSocket frames from client to CLI
+    pending_websockets: DashMap<String, (mpsc::Sender<Vec<u8>>, mpsc::Sender<Vec<u8>>)>,
 }
 
 impl TunnelRegistry {
@@ -45,6 +77,8 @@ impl TunnelRegistry {
             next_request_id: std::sync::atomic::AtomicU64::new(1),
             pending_requests: DashMap::new(),
             base_domain,
+            next_ws_connection_id: std::sync::atomic::AtomicU64::new(1),
+            pending_websockets: DashMap::new(),
         }
     }
 
@@ -129,5 +163,61 @@ impl TunnelRegistry {
             }
         }
         false
+    }
+
+    /// Generate next WebSocket connection ID
+    pub fn next_ws_connection_id(&self) -> String {
+        let id = self
+            .next_ws_connection_id
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        format!("ws-{}", id)
+    }
+
+    /// Register a pending WebSocket connection
+    ///
+    /// Returns channels for:
+    /// - response_rx: receives the 101 upgrade response from CLI
+    /// - frame_rx: receives WebSocket frames from CLI (to send to browser)
+    pub fn register_pending_websocket(
+        &self,
+        connection_id: String,
+    ) -> (mpsc::Receiver<Vec<u8>>, mpsc::Receiver<Vec<u8>>) {
+        let (response_tx, response_rx) = mpsc::channel(1);
+        let (frame_tx, frame_rx) = mpsc::channel(100);
+
+        self.pending_websockets
+            .insert(connection_id, (response_tx, frame_tx));
+
+        (response_rx, frame_rx)
+    }
+
+    /// Send 101 upgrade response for a WebSocket connection
+    pub async fn send_websocket_upgrade_response(
+        &self,
+        connection_id: &str,
+        response_data: Vec<u8>,
+    ) -> bool {
+        if let Some(entry) = self.pending_websockets.get(connection_id) {
+            if entry.value().0.send(response_data).await.is_ok() {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Send WebSocket frame from CLI to browser
+    pub async fn send_websocket_frame(&self, connection_id: &str, frame_data: Vec<u8>) -> bool {
+        if let Some(entry) = self.pending_websockets.get(connection_id) {
+            if entry.value().1.send(frame_data).await.is_ok() {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Remove WebSocket connection
+    pub fn remove_websocket(&self, connection_id: &str) {
+        self.pending_websockets.remove(connection_id);
+        info!("WebSocket connection removed: {}", connection_id);
     }
 }

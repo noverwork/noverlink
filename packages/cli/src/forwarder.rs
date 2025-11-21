@@ -24,8 +24,8 @@ pub async fn forward_to_localhost(request: &[u8], local_port: u16) -> Result<Vec
         .await
         .context("Failed to write request to localhost")?;
 
-    // Read response with timeout
-    let response = timeout(Duration::from_secs(30), read_http_response(&mut stream))
+    // Read response with timeout (7 minutes, matching ngrok)
+    let response = timeout(Duration::from_secs(420), read_http_response(&mut stream))
         .await
         .context("Timeout reading response from localhost")??;
 
@@ -87,25 +87,51 @@ fn is_complete_http_response(buffer: &[u8]) -> bool {
         return false;
     };
 
-    // Look for Content-Length header
+    // Look for Content-Length header (case-insensitive)
     for line in headers_str.lines() {
-        if let Some(value) = line.strip_prefix("Content-Length:") {
-            if let Ok(content_length) = value.trim().parse::<usize>() {
-                let expected_total = headers_end + 4 + content_length;
-                return buffer.len() >= expected_total;
+        if line.to_lowercase().starts_with("content-length:") {
+            if let Some(value) = line.split(':').nth(1) {
+                if let Ok(content_length) = value.trim().parse::<usize>() {
+                    let expected_total = headers_end + 4 + content_length;
+                    return buffer.len() >= expected_total;
+                }
             }
         }
     }
 
-    // If no Content-Length, check for chunked encoding
-    if headers_str.contains("Transfer-Encoding: chunked") {
-        // For chunked encoding, look for final chunk (0\r\n\r\n)
-        return buffer.windows(5).any(|w| w == b"0\r\n\r\n");
+    // If no Content-Length, check for chunked encoding (case-insensitive)
+    if headers_str.to_lowercase().contains("transfer-encoding:")
+        && headers_str.to_lowercase().contains("chunked")
+    {
+        // RFC 7230: chunked body ends with "0\r\n" followed by optional trailers, then final "\r\n"
+        // Pattern: "\r\n0\r\n\r\n" (no trailers) or "\r\n0\r\n<headers>\r\n\r\n" (with trailers)
+        let body_start = headers_end + 4;
+        if let Some(body) = buffer.get(body_start..) {
+            // Look for the last chunk marker "\r\n0\r\n"
+            if let Some(last_chunk_pos) = body.windows(5).rposition(|w| w == b"\r\n0\r\n") {
+                // Start from the "0" in "\r\n0\r\n" and check remaining data
+                let from_zero = last_chunk_pos + 2; // skip "\r\n"
+                if let Some(remaining) = body.get(from_zero..) {
+                    // Verify it starts with "0\r\n"
+                    if remaining.len() >= 3 && remaining.starts_with(b"0\r\n") {
+                        // SAFETY: We verified remaining.len() >= 3, so get(3..) is safe
+                        if let Some(after_zero_crlf) = remaining.get(3..) {
+                            // No trailers: immediately followed by "\r\n"
+                            // With trailers: followed by headers then "\r\n\r\n"
+                            return after_zero_crlf.starts_with(b"\r\n")
+                                || after_zero_crlf.windows(4).any(|w| w == b"\r\n\r\n");
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
-    // If no Content-Length and not chunked, connection close indicates end
-    // But we can't detect that here, so assume complete if we have headers
-    buffer.len() > headers_end + 4
+    // If no Content-Length and not chunked, must read until connection closes (EOF)
+    // Cannot determine completeness from buffer content alone
+    // Return false to force reading until EOF
+    false
 }
 
 /// Find the end of HTTP headers
@@ -153,8 +179,26 @@ mod tests {
         let incomplete = b"HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\nHello";
         assert!(!is_complete_http_response(incomplete));
 
-        // Chunked encoding (final chunk)
+        // Chunked encoding - simple case
         let chunked = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n0\r\n\r\n";
         assert!(is_complete_http_response(chunked));
+
+        // Chunked encoding - lowercase header
+        let chunked_lower =
+            b"HTTP/1.1 200 OK\r\ntransfer-encoding: chunked\r\n\r\n5\r\nHello\r\n0\r\n\r\n";
+        assert!(is_complete_http_response(chunked_lower));
+
+        // Chunked encoding - with trailers
+        let chunked_trailers = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n0\r\nX-Checksum: abc\r\n\r\n";
+        assert!(is_complete_http_response(chunked_trailers));
+
+        // Chunked encoding - incomplete (missing final CRLF)
+        let chunked_incomplete =
+            b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n0\r\n";
+        assert!(!is_complete_http_response(chunked_incomplete));
+
+        // Content-Length - case insensitive
+        let content_length_lower = b"HTTP/1.1 200 OK\r\ncontent-length: 5\r\n\r\nHello";
+        assert!(is_complete_http_response(content_length_lower));
     }
 }

@@ -5,6 +5,7 @@
 //! Simple, single-relay architecture for MVP.
 
 mod handlers;
+mod metrics;
 mod registry;
 
 use std::env;
@@ -16,6 +17,7 @@ use tokio::signal;
 use tracing::{error, info};
 
 use handlers::{handle_cli_connection, start_http_server};
+use metrics::create_metrics;
 use registry::TunnelRegistry;
 
 #[tokio::main]
@@ -51,6 +53,9 @@ async fn main() -> Result<()> {
 
     // Shared tunnel registry
     let registry = Arc::new(TunnelRegistry::new(base_domain));
+
+    // Metrics (no-op for now, can be replaced with real implementation)
+    let _metrics = create_metrics();
 
     // Start WebSocket server for CLI connections
     let ws_addr = format!("0.0.0.0:{}", ws_port);
