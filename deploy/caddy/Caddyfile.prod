@@ -1,0 +1,33 @@
+# Noverlink Caddy Configuration - Production
+#
+# For production deployment with automatic Let's Encrypt TLS certificates.
+# Both relay and Caddy run in Docker containers.
+
+# Wildcard subdomain routing for tunnels
+# Example: funny-cat-123.noverlink.com -> relay HTTP handler
+*.{$BASE_DOMAIN} {
+    # Automatic HTTPS with Let's Encrypt
+    # Caddy will request certificates automatically using ACME
+    # Email is configured via ACME_EMAIL environment variable
+
+    # Forward to relay HTTP handler (container name in Docker network)
+    reverse_proxy relay:8080 {
+        # Health check
+        health_uri /health
+        health_interval 10s
+        health_timeout 5s
+    }
+}
+
+# WebSocket endpoint for CLI connections
+# Example: ws.noverlink.com -> relay WebSocket handler
+ws.{$BASE_DOMAIN} {
+    # Automatic HTTPS with Let's Encrypt
+
+    # Forward to relay WebSocket handler
+    reverse_proxy relay:8444 {
+        health_uri /health
+        health_interval 10s
+        health_timeout 5s
+    }
+}

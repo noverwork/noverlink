@@ -14,7 +14,28 @@ use crate::registry::{TunnelMessage, TunnelRegistry};
 /// Start HTTP listener for public traffic
 pub async fn start_http_server(port: u16, registry: Arc<TunnelRegistry>) -> Result<()> {
     let addr = format!("0.0.0.0:{}", port);
-    let listener = TcpListener::bind(&addr).await?;
+
+    info!("Attempting to bind HTTP server to {}", addr);
+
+    // Enable SO_REUSEADDR for development (immediate restart without TIME_WAIT)
+    let socket = socket2::Socket::new(
+        socket2::Domain::IPV4,
+        socket2::Type::STREAM,
+        Some(socket2::Protocol::TCP),
+    )?;
+
+    info!("Created socket, setting SO_REUSEADDR");
+    socket.set_reuse_address(true)?;
+
+    info!("Attempting to bind to {}", addr);
+    let sock_addr: std::net::SocketAddr = addr.parse()?;
+    socket.bind(&sock_addr.into())?;
+
+    info!("Bind successful, setting listen backlog");
+    socket.listen(1024)?;
+    socket.set_nonblocking(true)?;
+
+    let listener = TcpListener::from_std(socket.into())?;
 
     info!("HTTP listener started on {}", addr);
 

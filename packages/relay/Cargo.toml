@@ -18,6 +18,7 @@ noverlink-shared = { path = "../rs-shared" }
 
 # Runtime
 tokio = { version = "1", features = ["rt-multi-thread", "net", "signal", "macros", "sync", "io-util", "fs", "time"] }
+socket2 = "0.5"
 
 # WebSocket
 tokio-tungstenite = "0.24"
@@ -42,4 +43,4 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Database (for future multi-relay support)
-redis = { version = "0.27", features = ["tokio-comp", "aio"] }
+# redis = { version = "0.27", features = ["tokio-comp", "aio"] }
