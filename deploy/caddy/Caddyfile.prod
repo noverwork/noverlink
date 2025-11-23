@@ -1,14 +1,22 @@
-# Noverlink Caddy Configuration - Production
+# Noverlink Caddy Configuration - Production with Cloudflare Origin CA
 #
-# For production deployment with automatic Let's Encrypt TLS certificates.
-# Both relay and Caddy run in Docker containers.
+# For production deployment with Cloudflare proxy enabled.
+# Uses Cloudflare Origin CA certificate for wildcard domain support.
+#
+# Setup requirements:
+#   1. Generate Cloudflare Origin CA certificate (see certs/README.md)
+#   2. Place origin.pem and origin.key in deploy/caddy/certs/
+#   3. Set Cloudflare SSL/TLS mode to "Full (strict)"
+#   4. DNS: *.noverlink.com → server IP [Proxied ON]
+#   5. DNS: ws.noverlink.com → server IP [Proxied OFF]
 
 # Wildcard subdomain routing for tunnels
 # Example: funny-cat-123.noverlink.com -> relay HTTP handler
 *.{$BASE_DOMAIN} {
-    # Automatic HTTPS with Let's Encrypt
-    # Caddy will request certificates automatically using ACME
-    # Email is configured via ACME_EMAIL environment variable
+    # Use Cloudflare Origin CA certificate
+    # This certificate is trusted by Cloudflare but NOT by browsers
+    # Only use when Cloudflare proxy is enabled (orange cloud)
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
 
     # Forward to relay HTTP handler (container name in Docker network)
     reverse_proxy relay:8080 {
@@ -22,7 +30,9 @@
 # WebSocket endpoint for CLI connections
 # Example: ws.noverlink.com -> relay WebSocket handler
 ws.{$BASE_DOMAIN} {
-    # Automatic HTTPS with Let's Encrypt
+    # Let's Encrypt automatic certificate (DNS only mode)
+    # No tls directive = Caddy automatically obtains Let's Encrypt cert
+    # This works because ws.noverlink.com has Cloudflare proxy OFF (DNS only)
 
     # Forward to relay WebSocket handler
     reverse_proxy relay:8444 {
