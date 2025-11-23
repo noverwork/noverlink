@@ -20,7 +20,7 @@
       "serve": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "WS_PORT=8444 HTTP_PORT=8080 cargo run --package relay",
+          "command": "cargo run --package relay",
           "cwd": "{projectRoot}/../.."
         }
       },

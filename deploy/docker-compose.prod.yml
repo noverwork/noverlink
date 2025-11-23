@@ -1,0 +1,117 @@
+# Noverlink Production Docker Compose
+#
+# Full production stack: relay, caddy, postgres, redis
+#
+# Prerequisites:
+#   - Set environment variables in .env file
+#   - Ensure DNS records point to this server:
+#     - *.noverlink.com -> server IP
+#     - ws.noverlink.com -> server IP
+#   - Open ports 80, 443 in firewall
+#
+# Usage:
+#   cd deploy
+#   docker compose -f docker-compose.prod.yml up -d
+
+services:
+  # Reverse proxy with automatic HTTPS
+  caddy:
+    image: caddy:2-alpine
+    container_name: noverlink-caddy
+    ports:
+      - "80:80"     # HTTP (redirects to HTTPS)
+      - "443:443"   # HTTPS
+    environment:
+      BASE_DOMAIN: ${BASE_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      relay:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - noverlink
+
+  # Relay server (Rust)
+  relay:
+    build:
+      context: ../packages/relay
+      dockerfile: Dockerfile
+    container_name: noverlink-relay
+    environment:
+      WS_PORT: 8444
+      HTTP_PORT: 8080
+      BASE_DOMAIN: ${BASE_DOMAIN}
+      RUST_LOG: ${RUST_LOG:-info}
+    expose:
+      - "8080"
+      - "8444"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      # Redis not needed for MVP
+      # redis:
+      #   condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - noverlink
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: noverlink-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - noverlink
+
+  # Redis cache (OPTIONAL - not currently used by relay)
+  # Uncomment when implementing multi-relay support or session persistence
+  #
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: noverlink-redis
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+  #   expose:
+  #     - "6379"
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - noverlink
+
+networks:
+  noverlink:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
+  postgres_data:
+  redis_data:

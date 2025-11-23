@@ -59,7 +59,19 @@ async fn main() -> Result<()> {
 
     // Start WebSocket server for CLI connections
     let ws_addr = format!("0.0.0.0:{}", ws_port);
-    let ws_listener = TcpListener::bind(&ws_addr).await?;
+
+    // Enable SO_REUSEADDR for WebSocket listener
+    let ws_socket = socket2::Socket::new(
+        socket2::Domain::IPV4,
+        socket2::Type::STREAM,
+        Some(socket2::Protocol::TCP),
+    )?;
+    ws_socket.set_reuse_address(true)?;
+    ws_socket.bind(&ws_addr.parse::<std::net::SocketAddr>()?.into())?;
+    ws_socket.listen(1024)?;
+    ws_socket.set_nonblocking(true)?;
+
+    let ws_listener = TcpListener::from_std(ws_socket.into())?;
     info!("WebSocket listener started on {}", ws_addr);
 
     let registry_ws = Arc::clone(&registry);

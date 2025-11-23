@@ -1,0 +1,22 @@
+# Noverlink Caddy Configuration - Development
+#
+# For local development with self-signed TLS certificates.
+# Relay runs directly on host (cargo run), Caddy runs in Docker.
+
+# Wildcard subdomain routing for tunnels
+# Example: funny-cat-123.localhost -> relay HTTP handler
+*.localhost {
+    # Use self-signed certificate for localhost
+    tls internal
+
+    # Forward to relay HTTP handler on host machine
+    # Note: host.docker.internal resolves to host's IP from within Docker
+    reverse_proxy host.docker.internal:8080
+}
+
+# WebSocket endpoint for CLI connections
+# Example: ws.localhost -> relay WebSocket handler
+ws.localhost {
+    tls internal
+    reverse_proxy host.docker.internal:8444
+}
