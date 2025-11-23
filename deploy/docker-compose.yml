@@ -11,7 +11,7 @@
 #
 # Usage:
 #   cd deploy
-#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose up -d
 
 services:
   # Reverse proxy with Cloudflare Origin CA
@@ -25,7 +25,7 @@ services:
       BASE_DOMAIN: ${BASE_DOMAIN}
     volumes:
       # Caddyfile configuration
-      - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       # Cloudflare Origin CA certificates (must be generated manually)
       - ./caddy/certs:/etc/caddy/certs:ro
       # Caddy data and config persistence

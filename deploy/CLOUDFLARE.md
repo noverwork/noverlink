@@ -176,8 +176,8 @@ Origin CA certificates are required for Cloudflare → Caddy HTTPS connection.
 ### 5.1 Verify Configuration Files
 
 Check that these files are configured:
-- ✅ [deploy/caddy/Caddyfile.prod](caddy/Caddyfile.prod) - Uses Origin CA
-- ✅ [deploy/docker-compose.prod.yml](docker-compose.prod.yml) - Mounts certs directory
+- ✅ [deploy/caddy/Caddyfile](caddy/Caddyfile) - Uses Origin CA
+- ✅ [deploy/docker-compose.yml](docker-compose.yml) - Mounts certs directory
 - ✅ [deploy/caddy/certs/origin.pem](caddy/certs/origin.pem) - Certificate (you created)
 - ✅ [deploy/caddy/certs/origin.key](caddy/certs/origin.key) - Private key (you created)
 
@@ -203,14 +203,14 @@ RUST_LOG=info
 
 ```bash
 cd deploy
-docker compose -f docker-compose.prod.yml up -d
+docker compose up -d
 ```
 
 ### 5.4 Verify Services
 
 ```bash
 # Check all services are running
-docker compose -f docker-compose.prod.yml ps
+docker compose ps
 
 # Check Caddy logs (should load Origin CA cert successfully)
 docker logs noverlink-caddy
@@ -274,7 +274,7 @@ ls -la /path/to/noverlink/deploy/caddy/certs/
 # Should show origin.pem and origin.key
 
 # Restart Caddy
-docker compose -f docker-compose.prod.yml restart caddy
+docker compose restart caddy
 ```
 
 ### 2. 502 Bad Gateway (Cloudflare)

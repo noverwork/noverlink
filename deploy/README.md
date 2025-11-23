@@ -16,37 +16,21 @@ This directory contains deployment configurations for Noverlink relay server wit
 
 ## Quick Start (Development)
 
-For local development with HTTPS support:
+For local development with HTTPS support, see [../dev-containers/](../dev-containers/).
 
-### 1. Start the relay server
-
+**Quick summary**:
 ```bash
-cd packages/relay
-WS_PORT=8444 HTTP_PORT=8080 BASE_DOMAIN=localhost cargo run
+# Terminal 1: Start relay
+cd packages/relay && cargo run
+
+# Terminal 2: Start Caddy
+cd dev-containers && docker compose up
+
+# Terminal 3: Start CLI
+cd packages/cli && cargo run -- http 3000
 ```
 
-### 2. Start Caddy (in a new terminal)
-
-```bash
-cd deploy
-docker compose -f docker-compose.dev.yml up
-```
-
-### 3. Test the setup
-
-```bash
-# Start a tunnel (you'll need to build the CLI first)
-cd packages/cli
-cargo run -- http 3000
-
-# You'll get a URL like: https://funny-cat-123.localhost
-```
-
-### 4. Accept self-signed certificate
-
-When you visit `https://*.localhost` in your browser, you'll need to accept the self-signed certificate:
-- Chrome/Edge: Click "Advanced" → "Proceed to localhost (unsafe)"
-- Firefox: Click "Advanced" → "Accept the Risk and Continue"
+Visit the tunnel URL (e.g., `https://funny-cat.localhost`) and accept self-signed certificate.
 
 ---
 
@@ -74,7 +58,7 @@ When you visit `https://*.localhost` in your browser, you'll need to accept the 
 2. Update nameservers
 3. Generate Origin CA certificate
 4. Configure DNS: `*.noverlink.com` [Proxied], `ws.noverlink.com` [DNS only]
-5. Deploy with `docker-compose.prod.yml`
+5. Deploy with `docker-compose.yml`
 
 ---
 
@@ -112,7 +96,7 @@ ws.noverlink.com   A    YOUR_SERVER_IP
 
 #### Step 2: Modify Caddyfile
 
-Edit [caddy/Caddyfile.prod](caddy/Caddyfile.prod) to use Let's Encrypt instead of Origin CA:
+Edit [caddy/Caddyfile](caddy/Caddyfile) to use Let's Encrypt instead of Origin CA:
 
 ```caddyfile
 *.{$BASE_DOMAIN} {
@@ -141,14 +125,14 @@ Required values:
 #### Step 4: Deploy
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 #### Step 5: Verify
 
 ```bash
 # Check all services are running
-docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.yml ps
 
 # Check Caddy logs
 docker logs noverlink-caddy
@@ -288,15 +272,15 @@ git pull
 
 ```bash
 cd deploy
-docker compose -f docker-compose.prod.yml down
-docker compose -f docker-compose.prod.yml build --no-cache
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.yml down
+docker compose -f docker-compose.yml build --no-cache
+docker compose -f docker-compose.yml up -d
 ```
 
 ### View logs
 
 ```bash
-docker compose -f docker-compose.prod.yml logs -f
+docker compose -f docker-compose.yml logs -f
 ```
 
 ---
@@ -316,7 +300,7 @@ For high-traffic deployments:
 
 1. **Increase relay resources**:
    ```yaml
-   # In docker-compose.prod.yml
+   # In docker-compose.yml
    relay:
      deploy:
        resources:
@@ -327,7 +311,7 @@ For high-traffic deployments:
 
 2. **Redis persistence**:
    ```yaml
-   # In docker-compose.prod.yml
+   # In docker-compose.yml
    redis:
      command: redis-server --appendonly yes --save 60 1000
    ```
