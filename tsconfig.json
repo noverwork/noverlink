@@ -20,6 +20,12 @@
     },
     {
       "path": "./packages/backend-shared"
+    },
+    {
+      "path": "./packages/migrator"
+    },
+    {
+      "path": "./packages/ss"
     }
   ]
 }

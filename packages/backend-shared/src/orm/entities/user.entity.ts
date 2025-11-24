@@ -1,14 +1,15 @@
-import { PgBaseEntity } from '../base-entities';
 import { Entity, Property } from '@mikro-orm/core';
+
+import { PgBaseEntity } from '../base-entities';
 
 @Entity()
 export class User extends PgBaseEntity {
-  @Property()
+  @Property({ type: 'string' })
   name!: string;
 
-  @Property()
+  @Property({ type: 'string' })
   email!: string;
 
-  @Property()
+  @Property({ type: 'string', hidden: true })
   password!: string;
 }
