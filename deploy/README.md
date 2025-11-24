@@ -6,6 +6,8 @@ This directory contains deployment configurations for Noverlink relay server wit
 
 - [Quick Start (Development)](#quick-start-development)
 - [Production Deployment](#production-deployment)
+  - [Option A: Cloudflare (Recommended)](#option-a-cloudflare-recommended)
+  - [Option B: Direct Let's Encrypt](#option-b-direct-lets-encrypt)
 - [Architecture](#architecture)
 - [DNS Configuration](#dns-configuration)
 - [Troubleshooting](#troubleshooting)
@@ -14,50 +16,101 @@ This directory contains deployment configurations for Noverlink relay server wit
 
 ## Quick Start (Development)
 
-For local development with HTTPS support:
+For local development with HTTPS support, see [../dev-containers/](../dev-containers/).
 
-### 1. Start the relay server
-
+**Quick summary**:
 ```bash
-cd packages/relay
-WS_PORT=8444 HTTP_PORT=8080 BASE_DOMAIN=localhost cargo run
+# Terminal 1: Start relay
+cd packages/relay && cargo run
+
+# Terminal 2: Start Caddy
+cd dev-containers && docker compose up
+
+# Terminal 3: Start CLI
+cd packages/cli && cargo run -- http 3000
 ```
 
-### 2. Start Caddy (in a new terminal)
-
-```bash
-cd deploy
-docker compose -f docker-compose.dev.yml up
-```
-
-### 3. Test the setup
-
-```bash
-# Start a tunnel (you'll need to build the CLI first)
-cd packages/cli
-cargo run -- http 3000
-
-# You'll get a URL like: https://funny-cat-123.localhost
-```
-
-### 4. Accept self-signed certificate
-
-When you visit `https://*.localhost` in your browser, you'll need to accept the self-signed certificate:
-- Chrome/Edge: Click "Advanced" → "Proceed to localhost (unsafe)"
-- Firefox: Click "Advanced" → "Accept the Risk and Continue"
+Visit the tunnel URL (e.g., `https://funny-cat.localhost`) and accept self-signed certificate.
 
 ---
 
 ## Production Deployment
 
-### Prerequisites
+**Choose your deployment method:**
+
+### Option A: Cloudflare (Recommended)
+
+✅ **Best for**: Unlimited tunnels, free SSL, global CDN, DDoS protection
+
+**Advantages**:
+- Unlimited subdomain HTTPS (bypasses Let's Encrypt 50/week limit)
+- Free Cloudflare Origin CA certificate (15 year validity)
+- Automatic DDoS protection
+- Global CDN acceleration
+- Zero cost
+
+**When to use**: If you expect >50 new tunnels per week or want DDoS protection.
+
+📖 **[Complete Cloudflare Setup Guide](CLOUDFLARE.md)**
+
+**Quick summary**:
+1. Add domain to Cloudflare (free plan)
+2. Update nameservers
+3. Generate Origin CA certificate
+4. Configure DNS: `*.noverlink.com` [Proxied], `ws.noverlink.com` [DNS only]
+5. Deploy with `docker-compose.yml`
+
+---
+
+### Option B: Direct Let's Encrypt
+
+✅ **Best for**: Direct control, low latency, <50 tunnels/week
+
+**Advantages**:
+- No third-party proxy
+- Lowest latency (direct connection)
+- Full control over traffic
+
+**Limitations**:
+- Let's Encrypt rate limit: 50 certificates per week
+- No built-in DDoS protection
+- No CDN acceleration
+
+**Setup**:
+
+#### Prerequisites
 
 1. **Domain name**: You need a domain (e.g., `noverlink.com`)
-2. **DNS configuration**: Set up wildcard DNS records (see [DNS Configuration](#dns-configuration))
+2. **DNS configuration**: Set up DNS records pointing directly to your server
 3. **Server**: VPS with Docker installed (Ubuntu/Debian recommended)
 4. **Ports**: Open ports 80 and 443 in firewall
 
-### Step 1: Configure environment
+#### Step 1: Configure DNS
+
+Point your domain directly to your server (no Cloudflare):
+
+```
+*.noverlink.com    A    YOUR_SERVER_IP
+ws.noverlink.com   A    YOUR_SERVER_IP
+```
+
+#### Step 2: Modify Caddyfile
+
+Edit [caddy/Caddyfile](caddy/Caddyfile) to use Let's Encrypt instead of Origin CA:
+
+```caddyfile
+*.{$BASE_DOMAIN} {
+    # Remove the tls directive to use Let's Encrypt
+    reverse_proxy relay:8080
+}
+```
+
+**Note**: Wildcard Let's Encrypt certificates require DNS-01 challenge, which Caddy doesn't support by default. You'll need to either:
+- Use DNS API integration (complex)
+- Accept the 50 certs/week limit with individual subdomain certificates
+- Use Cloudflare (recommended)
+
+#### Step 3: Configure environment
 
 ```bash
 cd deploy
@@ -67,36 +120,28 @@ nano .env  # Edit with your values
 
 Required values:
 - `BASE_DOMAIN`: Your domain (e.g., `noverlink.com`)
-- `ACME_EMAIL`: Email for Let's Encrypt notifications
 - `POSTGRES_PASSWORD`: Strong password for database
-- `REDIS_PASSWORD`: Strong password for Redis
 
-### Step 2: Deploy
+#### Step 4: Deploy
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
-This will:
-- Build the relay server from source
-- Start Caddy with automatic HTTPS
-- Start PostgreSQL and Redis
-- Request Let's Encrypt certificates automatically
-
-### Step 3: Verify
+#### Step 5: Verify
 
 ```bash
 # Check all services are running
-docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.yml ps
 
-# Check Caddy logs (certificate acquisition)
+# Check Caddy logs
 docker logs noverlink-caddy
 
 # Check relay logs
 docker logs noverlink-relay
 ```
 
-### Step 4: Test tunnel
+#### Step 6: Test tunnel
 
 ```bash
 # On your local machine, connect CLI to production relay
@@ -227,15 +272,15 @@ git pull
 
 ```bash
 cd deploy
-docker compose -f docker-compose.prod.yml down
-docker compose -f docker-compose.prod.yml build --no-cache
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.yml down
+docker compose -f docker-compose.yml build --no-cache
+docker compose -f docker-compose.yml up -d
 ```
 
 ### View logs
 
 ```bash
-docker compose -f docker-compose.prod.yml logs -f
+docker compose -f docker-compose.yml logs -f
 ```
 
 ---
@@ -255,7 +300,7 @@ For high-traffic deployments:
 
 1. **Increase relay resources**:
    ```yaml
-   # In docker-compose.prod.yml
+   # In docker-compose.yml
    relay:
      deploy:
        resources:
@@ -266,7 +311,7 @@ For high-traffic deployments:
 
 2. **Redis persistence**:
    ```yaml
-   # In docker-compose.prod.yml
+   # In docker-compose.yml
    redis:
      command: redis-server --appendonly yes --save 60 1000
    ```

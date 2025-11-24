@@ -11,10 +11,10 @@
 #
 # Usage:
 #   cd deploy
-#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose up -d
 
 services:
-  # Reverse proxy with automatic HTTPS
+  # Reverse proxy with Cloudflare Origin CA
   caddy:
     image: caddy:2-alpine
     container_name: noverlink-caddy
@@ -23,9 +23,12 @@ services:
       - "443:443"   # HTTPS
     environment:
       BASE_DOMAIN: ${BASE_DOMAIN}
-      ACME_EMAIL: ${ACME_EMAIL}
     volumes:
-      - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      # Caddyfile configuration
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Cloudflare Origin CA certificates (must be generated manually)
+      - ./caddy/certs:/etc/caddy/certs:ro
+      # Caddy data and config persistence
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

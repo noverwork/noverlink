@@ -84,7 +84,7 @@ impl TunnelRegistry {
 
     /// Get full URL for a subdomain
     pub fn get_full_url(&self, subdomain: &str) -> String {
-        format!("http://{}.{}", subdomain, self.base_domain)
+        format!("https://{}.{}", subdomain, self.base_domain)
     }
 
     /// Generate a random human-readable subdomain

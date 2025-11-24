@@ -3,4 +3,6 @@ export enum EnvField {
   LogLevel = 'LOG_LEVEL',
   AppBind = 'APP_BIND',
   AppPort = 'APP_PORT',
+  DBClientUrl = 'DB_CLIENT_URL',
+  DBDebug = 'DB_DEBUG',
 }

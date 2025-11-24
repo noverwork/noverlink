@@ -1,0 +1,17 @@
+# Cloudflare Origin CA Certificates
+# These files are server-specific and contain sensitive cryptographic material.
+# NEVER commit them to version control.
+
+# Certificate and key files
+*.pem
+*.key
+*.crt
+*.cer
+
+# Backup files
+*.bak
+*.old
+
+# Only commit documentation
+!.gitignore
+!README.md
