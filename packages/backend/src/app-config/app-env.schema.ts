@@ -1,7 +1,6 @@
 import { Environment } from '@noverlink/shared';
 import {
   IsBoolean,
-  IsBooleanString,
   IsEnum,
   IsIP,
   IsNumber,

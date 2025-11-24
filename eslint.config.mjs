@@ -62,19 +62,9 @@ export default [
   {
     files: ['**/*.js', '**/*.ts', '**/*.tsx'],
     rules: {
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'no-console': ['error'],
     },
   },
-  // {
-  //   files: ['**/*.activity.ts', '**/activities/*.ts'],
-  //   plugins: {
-  //     temporal: temporalRules,
-  //   },
-  //   rules: {
-  //     'temporal/no-duplicate-activity-methods': 'error',
-  //     'temporal/activity-methods-require-decorator': 'error',
-  //   },
-  // },
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
