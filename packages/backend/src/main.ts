@@ -1,22 +1,71 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
-import { Logger } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { NestApplication, NestFactory } from '@nestjs/core';
+import { Logger as PinoLogger } from 'nestjs-pino';
 
 import { AppModule } from './app/app.module';
+import { AppConfigService } from './app-config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+  const app = await NestFactory.create<NestApplication>(AppModule, {
+    bufferLogs: true,
+  });
+
+  const appConfigService = app.get(AppConfigService);
+  const {
+    app: { port, bind: host },
+    env: { isProduction },
+  } = appConfigService;
+
+  // Use Pino logger
+  app.useLogger(app.get(PinoLogger));
+
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      disableErrorMessages: isProduction,
+      enableDebugMessages: !isProduction,
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      forbidUnknownValues: true,
+    })
   );
+
+  // CORS configuration
+  app.enableCors({
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Location'],
+    credentials: true,
+  });
+
+  // Global prefix
+  app.setGlobalPrefix('api');
+
+  // Enable graceful shutdown hooks
+  app.enableShutdownHooks();
+
+  // Handle shutdown signals for graceful cleanup
+  const shutdown = async (signal: string) => {
+    Logger.log(`${signal} received, shutting down gracefully...`);
+    try {
+      await app.close();
+      Logger.log('✅ Application shutdown complete');
+      process.exit(0);
+    } catch (error) {
+      Logger.error('❌ Error during shutdown:', error);
+      process.exit(1);
+    }
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+
+  await app.listen(port, host);
+
+  Logger.log(`🚀 Noverlink Backend running on: http://${host}:${port}/api`);
+  Logger.log(`📝 Environment: ${isProduction ? 'production' : 'development'}`);
 }
 
-bootstrap();
+void bootstrap();

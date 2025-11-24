@@ -1,5 +1,7 @@
 import { Environment } from '@noverlink/shared';
 import {
+  IsBoolean,
+  IsBooleanString,
   IsEnum,
   IsIP,
   IsNumber,
@@ -9,6 +11,7 @@ import {
   Min,
 } from 'class-validator';
 
+import { Transform } from 'class-transformer';
 import { EnvField } from './env.constant';
 
 export class AppEnvSchema {
@@ -26,4 +29,13 @@ export class AppEnvSchema {
   @Max(65535)
   @Min(1001)
   [EnvField.AppPort]!: number;
+
+  @IsString()
+  [EnvField.DBClientUrl]!: string;
+
+  @IsBoolean()
+  @Transform(({ key, obj }) => {
+    return obj[key] === 'true';
+  })
+  [EnvField.DBDebug]!: boolean;
 }

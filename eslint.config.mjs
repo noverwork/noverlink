@@ -1,6 +1,7 @@
 import nx from '@nx/eslint-plugin';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import sonarjs from 'eslint-plugin-sonarjs';
+import mikroOrmRules from './packages/backend-shared/src/orm/eslint-rules/index.mjs';
 
 export default [
   ...nx.configs['flat/base'],
@@ -92,6 +93,15 @@ export default [
     files: ['**/*.spec.ts', '**/*.spec.tsx'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    files: ['**/*.ts'],
+    plugins: {
+      'mikro-orm': mikroOrmRules,
+    },
+    rules: {
+      'mikro-orm/ensure-request-context-requires-entity-manager': 'error',
     },
   },
 ];

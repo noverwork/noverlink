@@ -24,4 +24,11 @@ export class AppConfigService {
       port: this.configService.getOrThrow<number>(EnvField.AppPort),
     };
   }
+
+  get db() {
+    return {
+      clientUrl: this.configService.getOrThrow<string>(EnvField.DBClientUrl),
+      debug: this.configService.getOrThrow<boolean>(EnvField.DBDebug),
+    };
+  }
 }
