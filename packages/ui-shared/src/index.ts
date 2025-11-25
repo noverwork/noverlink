@@ -3,5 +3,15 @@
 // Export utility functions
 export * from './lib/utils';
 
-// Export UI components
+// Export UI components (shadcn/ui base)
 export * from './components/ui/button';
+export * from './components/ui/card';
+export * from './components/ui/input';
+export * from './components/ui/separator';
+export * from './components/ui/sheet';
+export * from './components/ui/skeleton';
+export * from './components/ui/tooltip';
+export * from './components/ui/sidebar';
+
+// Export custom tech-themed components
+export * from './components/custom';
