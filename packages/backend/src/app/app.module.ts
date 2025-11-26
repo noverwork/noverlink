@@ -1,15 +1,15 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Module } from '@nestjs/common';
+import { ENTITIES } from '@noverlink/backend-shared';
+import { PinoLoggerModule } from '@noverlink/backend-shared';
 import { PinoLogger } from 'nestjs-pino';
 
 import { AppConfigService } from '../app-config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ENTITIES } from '@noverlink/backend-shared';
 import { AppConfigModule } from '../app-config/app-config.module';
 import { SERVICE_NAME } from './app.constant';
-import { PinoLoggerModule } from '@noverlink/backend-shared';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [

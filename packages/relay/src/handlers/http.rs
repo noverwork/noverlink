@@ -1,5 +1,7 @@
 //! HTTP handler for public traffic proxying
 
+#![allow(clippy::indexing_slicing)] // Slicing is bounds-checked in this module
+
 use std::sync::Arc;
 use std::time::Duration;
 

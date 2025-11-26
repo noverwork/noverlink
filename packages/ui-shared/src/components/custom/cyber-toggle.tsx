@@ -5,6 +5,27 @@ import * as React from 'react';
 
 import { cn } from '../../lib/utils';
 
+function useControlledToggle(
+  checked: boolean | undefined,
+  defaultChecked: boolean,
+  disabled: boolean | undefined,
+  onCheckedChange: ((checked: boolean) => void) | undefined
+) {
+  const [isChecked, setIsChecked] = React.useState(defaultChecked);
+  const controlledChecked = checked ?? isChecked;
+
+  const handleClick = () => {
+    if (disabled) return;
+    const newValue = !controlledChecked;
+    if (checked === undefined) {
+      setIsChecked(newValue);
+    }
+    onCheckedChange?.(newValue);
+  };
+
+  return { controlledChecked, handleClick };
+}
+
 const toggleVariants = cva(
   [
     'relative inline-flex shrink-0 cursor-pointer items-center',
@@ -70,17 +91,12 @@ const CyberToggle = React.forwardRef<HTMLButtonElement, CyberToggleProps>(
     },
     ref
   ) => {
-    const [isChecked, setIsChecked] = React.useState(defaultChecked);
-    const controlledChecked = checked ?? isChecked;
-
-    const handleClick = () => {
-      if (disabled) return;
-      const newValue = !controlledChecked;
-      if (checked === undefined) {
-        setIsChecked(newValue);
-      }
-      onCheckedChange?.(newValue);
-    };
+    const { controlledChecked, handleClick } = useControlledToggle(
+      checked,
+      defaultChecked,
+      disabled,
+      onCheckedChange
+    );
 
     const toggle = (
       <button
@@ -158,17 +174,12 @@ const CyberCheckbox = React.forwardRef<HTMLButtonElement, CyberCheckboxProps>(
     },
     ref
   ) => {
-    const [isChecked, setIsChecked] = React.useState(defaultChecked);
-    const controlledChecked = checked ?? isChecked;
-
-    const handleClick = () => {
-      if (disabled) return;
-      const newValue = !controlledChecked;
-      if (checked === undefined) {
-        setIsChecked(newValue);
-      }
-      onCheckedChange?.(newValue);
-    };
+    const { controlledChecked, handleClick } = useControlledToggle(
+      checked,
+      defaultChecked,
+      disabled,
+      onCheckedChange
+    );
 
     const checkbox = (
       <button

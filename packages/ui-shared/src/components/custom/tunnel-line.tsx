@@ -5,6 +5,16 @@ import * as React from 'react';
 
 import { cn } from '../../lib/utils';
 
+function getFlowAnimation(
+  isHorizontal: boolean,
+  flowDirection: 'forward' | 'backward'
+): string {
+  if (isHorizontal) {
+    return flowDirection === 'forward' ? 'flow-right' : 'flow-left';
+  }
+  return flowDirection === 'forward' ? 'flow-down' : 'flow-up';
+}
+
 const tunnelLineVariants = cva('relative', {
   variants: {
     status: {
@@ -75,9 +85,7 @@ const TunnelLine = React.forwardRef<HTMLDivElement, TunnelLineProps>(
               'shadow-lg shadow-teal-400/50'
             )}
             style={{
-              animation: isHorizontal
-                ? `flow-${flowDirection === 'forward' ? 'right' : 'left'} 2s linear infinite`
-                : `flow-${flowDirection === 'forward' ? 'down' : 'up'} 2s linear infinite`,
+              animation: `${getFlowAnimation(isHorizontal, flowDirection)} 2s linear infinite`,
             }}
           />
         )}

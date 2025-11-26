@@ -135,18 +135,22 @@ export interface LoadingOverlayProps extends React.HTMLAttributes<HTMLDivElement
   variant?: 'tunnel' | 'spinner' | 'connection';
 }
 
+function getLoaderComponent(variant: 'tunnel' | 'spinner' | 'connection') {
+  if (variant === 'spinner') return SpinnerLoader;
+  if (variant === 'connection') return ConnectionLoader;
+  return TunnelLoader;
+}
+
 const LoadingOverlay = React.forwardRef<HTMLDivElement, LoadingOverlayProps>(
-  ({ className, loading = true, text, variant = 'tunnel', children, ...props }, ref) => {
+  (
+    { className, loading = true, text, variant = 'tunnel', children, ...props },
+    ref
+  ) => {
     if (!loading) {
-      return <>{children}</>;
+      return children;
     }
 
-    const LoaderComponent =
-      variant === 'spinner'
-        ? SpinnerLoader
-        : variant === 'connection'
-          ? ConnectionLoader
-          : TunnelLoader;
+    const LoaderComponent = getLoaderComponent(variant);
 
     return (
       <div ref={ref} className={cn('relative', className)} {...props}>

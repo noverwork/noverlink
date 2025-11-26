@@ -1,5 +1,9 @@
 'use client';
 
+/* eslint-disable sonarjs/pseudo-random, sonarjs/no-nested-functions, sonarjs/slow-regex */
+// This component uses Math.random for visual effects only (particle animation)
+// The nested functions and regex are acceptable for this use case
+
 import * as React from 'react';
 
 import { cn } from '../../lib/utils';

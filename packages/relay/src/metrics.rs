@@ -1,14 +1,14 @@
 //! Traffic metrics tracking
 //!
 //! This module provides a trait-based interface for recording traffic metrics.
-//! The actual implementation (e.g., TimescaleDB integration) can be plugged in later.
+//! The actual implementation (e.g., `TimescaleDB` integration) can be plugged in later.
 //!
 //! ## Future Implementation
 //!
 //! When implementing metrics storage:
 //! 1. Create a concrete type implementing `MetricsRecorder`
 //! 2. Add database dependencies (sqlx, tokio-postgres, etc.)
-//! 3. Implement `record_bytes()` to write to TimescaleDB
+//! 3. Implement `record_bytes()` to write to `TimescaleDB`
 //! 4. Replace `NoOpMetrics` with your implementation in `main.rs`
 
 #![allow(dead_code)] // Stub for future implementation
@@ -43,7 +43,7 @@ pub trait MetricsRecorder: Send + Sync {
 /// No-op implementation for metrics (placeholder)
 ///
 /// This implementation does nothing. Replace with a real implementation
-/// that writes to TimescaleDB or another metrics backend.
+/// that writes to `TimescaleDB` or another metrics backend.
 #[derive(Clone)]
 pub struct NoOpMetrics;
 
@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn test_metrics_clone() {
         let metrics = create_metrics();
-        let metrics2 = metrics.clone();
+        let metrics2 = Arc::<dyn MetricsRecorder>::clone(&metrics);
         metrics2.record_bytes("test", 2048);
         // Arc clone should work
     }

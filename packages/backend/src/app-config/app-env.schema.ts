@@ -1,4 +1,5 @@
 import { Environment } from '@noverlink/shared';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -10,7 +11,6 @@ import {
   Min,
 } from 'class-validator';
 
-import { Transform } from 'class-transformer';
 import { EnvField } from './env.constant';
 
 export class AppEnvSchema {

@@ -46,7 +46,9 @@ const TunnelProgress = React.forwardRef<HTMLDivElement, TunnelProgressProps>(
       <div className="w-full space-y-1">
         {showValue && (
           <div className="flex justify-between text-xs font-mono">
-            <span className="text-slate-400 uppercase tracking-wider">Progress</span>
+            <span className="text-slate-400 uppercase tracking-wider">
+              Progress
+            </span>
             <span className="text-teal-400">
               {indeterminate ? '...' : `${Math.round(percentage)}%`}
             </span>
@@ -70,7 +72,7 @@ const TunnelProgress = React.forwardRef<HTMLDivElement, TunnelProgressProps>(
             className={cn(
               'h-full rounded-full transition-all duration-300 ease-out',
               indeterminate ? 'w-1/3' : '',
-              'bg-gradient-to-r from-teal-600 to-teal-400'
+              'bg-linear-to-r from-teal-600 to-teal-400'
             )}
             style={{
               width: indeterminate ? undefined : `${percentage}%`,
@@ -95,41 +97,39 @@ export interface SegmentedProgressProps
   gap?: number;
 }
 
-const SegmentedProgress = React.forwardRef<HTMLDivElement, SegmentedProgressProps>(
-  (
-    { className, value, max = 100, segments = 10, gap = 2, ...props },
-    ref
-  ) => {
-    const percentage = Math.min(100, Math.max(0, (value / max) * 100));
-    const filledSegments = Math.round((percentage / 100) * segments);
+const SegmentedProgress = React.forwardRef<
+  HTMLDivElement,
+  SegmentedProgressProps
+>(({ className, value, max = 100, segments = 10, gap = 2, ...props }, ref) => {
+  const percentage = Math.min(100, Math.max(0, (value / max) * 100));
+  const filledSegments = Math.round((percentage / 100) * segments);
 
-    return (
-      <div
-        ref={ref}
-        className={cn('flex w-full h-2', className)}
-        style={{ gap: `${gap}px` }}
-        role="progressbar"
-        aria-valuenow={value}
-        aria-valuemin={0}
-        aria-valuemax={max}
-        {...props}
-      >
-        {Array.from({ length: segments }).map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              'flex-1 h-full rounded-sm transition-all duration-300',
-              i < filledSegments ? 'bg-teal-500' : 'bg-slate-800'
-            )}
-            style={{
-              transitionDelay: `${i * 30}ms`,
-            }}
-          />
-        ))}
-      </div>
-    );
-  }
-);
+  return (
+    <div
+      ref={ref}
+      className={cn('flex w-full h-2', className)}
+      style={{ gap: `${gap}px` }}
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={max}
+      {...props}
+    >
+      {Array.from({ length: segments }).map((_, i) => (
+        <div
+          key={i}
+          className={cn(
+            'flex-1 h-full rounded-sm transition-all duration-300',
+            i < filledSegments ? 'bg-teal-500' : 'bg-slate-800'
+          )}
+          style={{
+            transitionDelay: `${i * 30}ms`,
+          }}
+        />
+      ))}
+    </div>
+  );
+});
 SegmentedProgress.displayName = 'SegmentedProgress';
 
 export interface CircularProgressProps
@@ -141,7 +141,10 @@ export interface CircularProgressProps
   strokeWidth?: number;
 }
 
-const CircularProgress = React.forwardRef<HTMLDivElement, CircularProgressProps>(
+const CircularProgress = React.forwardRef<
+  HTMLDivElement,
+  CircularProgressProps
+>(
   (
     {
       className,
@@ -206,7 +209,9 @@ const CircularProgress = React.forwardRef<HTMLDivElement, CircularProgressProps>
           />
         </svg>
         {showValue && (
-          <span className={cn('absolute font-mono text-teal-400', currentSize.text)}>
+          <span
+            className={cn('absolute font-mono text-teal-400', currentSize.text)}
+          >
             {Math.round(percentage)}%
           </span>
         )}
