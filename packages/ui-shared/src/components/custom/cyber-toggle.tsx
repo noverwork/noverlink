@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../lib/utils';
 
 const toggleVariants = cva(
@@ -335,9 +336,9 @@ const CyberRadioItem = React.forwardRef<HTMLButtonElement, CyberRadioItemProps>(
 CyberRadioItem.displayName = 'CyberRadioItem';
 
 export {
-  CyberToggle,
   CyberCheckbox,
   CyberRadioGroup,
   CyberRadioItem,
+  CyberToggle,
   toggleVariants,
 };

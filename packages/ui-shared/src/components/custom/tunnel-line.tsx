@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../lib/utils';
 
 const tunnelLineVariants = cva('relative', {
@@ -224,4 +225,4 @@ const TunnelConnection = React.forwardRef<HTMLDivElement, TunnelConnectionProps>
 );
 TunnelConnection.displayName = 'TunnelConnection';
 
-export { TunnelLine, TunnelConnection, tunnelLineVariants };
+export { TunnelConnection, TunnelLine, tunnelLineVariants };

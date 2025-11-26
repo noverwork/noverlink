@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../lib/utils';
 
 const tunnelLoaderVariants = cva('relative inline-flex items-center justify-center', {
@@ -168,9 +169,9 @@ LoadingOverlay.displayName = 'LoadingOverlay';
 export const HexLoader = TunnelLoader;
 
 export {
-  TunnelLoader,
-  SpinnerLoader,
   ConnectionLoader,
   LoadingOverlay,
+  SpinnerLoader,
+  TunnelLoader,
   tunnelLoaderVariants,
 };

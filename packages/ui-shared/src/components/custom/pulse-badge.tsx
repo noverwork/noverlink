@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../lib/utils';
 
 const pulseBadgeVariants = cva(
@@ -257,4 +258,4 @@ const ConnectionBadge = React.forwardRef<HTMLDivElement, ConnectionBadgeProps>(
 );
 ConnectionBadge.displayName = 'ConnectionBadge';
 
-export { PulseBadge, StatusIndicator, ConnectionBadge, pulseBadgeVariants };
+export { ConnectionBadge, PulseBadge, pulseBadgeVariants,StatusIndicator };

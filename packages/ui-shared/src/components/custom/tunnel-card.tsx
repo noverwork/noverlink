@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../lib/utils';
 
 const tunnelCardVariants = cva(
@@ -205,4 +206,4 @@ const TunnelStats = React.forwardRef<HTMLDivElement, TunnelStatsProps>(
 );
 TunnelStats.displayName = 'TunnelStats';
 
-export { TunnelCard, MetricCard, TunnelStats, tunnelCardVariants };
+export { MetricCard, TunnelCard, tunnelCardVariants,TunnelStats };

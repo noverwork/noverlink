@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../lib/utils';
 
 const tunnelProgressVariants = cva('relative overflow-hidden', {
@@ -216,8 +217,8 @@ const CircularProgress = React.forwardRef<HTMLDivElement, CircularProgressProps>
 CircularProgress.displayName = 'CircularProgress';
 
 export {
-  TunnelProgress,
-  SegmentedProgress,
   CircularProgress,
+  SegmentedProgress,
+  TunnelProgress,
   tunnelProgressVariants,
 };

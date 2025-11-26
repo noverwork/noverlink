@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../lib/utils';
 
 const inputVariants = cva(
@@ -177,4 +178,4 @@ export const NeonTextarea = TunnelTextarea;
 export const NeonInputGroup = TunnelInputGroup;
 export const neonInputVariants = inputVariants;
 
-export { TunnelInput, TunnelTextarea, TunnelInputGroup, inputVariants };
+export { inputVariants,TunnelInput, TunnelInputGroup, TunnelTextarea };
