@@ -1,43 +1,43 @@
 'use client';
 
-import { useState } from 'react';
 import {
-  // Buttons
-  GlowButton,
-  // Inputs
-  TunnelInput,
-  TunnelTextarea,
-  TunnelInputGroup,
-  CyberToggle,
+  CircularProgress,
+  ConnectionBadge,
+  ConnectionLoader,
   CyberCheckbox,
   CyberRadioGroup,
   CyberRadioItem,
+  CyberToggle,
+  DataCell,
   // Data Display
   DataGrid,
-  DataCell,
-  PulseBadge,
-  StatusIndicator,
-  ConnectionBadge,
-  // Loading & Progress
-  TunnelLoader,
-  SpinnerLoader,
-  ConnectionLoader,
-  LoadingOverlay,
-  TunnelProgress,
-  SegmentedProgress,
-  CircularProgress,
+  // Buttons
+  GlowButton,
   // Backgrounds
   GridBackground,
+  LoadingOverlay,
+  MetricCard,
   ParticleField,
+  PulseBadge,
+  SegmentedProgress,
+  SpinnerLoader,
+  StatusIndicator,
+  TunnelCard,
+  TunnelConnection,
+  // Inputs
+  TunnelInput,
+  TunnelInputGroup,
+  TunnelLine,
+  // Loading & Progress
+  TunnelLoader,
   // Tunnel Components
   TunnelNode,
-  TunnelLine,
-  TunnelConnection,
-  TunnelCard,
-  MetricCard,
+  TunnelProgress,
   TunnelStats,
+  TunnelTextarea,
 } from '@noverlink/ui-shared';
 import { Search } from 'lucide-react';
+import { useState } from 'react';
 
 type TableRow = {
   id: string;
@@ -72,6 +72,18 @@ function ComponentGroup({ label, children }: { label: string; children: React.Re
       <div className="flex flex-wrap gap-3 items-center">{children}</div>
     </div>
   );
+}
+
+function getStatusVariant(value: unknown): 'connected' | 'warning' | 'disconnected' {
+  if (value === 'active') return 'connected';
+  if (value === 'idle') return 'warning';
+  return 'disconnected';
+}
+
+function getLatencyVariant(latency: number): 'success' | 'warning' | 'danger' {
+  if (latency < 50) return 'success';
+  if (latency < 100) return 'warning';
+  return 'danger';
 }
 
 export default function DevPage() {
@@ -412,13 +424,7 @@ export default function DevPage() {
                 key: 'status',
                 header: 'Status',
                 render: (value) => (
-                  <PulseBadge
-                    variant={
-                      value === 'active' ? 'connected' :
-                      value === 'idle' ? 'warning' : 'disconnected'
-                    }
-                    size="sm"
-                  >
+                  <PulseBadge variant={getStatusVariant(value)} size="sm">
                     {String(value)}
                   </PulseBadge>
                 ),
@@ -429,18 +435,12 @@ export default function DevPage() {
                 header: 'Latency',
                 align: 'right',
                 render: (value) => (
-                  <DataCell
-                    value={`${value}ms`}
-                    variant={
-                      Number(value) < 50 ? 'success' :
-                      Number(value) < 100 ? 'warning' : 'danger'
-                    }
-                  />
+                  <DataCell value={`${value}ms`} variant={getLatencyVariant(Number(value))} />
                 ),
               },
             ]}
             data={sampleData}
-            onRowClick={(row) => console.log('Clicked:', row)}
+            onRowClick={() => undefined}
           />
         </Section>
 

@@ -1,32 +1,27 @@
-import { cn } from '../../lib/utils';
+'use client';
+
+import {
+  cn,
+  GlowButton,
+  PulseBadge,
+  SegmentedProgress,
+} from '@noverlink/ui-shared';
+
 import { DashboardLayout } from '../dashboard-layout';
 
-function getPlanBorderClass(plan: { popular?: boolean; current?: boolean }) {
-  if (plan.popular) {
-    return 'border-blue-500 shadow-lg';
-  }
-  if (plan.current) {
-    return 'border-green-500';
-  }
-  return 'border-gray-700';
-}
-
-function getPlanButtonClass(plan: {
+interface Plan {
+  name: string;
+  price: string;
+  period: string;
+  features: string[];
+  cta: string;
   current?: boolean;
-  comingSoon?: boolean;
   popular?: boolean;
-}) {
-  if (plan.current || plan.comingSoon) {
-    return 'bg-gray-700 text-gray-400 cursor-not-allowed';
-  }
-  if (plan.popular) {
-    return 'bg-blue-600 text-white hover:bg-blue-700';
-  }
-  return 'bg-gray-700 text-white border border-gray-600 hover:bg-gray-600';
+  comingSoon?: boolean;
 }
 
 export function BillingsPage() {
-  const plans = [
+  const plans: Plan[] = [
     {
       name: 'Free',
       price: '$0',
@@ -73,30 +68,71 @@ export function BillingsPage() {
     },
   ];
 
+  // Usage data (demo)
+  const usage = {
+    tunnels: { used: 0, max: 1 },
+    bandwidth: { used: 0, max: 1024 }, // MB
+    billingPeriod: null as string | null,
+  };
+
   return (
     <DashboardLayout>
-      <h2 className="text-3xl font-bold text-white mb-2">
-        Billing & Subscription
-      </h2>
-      <p className="text-gray-400 mb-8">
-        Choose a plan that works for you. No hidden fees.
-      </p>
+      {/* Page Header */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold text-white tracking-tight">
+          Billing & Subscription
+        </h2>
+        <p className="text-slate-400 mt-1">
+          Choose a plan that works for you. No hidden fees.
+        </p>
+      </div>
 
       {/* Current Usage */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-8">
-        <h3 className="text-lg font-semibold text-white mb-4">Current Usage</h3>
+      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-medium text-white">Current Usage</h3>
+          <PulseBadge variant="connected" appearance="pill">
+            Free Plan
+          </PulseBadge>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <div className="text-sm text-gray-400 mb-1">Tunnels Used</div>
-            <div className="text-2xl font-bold text-white">0 / 1</div>
+          {/* Tunnels */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-400">Tunnels Used</span>
+              <span className="text-sm font-mono text-white">
+                {usage.tunnels.used} / {usage.tunnels.max}
+              </span>
+            </div>
+            <SegmentedProgress
+              value={usage.tunnels.used}
+              max={usage.tunnels.max}
+              segments={usage.tunnels.max}
+            />
           </div>
-          <div>
-            <div className="text-sm text-gray-400 mb-1">Bandwidth Used</div>
-            <div className="text-2xl font-bold text-white">0 / 1 GB</div>
+
+          {/* Bandwidth */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-400">Bandwidth Used</span>
+              <span className="text-sm font-mono text-white">
+                {usage.bandwidth.used} MB / {usage.bandwidth.max / 1024} GB
+              </span>
+            </div>
+            <SegmentedProgress
+              value={usage.bandwidth.used}
+              max={usage.bandwidth.max}
+              segments={10}
+            />
           </div>
-          <div>
-            <div className="text-sm text-gray-400 mb-1">Billing Period</div>
-            <div className="text-2xl font-bold text-white">-</div>
+
+          {/* Billing Period */}
+          <div className="space-y-3">
+            <span className="text-sm text-slate-400">Billing Period</span>
+            <div className="text-xl font-medium text-white">
+              {usage.billingPeriod || '—'}
+            </div>
           </div>
         </div>
       </div>
@@ -104,81 +140,148 @@ export function BillingsPage() {
       {/* Pricing Plans */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => (
-          <div
-            key={plan.name}
-            className={cn(
-              'bg-gray-800 rounded-lg border-2 p-6 relative',
-              getPlanBorderClass(plan)
-            )}
-          >
-            {plan.popular && (
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  POPULAR
-                </span>
-              </div>
-            )}
-            {plan.comingSoon && (
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-gray-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  COMING SOON
-                </span>
-              </div>
-            )}
-
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
-              <div className="flex items-baseline">
-                <span className="text-4xl font-bold text-white">
-                  {plan.price}
-                </span>
-                <span className="text-gray-400 ml-1">{plan.period}</span>
-              </div>
-            </div>
-
-            <ul className="space-y-3 mb-6">
-              {plan.features.map((feature, idx) => (
-                <li key={idx} className="flex items-start text-sm">
-                  <svg
-                    className="h-5 w-5 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-300">{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <button
-              className={cn(
-                'w-full py-2 px-4 rounded-md font-medium',
-                getPlanButtonClass(plan)
-              )}
-              disabled={plan.current || plan.comingSoon}
-            >
-              {plan.cta}
-            </button>
-          </div>
+          <PlanCard key={plan.name} plan={plan} />
         ))}
       </div>
 
       {/* Payment History */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mt-8">
-        <h3 className="text-lg font-semibold text-white mb-4">
-          Payment History
-        </h3>
-        <div className="text-sm text-gray-400">
-          No payment history yet. Upgrade to a paid plan to see invoices here.
+      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 mt-8">
+        <h3 className="text-lg font-medium text-white mb-4">Payment History</h3>
+        <div className="text-center py-8">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
+            <ReceiptIcon className="w-6 h-6 text-slate-500" />
+          </div>
+          <p className="text-sm text-slate-400">
+            No payment history yet. Upgrade to a paid plan to see invoices here.
+          </p>
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+function PlanCard({ plan }: { plan: Plan }) {
+  const getBorderClass = () => {
+    if (plan.popular) return 'border-teal-500/50';
+    if (plan.current) return 'border-teal-500/30';
+    return 'border-slate-800';
+  };
+
+  const getBgClass = () => {
+    if (plan.popular) return 'bg-gradient-to-b from-teal-500/10 to-slate-900/50';
+    return 'bg-slate-900/50';
+  };
+
+  return (
+    <div
+      className={cn(
+        'relative rounded-xl border-2 p-6',
+        getBorderClass(),
+        getBgClass()
+      )}
+    >
+      {/* Badge */}
+      {plan.popular && (
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+          <PulseBadge variant="connected" appearance="pill" pulse={false}>
+            POPULAR
+          </PulseBadge>
+        </div>
+      )}
+      {plan.comingSoon && (
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+          <PulseBadge variant="neutral" appearance="pill" pulse={false}>
+            COMING SOON
+          </PulseBadge>
+        </div>
+      )}
+
+      {/* Plan Header */}
+      <div className="mb-6 pt-2">
+        <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
+        <div className="flex items-baseline">
+          <span className="text-4xl font-bold text-white">{plan.price}</span>
+          <span className="text-slate-400 ml-1">{plan.period}</span>
+        </div>
+      </div>
+
+      {/* Features */}
+      <ul className="space-y-3 mb-6">
+        {plan.features.map((feature, idx) => (
+          <li key={idx} className="flex items-start text-sm">
+            <CheckIcon
+              className={cn(
+                'h-5 w-5 mr-2 flex-shrink-0',
+                plan.current || plan.popular ? 'text-teal-400' : 'text-slate-500'
+              )}
+            />
+            <span className="text-slate-300">{feature}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/* CTA Button */}
+      <PlanCtaButton plan={plan} />
+    </div>
+  );
+}
+
+function PlanCtaButton({ plan }: { plan: Plan }) {
+  if (plan.current) {
+    return (
+      <GlowButton variant="secondary" className="w-full" disabled>
+        {plan.cta}
+      </GlowButton>
+    );
+  }
+
+  if (plan.comingSoon) {
+    return (
+      <GlowButton variant="secondary" className="w-full opacity-50" disabled>
+        {plan.cta}
+      </GlowButton>
+    );
+  }
+
+  return (
+    <GlowButton
+      variant={plan.popular ? 'primary' : 'secondary'}
+      className="w-full"
+    >
+      {plan.cta}
+    </GlowButton>
+  );
+}
+
+// Icon components
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+function ReceiptIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185zM9.75 9h.008v.008H9.75V9zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 4.5h.008v.008h-.008V13.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+      />
+    </svg>
   );
 }

@@ -78,17 +78,6 @@ const TunnelProgress = React.forwardRef<HTMLDivElement, TunnelProgressProps>(
                 : undefined,
             }}
           />
-
-          <style jsx>{`
-            @keyframes progress-indeterminate {
-              0% {
-                transform: translateX(-100%);
-              }
-              100% {
-                transform: translateX(400%);
-              }
-            }
-          `}</style>
         </div>
       </div>
     );
