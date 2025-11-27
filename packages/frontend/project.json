@@ -1,0 +1,22 @@
+{
+  "name": "@noverlink/frontend",
+  "targets": {
+    "dev": {
+      "options": {
+        "command": "next dev --port 4200"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/frontend",
+        "command": "next dev --port 4200"
+      }
+    },
+    "start": {
+      "options": {
+        "command": "next start --port 4200"
+      }
+    }
+  }
+}

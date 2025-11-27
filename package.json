@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "dev": "nx run-many --target=serve --projects=@noverlink/backend,@noverlink/frontend --parallel=true --output-style=stream",
     "backend:serve": "nx serve @noverlink/backend",
     "backend:build": "nx build @noverlink/backend",
     "frontend:serve": "nx dev @noverlink/frontend",
@@ -120,6 +121,7 @@
     "@nestjs/core": "^11.1.7",
     "@nestjs/platform-express": "^11.1.7",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "argon2": "^0.44.0",
     "class-validator": "^0.14.2",
     "nestjs-pino": "^4.4.1",
     "next": "~15.2.4",

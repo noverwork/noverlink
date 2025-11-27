@@ -5,10 +5,11 @@ import {
   IsEnum,
   IsIP,
   IsNumber,
-  IsOptional,
   IsString,
+  IsUrl,
   Max,
   Min,
+  MinLength,
 } from 'class-validator';
 
 import { EnvField } from './env.constant';
@@ -17,9 +18,8 @@ export class AppEnvSchema {
   @IsEnum(Environment)
   [EnvField.NodeEnv]!: Environment;
 
-  @IsOptional()
   @IsString()
-  [EnvField.LogLevel]?: string;
+  [EnvField.LogLevel]!: string;
 
   @IsIP()
   [EnvField.AppBind]!: string;
@@ -37,4 +37,43 @@ export class AppEnvSchema {
     return obj[key] === 'true';
   })
   [EnvField.DBDebug]!: boolean;
+
+  // JWT Configuration
+  @IsString()
+  @MinLength(32)
+  [EnvField.JwtSecret]!: string;
+
+  @IsString()
+  [EnvField.JwtExpiresIn]!: string;
+
+  @IsString()
+  @MinLength(32)
+  [EnvField.JwtRefreshSecret]!: string;
+
+  @IsString()
+  [EnvField.JwtRefreshExpiresIn]!: string;
+
+  // OAuth - Google
+  @IsString()
+  [EnvField.GoogleClientId]!: string;
+
+  @IsString()
+  [EnvField.GoogleClientSecret]!: string;
+
+  @IsUrl({ require_tld: false })
+  [EnvField.GoogleCallbackUrl]!: string;
+
+  // OAuth - GitHub
+  @IsString()
+  [EnvField.GithubClientId]!: string;
+
+  @IsString()
+  [EnvField.GithubClientSecret]!: string;
+
+  @IsUrl({ require_tld: false })
+  [EnvField.GithubCallbackUrl]!: string;
+
+  // Frontend URL for OAuth redirects
+  @IsUrl({ require_tld: false })
+  [EnvField.FrontendUrl]!: string;
 }

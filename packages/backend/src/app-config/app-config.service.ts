@@ -11,7 +11,7 @@ export class AppConfigService {
   get env() {
     return {
       nodeEnv: this.configService.getOrThrow<Environment>(EnvField.NodeEnv),
-      logLevel: this.configService.get<string>(EnvField.LogLevel, 'info'),
+      logLevel: this.configService.getOrThrow<string>(EnvField.LogLevel),
       isProduction:
         this.configService.getOrThrow<Environment>(EnvField.NodeEnv) ===
         Environment.Production,
@@ -22,6 +22,7 @@ export class AppConfigService {
     return {
       bind: this.configService.getOrThrow<string>(EnvField.AppBind),
       port: this.configService.getOrThrow<number>(EnvField.AppPort),
+      frontendUrl: this.configService.getOrThrow<string>(EnvField.FrontendUrl),
     };
   }
 
@@ -29,6 +30,46 @@ export class AppConfigService {
     return {
       clientUrl: this.configService.getOrThrow<string>(EnvField.DBClientUrl),
       debug: this.configService.getOrThrow<boolean>(EnvField.DBDebug),
+    };
+  }
+
+  get jwt() {
+    return {
+      secret: this.configService.getOrThrow<string>(EnvField.JwtSecret),
+      expiresIn: this.configService.getOrThrow<string>(EnvField.JwtExpiresIn),
+      refreshSecret: this.configService.getOrThrow<string>(
+        EnvField.JwtRefreshSecret
+      ),
+      refreshExpiresIn: this.configService.getOrThrow<string>(
+        EnvField.JwtRefreshExpiresIn
+      ),
+    };
+  }
+
+  get oauth() {
+    return {
+      google: {
+        clientId: this.configService.getOrThrow<string>(
+          EnvField.GoogleClientId
+        ),
+        clientSecret: this.configService.getOrThrow<string>(
+          EnvField.GoogleClientSecret
+        ),
+        callbackUrl: this.configService.getOrThrow<string>(
+          EnvField.GoogleCallbackUrl
+        ),
+      },
+      github: {
+        clientId: this.configService.getOrThrow<string>(
+          EnvField.GithubClientId
+        ),
+        clientSecret: this.configService.getOrThrow<string>(
+          EnvField.GithubClientSecret
+        ),
+        callbackUrl: this.configService.getOrThrow<string>(
+          EnvField.GithubCallbackUrl
+        ),
+      },
     };
   }
 }

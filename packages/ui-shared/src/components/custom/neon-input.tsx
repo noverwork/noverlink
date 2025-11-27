@@ -81,10 +81,10 @@ const TunnelInput = React.forwardRef<HTMLInputElement, TunnelInputProps>(
     const hasIcon = !!icon;
 
     return (
-      <div className="relative">
-        <div className="relative">
+      <div className="w-full">
+        <div className="relative flex items-center">
           {hasIcon && iconPosition === 'left' && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <div className="absolute left-3 text-slate-400 pointer-events-none z-10">
               {icon}
             </div>
           )}
@@ -93,14 +93,14 @@ const TunnelInput = React.forwardRef<HTMLInputElement, TunnelInputProps>(
             className={cn(
               inputVariants({ variant: error ? 'error' : variant, size, rounded, mono }),
               hasIcon && iconPosition === 'left' && 'pl-10',
-              hasIcon && iconPosition === 'right' && 'pr-10',
+              hasIcon && iconPosition === 'right' && 'pr-12',
               className
             )}
             ref={ref}
             {...props}
           />
           {hasIcon && iconPosition === 'right' && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+            <div className="absolute right-3 text-slate-400 z-10">
               {icon}
             </div>
           )}
@@ -157,7 +157,7 @@ const TunnelInputGroup = React.forwardRef<HTMLDivElement, TunnelInputGroupProps>
     return (
       <div ref={ref} className={cn('space-y-2', className)} {...props}>
         {label && (
-          <label className="block text-sm font-medium text-slate-200">
+          <label className="block text-sm font-medium text-white">
             {label}
             {required && <span className="text-rose-400 ml-1">*</span>}
           </label>
