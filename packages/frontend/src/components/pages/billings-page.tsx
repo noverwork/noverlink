@@ -179,8 +179,7 @@ function PlanCard({ plan }: { plan: Plan }) {
   };
 
   const getBgClass = () => {
-    if (plan.popular)
-      return 'bg-gradient-to-b from-teal-500/10 to-slate-900/50';
+    if (plan.popular) return 'bg-gradient-to-b from-teal-500/10 to-slate-900/50';
     return 'bg-slate-900/50';
   };
 
@@ -222,9 +221,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             <CheckIcon
               className={cn(
                 'h-5 w-5 mr-2 flex-shrink-0',
-                plan.current || plan.popular
-                  ? 'text-teal-400'
-                  : 'text-slate-500'
+                plan.current || plan.popular ? 'text-teal-400' : 'text-slate-500'
               )}
             />
             <span className="text-slate-300">{feature}</span>
