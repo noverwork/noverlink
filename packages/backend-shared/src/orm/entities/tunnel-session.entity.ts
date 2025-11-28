@@ -18,11 +18,21 @@ export enum SessionStatus {
   CLOSED = 'closed',
 }
 
+export enum TunnelProtocol {
+  HTTP = 'http',
+  TCP = 'tcp',
+}
+
 @Entity()
 export class TunnelSession extends PgBaseEntity {
   @ManyToOne(() => Domain)
   @Index()
   domain!: Domain;
+
+  @Enum(() => TunnelProtocol)
+  protocol: TunnelProtocol & Opt = TunnelProtocol.HTTP;
+
+  // ─── Session State ───────────────────────────────────────────
 
   @Enum(() => SessionStatus)
   @Index()
@@ -46,6 +56,8 @@ export class TunnelSession extends PgBaseEntity {
   /** CLI version for debugging */
   @Property({ type: 'string', nullable: true })
   clientVersion?: string;
+
+  // ─── Relations ───────────────────────────────────────────────
 
   @OneToMany(() => HttpRequest, (req) => req.session)
   httpRequests = new Collection<HttpRequest>(this);

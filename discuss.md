@@ -4,23 +4,27 @@
 
 ```
 User
- ├── domains[]         → Domain (含 tunnel 配置)
+ ├── domains[]         → Domain
  ├── usageQuotas[]     → UsageQuota
  ├── oauthConnections[] → OAuthConnection
  └── subscriptions[]   → Subscription
 
-Domain (= hostname + tunnel 配置)
- ├── hostname, isReserved, isCustom, dnsVerified  // DNS 層
- ├── protocol, targetPort, targetHost, isEnabled, recordRequests  // Tunnel 配置
+Domain (subdomain 保留)
+ ├── hostname, isReserved
  └── sessions[]        → TunnelSession
 
 TunnelSession
  ├── domain            → Domain
+ ├── protocol          // HTTP 或 TCP
  └── httpRequests[]    → HttpRequest
 
 HttpRequest
  └── session           → TunnelSession
 ```
+
+設計模式：**Stateless**（類似 ngrok）
+- Domain 只保留 hostname
+- tunnel 配置由 CLI 每次連線帶入
 
 ---
 
@@ -77,15 +81,16 @@ HttpRequest
 ### 3. CLI 連線
 
 ```bash
-$ noverlink --token nk_xxx --subdomain myapp
+$ noverlink --token nk_xxx --subdomain myapp --port 3000
 ```
 
 ```
 [Relay] 驗證 authToken → 找到 User
-[Relay] 查詢 Domain { hostname: "myapp", user, isEnabled: true }
+[Relay] 查詢 Domain { hostname: "myapp", user }
 [Relay] 建立 WebSocket 連線
  → TunnelSession {
      domain,
+     protocol: HTTP,
      status: ACTIVE,
      connectedAt: now(),
      clientIp: "203.0.113.50",
