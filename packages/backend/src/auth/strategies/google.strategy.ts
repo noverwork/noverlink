@@ -8,8 +8,6 @@ export interface OAuthProfile {
   id: string;
   email: string;
   name: string;
-  accessToken: string;
-  refreshToken?: string;
 }
 
 @Injectable()
@@ -25,8 +23,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    accessToken: string,
-    refreshToken: string,
+    _accessToken: string,
+    _refreshToken: string,
     profile: Profile,
     done: VerifyCallback
   ): Promise<void> {
@@ -36,8 +34,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       id,
       email: emails?.[0]?.value || '',
       name: displayName || '',
-      accessToken,
-      refreshToken,
     };
 
     done(null, oauthProfile);

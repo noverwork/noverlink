@@ -12,13 +12,20 @@ import { DashboardLayout } from '../dashboard-layout';
 interface Plan {
   name: string;
   price: string;
+  yearlyPrice?: string;
   period: string;
   features: string[];
   cta: string;
   current?: boolean;
   popular?: boolean;
-  comingSoon?: boolean;
+  productId?: string;
 }
+
+// Product IDs from Polar Dashboard - configure in environment
+const POLAR_PRODUCTS = {
+  hobbyist: process.env.NEXT_PUBLIC_POLAR_HOBBYIST_PRODUCT_ID || '',
+  pro: process.env.NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID || '',
+};
 
 export function BillingsPage() {
   const plans: Plan[] = [
@@ -29,42 +36,46 @@ export function BillingsPage() {
       features: [
         '1 concurrent tunnel',
         '1 GB bandwidth/month',
-        'Basic support',
+        'Community support',
         'HTTP/HTTPS only',
       ],
       cta: 'Current Plan',
       current: true,
     },
     {
-      name: 'Pro',
-      price: '$9',
+      name: 'Hobbyist',
+      price: '$12',
+      yearlyPrice: '$99',
       period: '/month',
       features: [
-        '10 concurrent tunnels',
-        '100 GB bandwidth/month',
-        'Priority support',
+        '5 concurrent tunnels',
+        '50 GB bandwidth/month',
+        'Email support',
         'HTTP/HTTPS + TCP/UDP',
-        'Custom domains',
+        'Custom subdomains',
       ],
-      cta: 'Upgrade to Pro',
+      cta: 'Upgrade to Hobbyist',
       current: false,
       popular: true,
+      productId: POLAR_PRODUCTS.hobbyist,
     },
     {
-      name: 'Pro Plus',
-      price: '$49',
+      name: 'Pro',
+      price: '$39',
+      yearlyPrice: '$349',
       period: '/month',
       features: [
         'Unlimited tunnels',
-        '1 TB bandwidth/month',
-        '24/7 Priority support',
+        '500 GB bandwidth/month',
+        'Priority support',
         'All protocols',
         'Custom domains',
         'Dedicated relay servers',
+        'Team features',
       ],
-      cta: 'Coming Soon',
+      cta: 'Upgrade to Pro',
       current: false,
-      comingSoon: true,
+      productId: POLAR_PRODUCTS.pro,
     },
   ];
 
@@ -138,7 +149,7 @@ export function BillingsPage() {
       </div>
 
       {/* Pricing Plans */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
         {plans.map((plan) => (
           <PlanCard key={plan.name} plan={plan} />
         ))}
@@ -175,7 +186,7 @@ function PlanCard({ plan }: { plan: Plan }) {
   return (
     <div
       className={cn(
-        'relative rounded-xl border-2 p-6',
+        'relative rounded-xl border-2 p-6 flex flex-col h-full',
         getBorderClass(),
         getBgClass()
       )}
@@ -188,13 +199,6 @@ function PlanCard({ plan }: { plan: Plan }) {
           </PulseBadge>
         </div>
       )}
-      {plan.comingSoon && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <PulseBadge variant="neutral" appearance="pill" pulse={false}>
-            COMING SOON
-          </PulseBadge>
-        </div>
-      )}
 
       {/* Plan Header */}
       <div className="mb-6 pt-2">
@@ -203,10 +207,15 @@ function PlanCard({ plan }: { plan: Plan }) {
           <span className="text-4xl font-bold text-white">{plan.price}</span>
           <span className="text-slate-400 ml-1">{plan.period}</span>
         </div>
+        {plan.yearlyPrice && (
+          <div className="text-sm text-slate-500 mt-1">
+            or {plan.yearlyPrice}/year (save ~30%)
+          </div>
+        )}
       </div>
 
       {/* Features */}
-      <ul className="space-y-3 mb-6">
+      <ul className="space-y-3 mb-6 flex-1">
         {plan.features.map((feature, idx) => (
           <li key={idx} className="flex items-start text-sm">
             <CheckIcon
@@ -235,18 +244,19 @@ function PlanCtaButton({ plan }: { plan: Plan }) {
     );
   }
 
-  if (plan.comingSoon) {
-    return (
-      <GlowButton variant="secondary" className="w-full opacity-50" disabled>
-        {plan.cta}
-      </GlowButton>
-    );
-  }
+  const checkoutUrl = plan.productId
+    ? `/api/checkout?products=${plan.productId}`
+    : '#';
+
+  const handleClick = () => {
+    window.location.href = checkoutUrl;
+  };
 
   return (
     <GlowButton
       variant={plan.popular ? 'primary' : 'secondary'}
       className="w-full"
+      onClick={handleClick}
     >
       {plan.cta}
     </GlowButton>

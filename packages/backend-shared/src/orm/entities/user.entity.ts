@@ -17,6 +17,7 @@ import { UsageQuota } from './usage-quota.entity';
 
 export enum UserPlan {
   FREE = 'free',
+  HOBBYIST = 'hobbyist',
   PRO = 'pro',
   ENTERPRISE = 'enterprise',
 }

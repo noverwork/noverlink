@@ -119,15 +119,6 @@ export class AuthService {
     );
 
     if (connection) {
-      // Update tokens if provided
-      if (profile.accessToken) {
-        connection.accessToken = profile.accessToken;
-      }
-      if (profile.refreshToken) {
-        connection.refreshToken = profile.refreshToken;
-      }
-      await this.em.flush();
-
       return this.generateTokens(connection.user);
     }
 
@@ -150,8 +141,6 @@ export class AuthService {
     connection = this.em.create(OAuthConnection, {
       provider,
       providerUserId: profile.id,
-      accessToken: profile.accessToken,
-      refreshToken: profile.refreshToken,
       user,
     });
 

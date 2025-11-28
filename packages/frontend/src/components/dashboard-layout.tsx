@@ -17,7 +17,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/', label: 'Overview', icon: DashboardIcon },
+    { href: '/dashboard', label: 'Dashboard', icon: DashboardIcon },
     { href: '/tunnels', label: 'Tunnels', icon: TunnelIcon },
     { href: '/settings', label: 'Settings', icon: SettingsIcon },
     { href: '/billings', label: 'Billing', icon: BillingIcon },

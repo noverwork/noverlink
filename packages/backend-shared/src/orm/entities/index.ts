@@ -1,5 +1,6 @@
 export * from './domain.entity';
 export * from './oauth-connection.entity';
+export * from './subscription.entity';
 export * from './tunnel.entity';
 export * from './tunnel-request.entity';
 export * from './tunnel-session.entity';

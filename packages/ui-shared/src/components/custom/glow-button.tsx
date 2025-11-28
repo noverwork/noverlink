@@ -10,16 +10,17 @@ const glowButtonVariants = cva(
   [
     'inline-flex items-center justify-center gap-2',
     'font-medium text-sm',
+    'cursor-pointer',
     'transition-colors',
-    'disabled:pointer-events-none disabled:opacity-50',
+    'disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
   ],
   {
     variants: {
       variant: {
         primary: [
-          'bg-teal-500 text-white',
-          'hover:bg-teal-400',
+          'border border-teal-500 bg-teal-500 text-white',
+          'hover:bg-teal-400 hover:border-teal-400',
           'focus-visible:ring-teal-500',
         ],
         secondary: [
@@ -81,7 +82,7 @@ const GlowButton = React.forwardRef<HTMLButtonElement, GlowButtonProps>(
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp
-        className={cn(glowButtonVariants({ variant, size, rounded, className }))}
+        className={cn(glowButtonVariants({ variant, size, rounded }), className)}
         ref={ref}
         disabled={disabled || loading}
         {...props}

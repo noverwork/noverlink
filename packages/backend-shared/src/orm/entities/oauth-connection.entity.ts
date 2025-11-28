@@ -26,12 +26,6 @@ export class OAuthConnection extends PgBaseEntity {
   @Index()
   providerUserId!: string;
 
-  @Property({ type: 'string', nullable: true, hidden: true })
-  accessToken?: string;
-
-  @Property({ type: 'string', nullable: true, hidden: true })
-  refreshToken?: string;
-
   @ManyToOne(() => User)
   user!: User;
 }

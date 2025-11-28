@@ -47,7 +47,8 @@
         ],
         "options": {
           "buildTarget": "@noverlink/migrator:build",
-          "runBuildTargetDependencies": false
+          "runBuildTargetDependencies": false,
+          "watch": false
         },
         "configurations": {
           "development": {

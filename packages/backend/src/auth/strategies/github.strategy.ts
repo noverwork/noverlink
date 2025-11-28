@@ -24,8 +24,8 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   }
 
   async validate(
-    accessToken: string,
-    refreshToken: string,
+    _accessToken: string,
+    _refreshToken: string,
     profile: Profile,
     done: VerifyCallback
   ): Promise<void> {
@@ -35,8 +35,6 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       id,
       email: emails?.[0]?.value || '',
       name: displayName || username || '',
-      accessToken,
-      refreshToken,
     };
 
     done(null, oauthProfile);

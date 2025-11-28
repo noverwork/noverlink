@@ -1,6 +1,7 @@
 import {
   Domain,
   OAuthConnection,
+  Subscription,
   Tunnel,
   TunnelRequest,
   TunnelSession,
@@ -18,4 +19,5 @@ export const ENTITIES = [
   TunnelRequest,
   UsageQuota,
   OAuthConnection,
+  Subscription,
 ];

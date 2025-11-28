@@ -7,6 +7,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@polar-sh/nextjs": "^0.9.0",
+    "@polar-sh/sdk": "^0.41.5",
     "@tanstack/react-query": "^5.90.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

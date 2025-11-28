@@ -36,7 +36,7 @@ const mockActiveTunnels = [
   },
 ];
 
-export function OverviewPage() {
+export function DashboardPage() {
   // In production, this comes from real-time API/WebSocket
   const activeTunnels = mockActiveTunnels;
   const hasActiveTunnels = activeTunnels.length > 0;

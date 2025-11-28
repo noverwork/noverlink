@@ -9,6 +9,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { AppConfigService } from '../app-config';
 import { AppConfigModule } from '../app-config/app-config.module';
 import { AuthModule, JwtAuthGuard } from '../auth';
+import { BillingModule } from '../billing';
 import { SERVICE_NAME } from './app.constant';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -42,6 +43,7 @@ import { AppService } from './app.service';
       driver: PostgreSqlDriver,
     }),
     AuthModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [
