@@ -88,7 +88,7 @@ pub enum WebSocketMessage {
     /// and received 101 Switching Protocols response. Includes the response
     /// for Relay to forward to the client.
     WebSocketReady {
-        /// Connection ID matching the WebSocketUpgrade message
+        /// Connection ID matching the `WebSocketUpgrade` message
         connection_id: String,
         /// Base64-encoded 101 response from localhost
         upgrade_response: String,

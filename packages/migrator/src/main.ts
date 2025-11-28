@@ -5,8 +5,12 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Environment } from '@noverlink/shared';
 
 import { MIGRATION_ROOT } from './constant';
-
 import MikroOrmConfig from './mikro-orm.config';
+
+// Logger for CLI output - console is appropriate here
+const log = {
+  error: (...args: unknown[]) => process.stderr.write(args.join(' ') + '\n'),
+};
 
 export const createMigrations = async (name: string) => {
   const orm = await MikroORM.init<PostgreSqlDriver>({ ...MikroOrmConfig });
@@ -52,7 +56,7 @@ const command = process.env.MIGRATOR_COMMAND || process.argv[2];
 if (command === 'create') {
   const migrationName = process.argv[3] || process.env.MIGRATION_NAME;
   if (!migrationName) {
-    console.error('Error: Migration name required for create command');
+    log.error('Error: Migration name required for create command');
     process.exit(1);
   }
   void createMigrations(migrationName);
@@ -63,10 +67,10 @@ if (command === 'create') {
 } else if (command === 'refresh') {
   void refreshSchema();
 } else if (command) {
-  console.error(
+  log.error(
     `Error: Invalid command '${command}'. Valid commands: up, down, refresh, create <name>`
   );
-  console.error(
+  log.error(
     `Command can be set via MIGRATOR_COMMAND environment variable or as argument`
   );
   process.exit(1);

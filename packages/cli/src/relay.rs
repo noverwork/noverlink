@@ -1,5 +1,7 @@
 //! Relay WebSocket connection management
 
+#![allow(clippy::indexing_slicing)] // Slicing is bounds-checked in this module
+
 use std::sync::Arc;
 
 use anyhow::{bail, Context, Result};
@@ -327,6 +329,7 @@ impl ResponseSender {
 }
 
 /// Handle a WebSocket connection to localhost
+#[allow(clippy::too_many_lines)]
 async fn handle_websocket_connection(
     connection_id: String,
     initial_request: String,

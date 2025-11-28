@@ -64,9 +64,10 @@ pub struct TunnelRegistry {
     base_domain: String,
     /// WebSocket connection ID counter
     next_ws_connection_id: std::sync::atomic::AtomicU64,
-    /// Map: `connection_id` -> (response_channel, frame_channel)
-    /// response_channel: for sending the 101 upgrade response back
-    /// frame_channel: for sending WebSocket frames from client to CLI
+    /// Map: `connection_id` -> (`response_channel`, `frame_channel`)
+    /// `response_channel`: for sending the 101 upgrade response back
+    /// `frame_channel`: for sending WebSocket frames from client to CLI
+    #[allow(clippy::type_complexity)]
     pending_websockets: DashMap<String, (mpsc::Sender<Vec<u8>>, mpsc::Sender<Vec<u8>>)>,
 }
 
@@ -176,8 +177,8 @@ impl TunnelRegistry {
     /// Register a pending WebSocket connection
     ///
     /// Returns channels for:
-    /// - response_rx: receives the 101 upgrade response from CLI
-    /// - frame_rx: receives WebSocket frames from CLI (to send to browser)
+    /// - `response_rx`: receives the 101 upgrade response from CLI
+    /// - `frame_rx`: receives WebSocket frames from CLI (to send to browser)
     pub fn register_pending_websocket(
         &self,
         connection_id: String,
