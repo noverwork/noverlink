@@ -43,5 +43,6 @@ export class Subscription extends PgBaseEntity {
   cancelAtPeriodEnd: boolean & Opt = false;
 
   @ManyToOne(() => User)
+  @Index()
   user!: User;
 }
