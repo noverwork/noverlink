@@ -76,4 +76,16 @@ export class AppEnvSchema {
   // Frontend URL for OAuth redirects
   @IsUrl({ require_tld: false })
   [EnvField.FrontendUrl]!: string;
+
+  // Tunnel/Relay
+  @IsString()
+  @MinLength(16)
+  [EnvField.TicketSecret]!: string;
+
+  @IsUrl({ require_tld: false })
+  [EnvField.RelayUrl]!: string;
+
+  @IsString()
+  @MinLength(16)
+  [EnvField.RelaySecret]!: string;
 }

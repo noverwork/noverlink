@@ -20,7 +20,7 @@ const mockTunnel = {
   id: 'tun_abc123',
   name: 'happy-fox-42',
   localPort: 3000,
-  publicUrl: 'happy-fox-42.nover.link',
+  publicUrl: 'happy-fox-42.noverlink.com',
   status: 'online' as const,
   requests: 1247,
   bandwidth: '23.4 MB',
@@ -96,7 +96,7 @@ const mockLogs = [
   },
 ];
 
-export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
+export function TunnelDetailPage({ tunnelId: _tunnelId }: TunnelDetailPageProps) {
   const tunnel = mockTunnel;
   const logs = mockLogs;
 
@@ -145,7 +145,7 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
           localLabel="localhost"
           localSublabel={`:${tunnel.localPort}`}
           publicLabel={tunnel.name}
-          publicSublabel=".nover.link"
+          publicSublabel=".noverlink.com"
           status="connected"
           tunnelName={tunnel.name}
           animated

@@ -1,3 +1,4 @@
+import type { Loaded } from '@mikro-orm/core';
 import {
   Body,
   Controller,
@@ -14,7 +15,14 @@ import type { Request, Response } from 'express';
 import { AppConfigService } from '../app-config';
 import { type AuthResponse, AuthService } from './auth.service';
 import { CurrentUser, Public } from './decorators';
-import { LoginDto, RefreshTokenDto, RegisterDto } from './dto';
+import {
+  type DeviceCodeResponse,
+  DevicePollDto,
+  type DevicePollResponse,
+  LoginDto,
+  RefreshTokenDto,
+  RegisterDto,
+} from './dto';
 import type { OAuthProfile } from './strategies/google.strategy';
 
 @Controller('auth')
@@ -88,8 +96,41 @@ export class AuthController {
     this.redirectWithTokens(res, authResponse);
   }
 
+  // ==================== Device Code Flow (CLI Authentication) ====================
+
+  @Public()
+  @Post('device')
+  startDeviceFlow(): DeviceCodeResponse {
+    return this.authService.startDeviceFlow();
+  }
+
+  @Public()
+  @Post('device/poll')
+  pollDeviceFlow(@Body() dto: DevicePollDto): Promise<DevicePollResponse> {
+    return this.authService.pollDeviceFlow(dto.device_code);
+  }
+
+  @Post('device/approve')
+  async approveDeviceCode(
+    @Body('user_code') userCode: string,
+    @CurrentUser() user: Loaded<User, never>
+  ): Promise<{ success: boolean }> {
+    const success = await this.authService.approveDeviceCode(userCode, user.id);
+    return { success };
+  }
+
+  @Post('device/deny')
+  denyDeviceCode(
+    @Body('user_code') userCode: string
+  ): { success: boolean } {
+    const success = this.authService.denyDeviceCode(userCode);
+    return { success };
+  }
+
+  // ==================== User Profile ====================
+
   @Get('me')
-  getProfile(@CurrentUser() user: User) {
+  getProfile(@CurrentUser() user: Loaded<User, never>) {
     return {
       id: user.id,
       name: user.name,

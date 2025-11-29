@@ -5,6 +5,32 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Connection ticket payload structure
+///
+/// This is the decoded payload from a connection ticket issued by the backend.
+/// The ticket is base64url-encoded JSON with an HMAC-SHA256 signature.
+///
+/// Format: `BASE64URL(payload).HMAC_SIGNATURE`
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TicketPayload {
+    /// User ID (UUID)
+    pub user_id: String,
+    /// User's subscription plan
+    pub plan: String,
+    /// Maximum number of concurrent tunnels allowed
+    pub max_tunnels: u8,
+    /// Reserved subdomain (None = random assignment)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subdomain: Option<String>,
+    /// Unique ticket ID for replay prevention
+    pub ticket_id: String,
+    /// Expiration timestamp (Unix seconds)
+    pub exp: i64,
+    /// HMAC-SHA256 signature (hex-encoded)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sig: Option<String>,
+}
+
 /// WebSocket message types for relay-CLI communication
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "lowercase")]
@@ -12,11 +38,10 @@ pub enum WebSocketMessage {
     /// CLI → Relay: Register a new tunnel
     ///
     /// The CLI sends this message when establishing a new tunnel.
-    /// If domain is None, the relay will assign a random subdomain.
+    /// The ticket is a signed JWT from the backend that authorizes the connection.
     Register {
-        /// Requested subdomain (e.g., "myapp"). If None, relay assigns random subdomain.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        domain: Option<String>,
+        /// Connection ticket from backend (HMAC-signed, contains `user_id`, plan, etc.)
+        ticket: String,
         /// Local port on CLI side to forward traffic to
         local_port: u16,
     },
@@ -121,27 +146,28 @@ mod tests {
     #[test]
     fn test_register_serialization() {
         let msg = WebSocketMessage::Register {
-            domain: Some("myapp".to_string()),
+            ticket: "eyJ1c2VyX2lkIjoiYWJjMTIzIn0.c2lnbmF0dXJl".to_string(),
             local_port: 3000,
         };
 
         let json = serde_json::to_string(&msg).unwrap();
         assert!(json.contains("\"type\":\"register\""));
-        assert!(json.contains("\"domain\":\"myapp\""));
+        assert!(json.contains("\"ticket\":\"eyJ1c2VyX2lkIjoiYWJjMTIzIn0.c2lnbmF0dXJl\""));
         assert!(json.contains("\"local_port\":3000"));
     }
 
     #[test]
-    fn test_register_without_domain() {
-        let msg = WebSocketMessage::Register {
-            domain: None,
-            local_port: 3000,
-        };
+    fn test_register_deserialization() {
+        let json = r#"{"type":"register","ticket":"test_ticket","local_port":8080}"#;
+        let msg: WebSocketMessage = serde_json::from_str(json).unwrap();
 
-        let json = serde_json::to_string(&msg).unwrap();
-        assert!(json.contains("\"type\":\"register\""));
-        assert!(!json.contains("\"domain\"")); // Should be skipped
-        assert!(json.contains("\"local_port\":3000"));
+        match msg {
+            WebSocketMessage::Register { ticket, local_port } => {
+                assert_eq!(ticket, "test_ticket");
+                assert_eq!(local_port, 8080);
+            }
+            _ => panic!("Wrong message type"),
+        }
     }
 
     #[test]

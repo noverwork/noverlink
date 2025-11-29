@@ -50,9 +50,14 @@ pub struct RelayConnection {
 }
 
 impl RelayConnection {
-    /// Connect to relay server and register tunnel
+    /// Connect to relay server and register tunnel with authentication ticket
+    ///
+    /// # Arguments
+    /// * `url` - WebSocket URL of the relay server
+    /// * `ticket` - Connection ticket from backend (HMAC-signed)
+    /// * `local_port` - Local port to forward traffic to
     #[allow(clippy::too_many_lines)]
-    pub async fn connect(url: &str, domain: Option<String>, local_port: u16) -> Result<Self> {
+    pub async fn connect(url: &str, ticket: &str, local_port: u16) -> Result<Self> {
         info!("Connecting to relay: {}", url);
 
         let (ws_stream, _) = connect_async(url)
@@ -64,9 +69,9 @@ impl RelayConnection {
         // Split stream into sink and stream
         let (mut ws_sink, mut ws_stream) = ws_stream.split();
 
-        // Register tunnel
+        // Register tunnel with authentication ticket
         let register_msg = WebSocketMessage::Register {
-            domain,
+            ticket: ticket.to_string(),
             local_port,
         };
         let json = serde_json::to_string(&register_msg)?;

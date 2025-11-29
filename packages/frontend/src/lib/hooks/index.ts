@@ -1,8 +1,8 @@
 export {
+  AUTH_QUERY_KEY,
   useLogin,
-  useRegister,
+  useLogout,
   useProfile,
   useRefreshToken,
-  useLogout,
-  AUTH_QUERY_KEY,
+  useRegister,
 } from './use-auth';

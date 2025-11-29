@@ -1,3 +1,6 @@
+import * as crypto from 'node:crypto';
+
+import type { Loaded } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
@@ -11,8 +14,34 @@ import * as argon2 from 'argon2';
 
 import { AppConfigService } from '../app-config';
 import { ARGON2_OPTIONS } from './auth.constant';
-import type { LoginDto, RefreshTokenDto, RegisterDto } from './dto';
+import type {
+  DeviceCodeResponse,
+  DevicePollResponse,
+  LoginDto,
+  RefreshTokenDto,
+  RegisterDto,
+} from './dto';
 import type { OAuthProfile } from './strategies/google.strategy';
+
+// Device code storage (in-memory for MVP, use Redis in production)
+interface PendingDeviceCode {
+  userCode: string;
+  expiresAt: number;
+  userId?: string; // Set when user approves
+  denied?: boolean;
+}
+
+const pendingDeviceCodes = new Map<string, PendingDeviceCode>();
+
+// Cleanup expired device codes periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, data] of pendingDeviceCodes.entries()) {
+    if (data.expiresAt < now) {
+      pendingDeviceCodes.delete(code);
+    }
+  }
+}, 60_000); // Every minute
 
 export interface AuthResponse {
   accessToken: string;
@@ -109,7 +138,7 @@ export class AuthService {
     }
 
     // Check if OAuth connection already exists
-    let connection = await this.em.findOne(
+    const connection = await this.em.findOne(
       OAuthConnection,
       {
         provider,
@@ -119,7 +148,7 @@ export class AuthService {
     );
 
     if (connection) {
-      return this.generateTokens(connection.user);
+      return this.generateTokens(connection.user.$);
     }
 
     // Check if user exists with this email
@@ -138,18 +167,18 @@ export class AuthService {
     }
 
     // Create OAuth connection
-    connection = this.em.create(OAuthConnection, {
+    const newConnection = this.em.create(OAuthConnection, {
       provider,
       providerUserId: profile.id,
       user,
     });
 
-    await this.em.persistAndFlush([user, connection]);
+    await this.em.persistAndFlush([user, newConnection]);
 
     return this.generateTokens(user);
   }
 
-  private generateTokens(user: User): AuthResponse {
+  private generateTokens(user: Loaded<User, never>): AuthResponse {
     const payload = { sub: user.id, email: user.email };
     const { jwt } = this.appConfigService;
 
@@ -195,5 +224,138 @@ export class AuthService {
     };
 
     return parseInt(num, 10) * multipliers[unit];
+  }
+
+  // ==================== Device Code Flow ====================
+
+  /**
+   * Start device code flow for CLI authentication
+   */
+  startDeviceFlow(): DeviceCodeResponse {
+    const deviceCode = crypto.randomBytes(32).toString('hex');
+    const userCode = this.generateUserCode();
+    const expiresIn = 900; // 15 minutes
+
+    pendingDeviceCodes.set(deviceCode, {
+      userCode,
+      expiresAt: Date.now() + expiresIn * 1000,
+    });
+
+    const frontendUrl = this.appConfigService.app.frontendUrl;
+
+    return {
+      device_code: deviceCode,
+      user_code: userCode,
+      verification_uri: `${frontendUrl}/auth/device`,
+      expires_in: expiresIn,
+      interval: 5, // Poll every 5 seconds
+    };
+  }
+
+  /**
+   * Poll for device code approval
+   */
+  async pollDeviceFlow(deviceCode: string): Promise<DevicePollResponse> {
+    const pending = pendingDeviceCodes.get(deviceCode);
+
+    if (!pending) {
+      return { error: 'expired_token' };
+    }
+
+    if (pending.expiresAt < Date.now()) {
+      pendingDeviceCodes.delete(deviceCode);
+      return { error: 'expired_token' };
+    }
+
+    if (pending.denied) {
+      pendingDeviceCodes.delete(deviceCode);
+      return { error: 'access_denied' };
+    }
+
+    if (!pending.userId) {
+      return { error: 'authorization_pending' };
+    }
+
+    // User has approved - generate CLI token
+    const user = await this.em.findOne(User, { id: pending.userId });
+    if (!user) {
+      pendingDeviceCodes.delete(deviceCode);
+      return { error: 'access_denied' };
+    }
+
+    // Generate long-lived CLI auth token
+    const authToken = await this.generateCliToken(user);
+
+    // Cleanup
+    pendingDeviceCodes.delete(deviceCode);
+
+    return { auth_token: authToken };
+  }
+
+  /**
+   * Verify user code and approve device (called from web UI)
+   */
+  async approveDeviceCode(userCode: string, userId: string): Promise<boolean> {
+    for (const [_deviceCode, data] of pendingDeviceCodes.entries()) {
+      if (data.userCode === userCode.toUpperCase() && data.expiresAt > Date.now()) {
+        data.userId = userId;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Deny device code (called from web UI)
+   */
+  denyDeviceCode(userCode: string): boolean {
+    for (const [, data] of pendingDeviceCodes.entries()) {
+      if (data.userCode === userCode.toUpperCase() && data.expiresAt > Date.now()) {
+        data.denied = true;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Validate CLI auth token and return user
+   */
+  async validateCliToken(token: string): Promise<User | null> {
+    // Token format: nv_<base64>
+    if (!token.startsWith('nv_')) {
+      return null;
+    }
+
+    const user = await this.em.findOne(User, { authToken: token });
+    if (!user || !user.isActive) {
+      return null;
+    }
+
+    return user;
+  }
+
+  /**
+   * Generate long-lived CLI authentication token
+   */
+  private async generateCliToken(user: Loaded<User, never>): Promise<string> {
+    const token = `nv_${crypto.randomBytes(32).toString('base64url')}`;
+
+    // Save token to user (for now, plaintext; production should hash it)
+    user.authToken = token;
+    await this.em.persistAndFlush(user);
+
+    return token;
+  }
+
+  /**
+   * Generate human-readable user code (XXXX-XXXX)
+   */
+  private generateUserCode(): string {
+    // Unambiguous alphabet (no 0/O, 1/I/L)
+    const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    const bytes = crypto.randomBytes(8);
+    const chars = Array.from(bytes).map((b) => alphabet[b % alphabet.length]);
+    return `${chars.slice(0, 4).join('')}-${chars.slice(4).join('')}`;
   }
 }

@@ -12,7 +12,7 @@ import {
 import { PgBaseEntity } from '../base-entities';
 import { Domain } from './domain.entity';
 import { OAuthConnection } from './oauth-connection.entity';
-import { Tunnel } from './tunnel.entity';
+import { Subscription } from './subscription.entity';
 import { UsageQuota } from './usage-quota.entity';
 
 export enum UserPlan {
@@ -47,21 +47,24 @@ export class User extends PgBaseEntity {
   @Property({ type: 'number' })
   maxBandwidthMb: number & Opt = 1000;
 
-  @Property({ type: 'string', nullable: true, hidden: true })
-  apiKey?: string;
-
   @Property({ type: 'boolean' })
   isActive: boolean & Opt = true;
 
+  /** Auth token for CLI authentication */
+  @Property({ type: 'string', nullable: true })
+  @Unique()
+  @Index()
+  authToken?: string;
+
   @OneToMany(() => Domain, (domain) => domain.user)
   domains = new Collection<Domain>(this);
-
-  @OneToMany(() => Tunnel, (tunnel) => tunnel.user)
-  tunnels = new Collection<Tunnel>(this);
 
   @OneToMany(() => UsageQuota, (quota) => quota.user)
   usageQuotas = new Collection<UsageQuota>(this);
 
   @OneToMany(() => OAuthConnection, (connection) => connection.user)
   oauthConnections = new Collection<OAuthConnection>(this);
+
+  @OneToMany(() => Subscription, (subscription) => subscription.user)
+  subscriptions = new Collection<Subscription>(this);
 }

@@ -1,7 +1,12 @@
 import { Webhooks } from '@polar-sh/nextjs';
 
+const webhookSecret = process.env.POLAR_WEBHOOK_SECRET;
+if (!webhookSecret) {
+  throw new Error('POLAR_WEBHOOK_SECRET is required');
+}
+
 export const POST = Webhooks({
-  webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
+  webhookSecret,
   onPayload: async (payload) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 

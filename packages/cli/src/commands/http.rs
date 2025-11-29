@@ -3,21 +3,33 @@
 use anyhow::{Context, Result};
 use tracing::{error, info};
 
+use crate::api::ApiClient;
+use crate::auth;
 use crate::forwarder;
 use crate::relay::RelayConnection;
 
-const DEFAULT_RELAY_URL: &str = "ws://localhost:8444";
-
-pub async fn run_http(port: u16, domain: Option<String>) -> Result<()> {
+pub async fn run_http(port: u16) -> Result<()> {
     println!("🚀 Starting Noverlink tunnel...");
     println!();
 
-    // Connect to relay
-    let relay_url = std::env::var("NOVERLINK_RELAY_URL").unwrap_or_else(|_| DEFAULT_RELAY_URL.to_string());
+    // Load auth token
+    let auth_token = auth::load_token()?;
 
-    let mut relay = RelayConnection::connect(&relay_url, domain, port)
-        .await
-        .context("Failed to connect to relay server")?;
+    // Get ticket from backend
+    println!("📡 Authenticating with backend...");
+    let api = ApiClient::from_config();
+    let ticket_response = api.get_ticket(&auth_token).await?;
+
+    println!("🔗 Connecting to relay...");
+
+    // Connect to relay with ticket
+    let mut relay = RelayConnection::connect(
+        &ticket_response.relay_url,
+        &ticket_response.ticket,
+        port,
+    )
+    .await
+    .context("Failed to connect to relay server")?;
 
     let tunnel_url = relay.tunnel_url().to_string();
 

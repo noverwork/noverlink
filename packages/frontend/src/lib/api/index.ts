@@ -1,9 +1,9 @@
-export { apiClient, ApiClient } from './client';
-export type { ApiError } from './client';
-export { authApi } from './auth';
 export type {
   AuthResponse,
-  UserProfile,
-  RegisterDto,
   LoginDto,
+  RegisterDto,
+  UserProfile,
 } from './auth';
+export { authApi } from './auth';
+export type { ApiError } from './client';
+export { ApiClient,apiClient } from './client';

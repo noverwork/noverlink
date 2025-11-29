@@ -1,25 +1,37 @@
-import { Entity, Index, ManyToOne, OneToMany, Property, Unique } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+  Opt,
+  Property,
+  type Ref,
+  Unique,
+} from '@mikro-orm/core';
 
 import { PgBaseEntity } from '../base-entities';
-import { Tunnel } from './tunnel.entity';
+import { TunnelSession } from './tunnel-session.entity';
 import { User } from './user.entity';
 
 @Entity()
 export class Domain extends PgBaseEntity {
-  @ManyToOne(() => User)
-  user!: User;
+  @ManyToOne(() => User, { ref: true })
+  @Index()
+  user!: Ref<User>;
 
+  /** Subdomain (e.g., "myapp" for myapp.noverlink.io) OR custom domain (e.g., "tunnel.mycompany.com") */
   @Property({ type: 'string' })
   @Unique()
   @Index()
-  name!: string;
+  hostname!: string;
 
-  @Property({ type: 'date', nullable: true })
-  reservedUntil?: Date;
-
+  /** True if user reserved this subdomain */
   @Property({ type: 'boolean' })
-  isActive = true;
+  isReserved: boolean & Opt = false;
 
-  @OneToMany(() => Tunnel, (tunnel) => tunnel.domain)
-  tunnels!: Tunnel[];
+  // ─── Relations ─────────────────────────────────────────────────
+
+  @OneToMany(() => TunnelSession, (session) => session.domain)
+  sessions = new Collection<TunnelSession>(this);
 }

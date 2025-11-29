@@ -10,14 +10,19 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Login to Noverlink (device code flow)
+    Login,
+
+    /// Logout from Noverlink
+    Logout,
+
+    /// Show current login status
+    Whoami,
+
     /// Start an HTTP tunnel
     Http {
         /// Local port to forward
         port: u16,
-
-        /// Domain (e.g. myapp.noverlink.io)
-        #[arg(long)]
-        domain: Option<String>,
     },
 
     /// Show tunnel status

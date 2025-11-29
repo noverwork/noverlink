@@ -1,9 +1,8 @@
 import {
   Domain,
+  HttpRequest,
   OAuthConnection,
   Subscription,
-  Tunnel,
-  TunnelRequest,
   TunnelSession,
   UsageQuota,
   User,
@@ -14,9 +13,8 @@ export * from './entities';
 export const ENTITIES = [
   User,
   Domain,
-  Tunnel,
   TunnelSession,
-  TunnelRequest,
+  HttpRequest,
   UsageQuota,
   OAuthConnection,
   Subscription,

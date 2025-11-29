@@ -59,7 +59,7 @@ export class BillingService {
   async handleSubscriptionActive(dto: SubscriptionActiveDto): Promise<void> {
     this.logger.log(`Subscription active: ${dto.subscriptionId}`);
 
-    let subscription = await this.em.findOne(
+    const subscription = await this.em.findOne(
       Subscription,
       { polarSubscriptionId: dto.subscriptionId },
       { populate: ['user'] }
@@ -73,8 +73,8 @@ export class BillingService {
 
       // Update user plan
       const newPlan = this.getPlanFromProductId(dto.productId);
-      subscription.user.plan = newPlan;
-      subscription.user.maxTunnels = this.getTunnelLimit(newPlan);
+      subscription.user.$.plan = newPlan;
+      subscription.user.$.maxTunnels = this.getTunnelLimit(newPlan);
 
       await this.em.flush();
     }
@@ -93,8 +93,8 @@ export class BillingService {
       subscription.status = SubscriptionStatus.CANCELED;
 
       // Downgrade user to free plan
-      subscription.user.plan = UserPlan.FREE;
-      subscription.user.maxTunnels = 1;
+      subscription.user.$.plan = UserPlan.FREE;
+      subscription.user.$.maxTunnels = 1;
 
       await this.em.flush();
       this.logger.log(`Downgraded user ${subscription.user.id} to FREE plan`);

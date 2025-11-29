@@ -1,35 +1,84 @@
-import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  Enum,
+  Index,
+  ManyToOne,
+  OneToMany,
+  Opt,
+  Property,
+  Ref,
+} from '@mikro-orm/core';
 
 import { PgBaseEntity } from '../base-entities';
-import { Tunnel } from './tunnel.entity';
-import { TunnelRequest } from './tunnel-request.entity';
+import { Domain } from './domain.entity';
+import { HttpRequest } from './http-request.entity';
+import { User } from './user.entity';
 
 export enum SessionStatus {
-  CONNECTED = 'connected',
-  DISCONNECTED = 'disconnected',
-  ERROR = 'error',
+  ACTIVE = 'active',
+  CLOSED = 'closed',
+}
+
+export enum TunnelProtocol {
+  HTTP = 'http',
+  TCP = 'tcp',
 }
 
 @Entity()
 export class TunnelSession extends PgBaseEntity {
-  @ManyToOne(() => Tunnel)
-  tunnel!: Tunnel;
+  @ManyToOne(() => User, { ref: true })
+  @Index()
+  user!: Ref<User>;
+
+  /** Reserved domain (nullable for random subdomains) */
+  @ManyToOne(() => Domain, { ref: true, nullable: true })
+  @Index()
+  domain?: Ref<Domain>;
+
+  /** Actual subdomain used (always set, whether reserved or random) */
+  @Property({ type: 'string', length: 63 })
+  @Index()
+  subdomain!: string;
+
+  /** Local port on CLI side */
+  @Property({ type: 'number' })
+  localPort!: number;
+
+  @Enum(() => TunnelProtocol)
+  protocol: TunnelProtocol & Opt = TunnelProtocol.HTTP;
+
+  // ─── Session State ───────────────────────────────────────────
 
   @Enum(() => SessionStatus)
-  status: SessionStatus = SessionStatus.CONNECTED;
+  @Index()
+  status: SessionStatus & Opt = SessionStatus.ACTIVE;
 
-  @Property({ type: 'string' })
-  clientIp!: string;
+  @Property({ type: 'Date' })
+  connectedAt: Date & Opt = new Date();
 
+  @Property({ type: 'Date', nullable: true })
+  disconnectedAt?: Date;
+
+  @Property({ type: 'bigint' })
+  bytesIn: bigint & Opt = BigInt(0);
+
+  @Property({ type: 'bigint' })
+  bytesOut: bigint & Opt = BigInt(0);
+
+  @Property({ type: 'string', nullable: true })
+  clientIp?: string;
+
+  /** CLI version for debugging */
   @Property({ type: 'string', nullable: true })
   clientVersion?: string;
 
-  @Property({ type: 'date', nullable: true })
-  disconnectedAt?: Date;
+  /** Relay instance ID that handles this session */
+  @Property({ type: 'string', length: 50, nullable: true })
+  relayId?: string;
 
-  @Property({ type: 'string', nullable: true })
-  disconnectReason?: string;
+  // ─── Relations ───────────────────────────────────────────────
 
-  @OneToMany(() => TunnelRequest, (request) => request.session)
-  requests!: TunnelRequest[];
+  @OneToMany(() => HttpRequest, (req) => req.session)
+  httpRequests = new Collection<HttpRequest>(this);
 }
