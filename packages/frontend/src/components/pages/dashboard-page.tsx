@@ -18,7 +18,7 @@ const mockActiveTunnels = [
     id: 'tun_abc123',
     name: 'happy-fox-42',
     localPort: 3000,
-    publicUrl: 'happy-fox-42.nover.link',
+    publicUrl: 'happy-fox-42.noverlink.com',
     status: 'online' as const,
     requests: 1247,
     bandwidth: '23.4 MB',
@@ -28,7 +28,7 @@ const mockActiveTunnels = [
     id: 'tun_def456',
     name: 'cool-tiger-88',
     localPort: 8080,
-    publicUrl: 'cool-tiger-88.nover.link',
+    publicUrl: 'cool-tiger-88.noverlink.com',
     status: 'online' as const,
     requests: 89,
     bandwidth: '1.2 MB',
@@ -101,7 +101,7 @@ export function DashboardPage() {
               localLabel="localhost"
               localSublabel={`:${activeTunnels[0].localPort}`}
               publicLabel={activeTunnels[0].name}
-              publicSublabel=".nover.link"
+              publicSublabel=".noverlink.com"
               status="connected"
               tunnelName={activeTunnels[0].name}
               animated
@@ -151,7 +151,7 @@ export function DashboardPage() {
                 localLabel="localhost"
                 localSublabel=":3000"
                 publicLabel="your-tunnel"
-                publicSublabel=".nover.link"
+                publicSublabel=".noverlink.com"
                 status="disconnected"
                 animated={false}
               />

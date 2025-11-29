@@ -81,4 +81,10 @@ export class AppConfigService {
       relayUrl: this.configService.getOrThrow<string>(EnvField.RelayUrl),
     };
   }
+
+  get relay() {
+    return {
+      secret: this.configService.getOrThrow<string>(EnvField.RelaySecret),
+    };
+  }
 }

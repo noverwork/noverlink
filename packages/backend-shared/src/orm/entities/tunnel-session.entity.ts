@@ -13,6 +13,7 @@ import {
 import { PgBaseEntity } from '../base-entities';
 import { Domain } from './domain.entity';
 import { HttpRequest } from './http-request.entity';
+import { User } from './user.entity';
 
 export enum SessionStatus {
   ACTIVE = 'active',
@@ -26,9 +27,23 @@ export enum TunnelProtocol {
 
 @Entity()
 export class TunnelSession extends PgBaseEntity {
-  @ManyToOne(() => Domain, { ref: true })
+  @ManyToOne(() => User, { ref: true })
   @Index()
-  domain!: Ref<Domain>;
+  user!: Ref<User>;
+
+  /** Reserved domain (nullable for random subdomains) */
+  @ManyToOne(() => Domain, { ref: true, nullable: true })
+  @Index()
+  domain?: Ref<Domain>;
+
+  /** Actual subdomain used (always set, whether reserved or random) */
+  @Property({ type: 'string', length: 63 })
+  @Index()
+  subdomain!: string;
+
+  /** Local port on CLI side */
+  @Property({ type: 'number' })
+  localPort!: number;
 
   @Enum(() => TunnelProtocol)
   protocol: TunnelProtocol & Opt = TunnelProtocol.HTTP;
@@ -57,6 +72,10 @@ export class TunnelSession extends PgBaseEntity {
   /** CLI version for debugging */
   @Property({ type: 'string', nullable: true })
   clientVersion?: string;
+
+  /** Relay instance ID that handles this session */
+  @Property({ type: 'string', length: 50, nullable: true })
+  relayId?: string;
 
   // ─── Relations ───────────────────────────────────────────────
 

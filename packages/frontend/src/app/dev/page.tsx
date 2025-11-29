@@ -116,7 +116,7 @@ export default function DevPage() {
                   localLabel="Local"
                   localSublabel=":3000"
                   publicLabel="Public"
-                  publicSublabel="api.nover.link"
+                  publicSublabel="api.noverlink.com"
                   status="connected"
                   tunnelName="api-gateway"
                   animated
@@ -153,7 +153,7 @@ export default function DevPage() {
 
             <ComponentGroup label="TunnelNode Variants">
               <TunnelNode variant="local" label="Local" sublabel=":3000" />
-              <TunnelNode variant="public" label="Public" sublabel=".nover.link" />
+              <TunnelNode variant="public" label="Public" sublabel=".noverlink.com" />
               <TunnelNode variant="relay" label="Relay" sublabel="edge-01" />
             </ComponentGroup>
 
@@ -178,14 +178,14 @@ export default function DevPage() {
               status="online"
               name="api-gateway"
               localPort={3000}
-              publicUrl="api.nover.link"
+              publicUrl="api.noverlink.com"
               stats="12.4k requests"
             />
             <TunnelCard
               status="online"
               name="web-server"
               localPort={8080}
-              publicUrl="app.nover.link"
+              publicUrl="app.noverlink.com"
               stats="8.2k requests"
             />
             <TunnelCard

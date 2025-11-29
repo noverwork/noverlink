@@ -6,7 +6,7 @@ import {
   OneToMany,
   Opt,
   Property,
-  Ref,
+  type Ref,
   Unique,
 } from '@mikro-orm/core';
 

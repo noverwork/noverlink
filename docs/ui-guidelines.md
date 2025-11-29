@@ -230,7 +230,7 @@ Examples:
 
 // URL - 連結
 <a className="font-mono text-xs text-teal-400 hover:text-teal-300">
-  api.nover.link
+  api.noverlink.com
 </a>
 ```
 
@@ -238,7 +238,7 @@ Examples:
 
 **必須使用等寬字體的內容：**
 - 端口號 (`:3000`, `:8080`)
-- URL / Domain (`api.nover.link`)
+- URL / Domain (`api.noverlink.com`)
 - IP 地址 (`192.168.1.1`)
 - Tunnel ID (`tunnel-xyz-abc`)
 - 時間戳 (`2024-01-15 14:30:22`)
@@ -422,7 +422,7 @@ import { TunnelNode } from '@noverlink/ui-shared';
 <TunnelNode
   variant="public"
   label="Public"
-  sublabel="api.nover.link"
+  sublabel="api.noverlink.com"
   icon={<GlobeIcon />}
 />
 
@@ -462,7 +462,7 @@ import { TunnelLine, TunnelConnection } from '@noverlink/ui-shared';
   localLabel="Local"
   localSublabel=":3000"
   publicLabel="Public"
-  publicSublabel="api.nover.link"
+  publicSublabel="api.noverlink.com"
   status="connected"
   tunnelName="tunnel-xyz"
   animated
@@ -486,7 +486,7 @@ import { TunnelCard } from '@noverlink/ui-shared';
   status="online"
   name="api-gateway"
   localPort={3000}
-  publicUrl="api.nover.link"
+  publicUrl="api.noverlink.com"
   stats="12.4k requests"
 />
 

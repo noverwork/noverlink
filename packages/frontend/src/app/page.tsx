@@ -64,7 +64,7 @@ export default function Page() {
                 localLabel="Local"
                 localSublabel=":3000"
                 publicLabel="Public"
-                publicSublabel="myapp.nover.link"
+                publicSublabel="myapp.noverlink.com"
                 status="connected"
                 tunnelName="tunnel-abc123"
                 animated

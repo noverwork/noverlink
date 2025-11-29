@@ -17,7 +17,7 @@ pub async fn run_http(port: u16) -> Result<()> {
 
     // Get ticket from backend
     println!("📡 Authenticating with backend...");
-    let api = ApiClient::from_config()?;
+    let api = ApiClient::from_config();
     let ticket_response = api.get_ticket(&auth_token).await?;
 
     println!("🔗 Connecting to relay...");

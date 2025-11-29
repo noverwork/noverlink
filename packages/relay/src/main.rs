@@ -5,8 +5,8 @@
 //! Simple, single-relay architecture for MVP.
 
 mod handlers;
-mod metrics;
 mod registry;
+mod session_client;
 mod ticket;
 
 use std::sync::Arc;
@@ -18,8 +18,8 @@ use tokio::signal;
 use tracing::{error, info};
 
 use handlers::{handle_cli_connection, start_http_server};
-use metrics::create_metrics;
 use registry::TunnelRegistry;
+use session_client::{RequestLogger, SessionClient};
 use ticket::TicketVerifier;
 
 #[tokio::main]
@@ -44,8 +44,19 @@ async fn main() -> Result<()> {
     // Ticket verifier for authenticating CLI connections
     let ticket_verifier = Arc::new(TicketVerifier::new(&config.ticket_secret));
 
-    // Metrics (no-op for now, can be replaced with real implementation)
-    let _metrics = create_metrics();
+    // Backend session client
+    let session_client = Arc::new(SessionClient::new(
+        &config.backend_url,
+        &config.relay_secret,
+        &config.relay_id,
+    ));
+    info!(
+        "Session client initialized, backend: {}",
+        config.backend_url
+    );
+
+    // Request logger - batches and sends HTTP request logs to backend
+    let request_logger = Arc::new(RequestLogger::new((*session_client).clone()));
 
     // Start WebSocket server for CLI connections
     let ws_addr = format!("0.0.0.0:{}", config.ws_port);
@@ -66,6 +77,8 @@ async fn main() -> Result<()> {
 
     let registry_ws = Arc::clone(&registry);
     let verifier_ws = Arc::clone(&ticket_verifier);
+    let session_client_ws = Arc::clone(&session_client);
+    let request_logger_ws = Arc::clone(&request_logger);
     let ws_handle = tokio::spawn(async move {
         loop {
             match ws_listener.accept().await {
@@ -73,9 +86,21 @@ async fn main() -> Result<()> {
                     info!("New CLI connection from {}", addr);
                     let registry = Arc::clone(&registry_ws);
                     let verifier = Arc::clone(&verifier_ws);
+                    let session_client = Arc::clone(&session_client_ws);
+                    let request_logger = Arc::clone(&request_logger_ws);
+                    let client_ip = addr.ip().to_string();
 
                     tokio::spawn(async move {
-                        if let Err(e) = handle_cli_connection(stream, registry, verifier).await {
+                        if let Err(e) = handle_cli_connection(
+                            stream,
+                            registry,
+                            verifier,
+                            session_client,
+                            request_logger,
+                            Some(&client_ip),
+                        )
+                        .await
+                        {
                             error!("CLI connection error from {}: {}", addr, e);
                         }
                     });
@@ -89,9 +114,10 @@ async fn main() -> Result<()> {
 
     // Start HTTP server for public traffic
     let registry_http = Arc::clone(&registry);
+    let request_logger_http = Arc::clone(&request_logger);
     let http_port = config.http_port;
     let http_handle = tokio::spawn(async move {
-        if let Err(e) = start_http_server(http_port, registry_http).await {
+        if let Err(e) = start_http_server(http_port, registry_http, request_logger_http).await {
             error!("HTTP server error: {}", e);
         }
     });

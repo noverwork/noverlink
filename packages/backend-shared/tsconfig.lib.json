@@ -11,6 +11,7 @@
     "target": "es2021",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "isolatedModules": false,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,

@@ -16,7 +16,7 @@ interface TicketPayload {
   user_id: string;
   plan: string;
   max_tunnels: number;
-  subdomain: string | null;
+  subdomain?: string; // Omitted when not provided (matches Rust serde skip_serializing_if)
   ticket_id: string;
   exp: number;
   sig?: string;
@@ -39,11 +39,13 @@ export class TunnelsService {
     const ticketId = crypto.randomUUID();
 
     // Build payload (without signature)
+    // Note: subdomain must be omitted (not null) when not provided,
+    // to match Rust's serde skip_serializing_if behavior
     const payload: TicketPayload = {
       user_id: user.id,
       plan: user.plan,
       max_tunnels: user.maxTunnels,
-      subdomain: subdomain || null,
+      ...(subdomain ? { subdomain } : {}),
       ticket_id: ticketId,
       exp: Math.floor(Date.now() / 1000) + expiresIn,
     };

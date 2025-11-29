@@ -21,7 +21,7 @@ pub async fn run_login() -> Result<()> {
     println!("🔐 Logging in to Noverlink...");
     println!();
 
-    let api = ApiClient::from_config()?;
+    let api = ApiClient::from_config();
 
     // Start device code flow
     let device_response = api.start_device_flow().await?;
@@ -105,7 +105,7 @@ pub fn run_logout() -> Result<()> {
 }
 
 /// Show current login status
-pub fn run_whoami() -> Result<()> {
+pub fn run_whoami() {
     if auth::is_logged_in() {
         println!("✅ You are logged in.");
         println!("   API: {}", auth::api_url());
@@ -113,6 +113,4 @@ pub fn run_whoami() -> Result<()> {
         println!("❌ You are not logged in.");
         println!("   Run 'noverlink login' to authenticate.");
     }
-
-    Ok(())
 }

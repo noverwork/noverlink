@@ -1,5 +1,6 @@
 //! WebSocket handler for CLI connections
 
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -13,6 +14,7 @@ use tracing::{error, info, warn};
 use noverlink_shared::WebSocketMessage;
 
 use crate::registry::{TunnelMessage, TunnelRegistry};
+use crate::session_client::{RequestLogger, SessionClient};
 use crate::ticket::TicketVerifier;
 
 /// Handle incoming CLI WebSocket connection
@@ -21,6 +23,9 @@ pub async fn handle_cli_connection(
     stream: TcpStream,
     registry: Arc<TunnelRegistry>,
     ticket_verifier: Arc<TicketVerifier>,
+    session_client: Arc<SessionClient>,
+    request_logger: Arc<RequestLogger>,
+    client_ip: Option<&str>,
 ) -> Result<()> {
     let ws_stream = accept_async(stream).await?;
     info!("WebSocket handshake completed");
@@ -97,11 +102,45 @@ pub async fn handle_cli_connection(
         final_domain, local_port, ticket_payload.user_id
     );
 
+    // Create session in backend
+    let session_id = match session_client
+        .create_session(
+            &ticket_payload.user_id,
+            &final_domain,
+            local_port,
+            client_ip,
+        )
+        .await
+    {
+        Ok(id) => id,
+        Err(e) => {
+            error!("Failed to create session in backend: {}", e);
+            let error_msg = WebSocketMessage::Error {
+                message: "Failed to create tunnel session".to_string(),
+            };
+            let json = serde_json::to_string(&error_msg)?;
+            ws_sink
+                .send(tokio_tungstenite::tungstenite::Message::Text(json))
+                .await?;
+            return Ok(());
+        }
+    };
+
     // Create channel for sending requests to CLI
     let (request_tx, mut request_rx) = mpsc::channel::<TunnelMessage>(100);
 
-    // Register tunnel
-    let _tunnel = registry.register(final_domain.clone(), request_tx, local_port);
+    // Track bytes for session close
+    let bytes_in = Arc::new(AtomicU64::new(0));
+    let bytes_out = Arc::new(AtomicU64::new(0));
+
+    // Register tunnel with user_id and session_id from ticket
+    let _tunnel = registry.register(
+        final_domain.clone(),
+        ticket_payload.user_id.clone(),
+        session_id.clone(),
+        request_tx,
+        local_port,
+    );
 
     // Send acknowledgment with full URL
     let ack = WebSocketMessage::Ack {
@@ -113,7 +152,7 @@ pub async fn handle_cli_connection(
         .send(tokio_tungstenite::tungstenite::Message::Text(ack_json))
         .await?;
 
-    info!("Tunnel established: {}", final_domain);
+    info!("Tunnel established: {} (session: {})", final_domain, session_id);
 
     // Main message loop
     loop {
@@ -122,6 +161,8 @@ pub async fn handle_cli_connection(
             Some(tunnel_msg) = request_rx.recv() => {
                 match tunnel_msg {
                     TunnelMessage::HttpRequest { request_id, request_data } => {
+                        bytes_in.fetch_add(u64::try_from(request_data.len()).unwrap_or(u64::MAX), Ordering::Relaxed);
+
                         let request_msg = WebSocketMessage::Request {
                             request_id,
                             payload: base64_encode(&request_data),
@@ -135,6 +176,8 @@ pub async fn handle_cli_connection(
                     }
 
                     TunnelMessage::WebSocketUpgrade { connection_id, request_data } => {
+                        bytes_in.fetch_add(u64::try_from(request_data.len()).unwrap_or(u64::MAX), Ordering::Relaxed);
+
                         let upgrade_msg = WebSocketMessage::WebSocketUpgrade {
                             connection_id,
                             initial_request: base64_encode(&request_data),
@@ -149,6 +192,8 @@ pub async fn handle_cli_connection(
                     }
 
                     TunnelMessage::WebSocketFrame { connection_id, frame_data } => {
+                        bytes_in.fetch_add(u64::try_from(frame_data.len()).unwrap_or(u64::MAX), Ordering::Relaxed);
+
                         let frame_msg = WebSocketMessage::WebSocketFrame {
                             connection_id,
                             data: base64_encode(&frame_data),
@@ -182,6 +227,8 @@ pub async fn handle_cli_connection(
                                 WebSocketMessage::Response { request_id, payload } => {
                                     match base64_decode(&payload) {
                                         Ok(response_data) => {
+                                            bytes_out.fetch_add(u64::try_from(response_data.len()).unwrap_or(u64::MAX), Ordering::Relaxed);
+
                                             if registry.send_response(request_id, response_data).await {
                                                 info!("Response sent for request {}", request_id);
                                             } else {
@@ -197,6 +244,8 @@ pub async fn handle_cli_connection(
                                 WebSocketMessage::WebSocketReady { connection_id, upgrade_response } => {
                                     match base64_decode(&upgrade_response) {
                                         Ok(response_data) => {
+                                            bytes_out.fetch_add(u64::try_from(response_data.len()).unwrap_or(u64::MAX), Ordering::Relaxed);
+
                                             if registry.send_websocket_upgrade_response(&connection_id, response_data).await {
                                                 info!("WebSocket upgrade response sent for {}", connection_id);
                                             } else {
@@ -212,6 +261,8 @@ pub async fn handle_cli_connection(
                                 WebSocketMessage::WebSocketFrame { connection_id, data } => {
                                     match base64_decode(&data) {
                                         Ok(frame_data) => {
+                                            bytes_out.fetch_add(u64::try_from(frame_data.len()).unwrap_or(u64::MAX), Ordering::Relaxed);
+
                                             if !registry.send_websocket_frame(&connection_id, frame_data).await {
                                                 warn!("Failed to send WebSocket frame for {}", connection_id);
                                             }
@@ -246,9 +297,21 @@ pub async fn handle_cli_connection(
         }
     }
 
-    // Cleanup
+    // Cleanup - flush pending logs and close session
+    request_logger.flush_session(session_id.clone());
+
+    let total_bytes_in = bytes_in.load(Ordering::Relaxed);
+    let total_bytes_out = bytes_out.load(Ordering::Relaxed);
+
+    session_client
+        .close_session(&session_id, total_bytes_in, total_bytes_out)
+        .await;
+
     registry.remove(&final_domain);
-    info!("Tunnel closed: {}", final_domain);
+    info!(
+        "Tunnel closed: {} (session: {}, bytes_in: {}, bytes_out: {})",
+        final_domain, session_id, total_bytes_in, total_bytes_out
+    );
 
     Ok(())
 }

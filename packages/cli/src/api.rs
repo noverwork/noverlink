@@ -59,8 +59,9 @@ impl ApiClient {
     }
 
     /// Create API client with configured URL
-    pub fn from_config() -> Result<Self> {
-        Ok(Self::new(api_url()))
+    #[must_use]
+    pub fn from_config() -> Self {
+        Self::new(api_url())
     }
 
     /// Start device code flow for authentication

@@ -23,4 +23,5 @@ export enum EnvField {
   // Tunnel/Relay
   TicketSecret = 'TICKET_SECRET',
   RelayUrl = 'RELAY_URL',
+  RelaySecret = 'RELAY_SECRET',
 }

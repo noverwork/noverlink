@@ -2,8 +2,9 @@
 
 #![allow(clippy::indexing_slicing)] // Slicing is bounds-checked in this module
 
+use std::collections::HashMap;
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::Result;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -12,9 +13,16 @@ use tokio::time::timeout;
 use tracing::{error, info, warn};
 
 use crate::registry::{TunnelMessage, TunnelRegistry};
+use crate::session_client::{base64_encode, truncate_body, HttpRequestLog, RequestLogger};
+
+const MAX_BODY_SIZE: usize = 65536; // 64KB max body for logging
 
 /// Start HTTP listener for public traffic
-pub async fn start_http_server(port: u16, registry: Arc<TunnelRegistry>) -> Result<()> {
+pub async fn start_http_server(
+    port: u16,
+    registry: Arc<TunnelRegistry>,
+    logger: Arc<RequestLogger>,
+) -> Result<()> {
     let addr = format!("0.0.0.0:{}", port);
 
     info!("Attempting to bind HTTP server to {}", addr);
@@ -45,8 +53,9 @@ pub async fn start_http_server(port: u16, registry: Arc<TunnelRegistry>) -> Resu
         match listener.accept().await {
             Ok((stream, client_addr)) => {
                 let registry = Arc::clone(&registry);
+                let logger = Arc::clone(&logger);
                 tokio::spawn(async move {
-                    if let Err(e) = handle_http_request(stream, registry).await {
+                    if let Err(e) = handle_http_request(stream, registry, logger).await {
                         error!("HTTP handler error from {}: {}", client_addr, e);
                     }
                 });
@@ -58,8 +67,13 @@ pub async fn start_http_server(port: u16, registry: Arc<TunnelRegistry>) -> Resu
     }
 }
 
-async fn handle_http_request(mut stream: TcpStream, registry: Arc<TunnelRegistry>) -> Result<()> {
+async fn handle_http_request(
+    mut stream: TcpStream,
+    registry: Arc<TunnelRegistry>,
+    logger: Arc<RequestLogger>,
+) -> Result<()> {
     let peer = stream.peer_addr()?;
+    let timer = logger.start_request();
 
     // Read full HTTP request
     let (buf, headers_end) = read_http_headers(&mut stream).await?;
@@ -69,6 +83,9 @@ async fn handle_http_request(mut stream: TcpStream, registry: Arc<TunnelRegistry
         anyhow::anyhow!("Headers end position out of bounds")
     })?;
     let host = parse_and_extract_host(headers_slice, &mut stream).await?;
+
+    // Parse request info for logging
+    let (method, path, query_string, request_headers) = parse_request_info(headers_slice);
 
     info!("HTTP request for host: {} from {}", host, peer);
 
@@ -82,6 +99,8 @@ async fn handle_http_request(mut stream: TcpStream, registry: Arc<TunnelRegistry
         return Ok(());
     };
 
+    let session_id = tunnel.session_id.clone();
+
     // Check if this is a WebSocket upgrade request
     let headers_slice = buf.get(..headers_end + 4).ok_or_else(|| {
         anyhow::anyhow!("Headers end position out of bounds")
@@ -90,16 +109,106 @@ async fn handle_http_request(mut stream: TcpStream, registry: Arc<TunnelRegistry
     if is_websocket_upgrade(headers_slice) {
         info!("WebSocket upgrade request detected for {}", host);
         let full_request = buf[..headers_end + 4].to_vec();
+        // WebSocket connections are long-lived, don't record as single request
         return handle_websocket_proxy(stream, tunnel, &registry, full_request, &subdomain).await;
     }
 
     // Read full request including body
     let full_request = read_full_request(&mut stream, buf, headers_end).await?;
 
+    // Extract request body for logging (truncated)
+    let request_body_start = headers_end + 4;
+    let request_body = if full_request.len() > request_body_start {
+        let body = &full_request[request_body_start..];
+        let (truncated, original_size) = truncate_body(body, MAX_BODY_SIZE);
+        Some((truncated, original_size))
+    } else {
+        None
+    };
+
     // Forward request to CLI and get response
-    forward_to_tunnel(&mut stream, tunnel, &registry, full_request, &host).await?;
+    let forward_result =
+        forward_to_tunnel(&mut stream, tunnel, &registry, full_request, &host).await?;
+
+    // Log the request
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| i64::try_from(d.as_secs()).unwrap_or(i64::MAX))
+        .unwrap_or(0);
+
+    let log = HttpRequestLog {
+        method,
+        path,
+        query_string,
+        request_headers: base64_encode(&serde_json::to_vec(&request_headers).unwrap_or_default()),
+        request_body: request_body.as_ref().map(|(b, _)| base64_encode(b)),
+        response_status: forward_result.status,
+        response_headers: forward_result
+            .response_headers
+            .map(|h| base64_encode(&serde_json::to_vec(&h).unwrap_or_default())),
+        response_body: forward_result.response_body.map(|b| base64_encode(&b)),
+        duration_ms: u32::try_from(timer.elapsed_ms()).unwrap_or(u32::MAX),
+        timestamp,
+        original_request_size: request_body.as_ref().and_then(|(_, s)| s.map(|v| u32::try_from(v).unwrap_or(u32::MAX))),
+        original_response_size: forward_result.original_response_size,
+    };
+
+    logger.log(session_id, log);
 
     Ok(())
+}
+
+/// Result of forwarding a request to tunnel
+struct ForwardResult {
+    status: u16,
+    response_headers: Option<HashMap<String, String>>,
+    response_body: Option<Vec<u8>>,
+    original_response_size: Option<u32>,
+}
+
+/// Parse HTTP request info for logging
+fn parse_request_info(headers_buf: &[u8]) -> (String, String, Option<String>, HashMap<String, String>) {
+    let mut headers = [httparse::EMPTY_HEADER; 64];
+    let mut req = httparse::Request::new(&mut headers);
+
+    if req.parse(headers_buf).is_ok() {
+        let method = req.method.unwrap_or("UNKNOWN").to_string();
+        let full_path = req.path.unwrap_or("/");
+
+        // Split path and query string using split_once for UTF-8 safety
+        let (path, query_string) = match full_path.split_once('?') {
+            Some((p, q)) => (p.to_string(), Some(q.to_string())),
+            None => (full_path.to_string(), None),
+        };
+
+        // Extract headers
+        let mut header_map = HashMap::new();
+        for h in req.headers.iter() {
+            if let Ok(value) = std::str::from_utf8(h.value) {
+                header_map.insert(h.name.to_string(), value.to_string());
+            }
+        }
+
+        (method, path, query_string, header_map)
+    } else {
+        ("UNKNOWN".to_string(), "/".to_string(), None, HashMap::new())
+    }
+}
+
+/// Parse response headers from raw HTTP response
+fn parse_response_headers(response: &[u8]) -> Option<HashMap<String, String>> {
+    let response_str = std::str::from_utf8(response).ok()?;
+    let (header_section, _) = response_str.split_once("\r\n\r\n")?;
+
+    let mut headers = HashMap::new();
+    for line in header_section.lines().skip(1) {
+        // Skip status line
+        if let Some((key, value)) = line.split_once(':') {
+            headers.insert(key.trim().to_string(), value.trim().to_string());
+        }
+    }
+
+    Some(headers)
 }
 
 /// Read HTTP headers from stream
@@ -370,7 +479,7 @@ async fn forward_to_tunnel(
     registry: &Arc<TunnelRegistry>,
     request_data: Vec<u8>,
     host: &str,
-) -> Result<()> {
+) -> Result<ForwardResult> {
     let (response_tx, mut response_rx) = tokio::sync::mpsc::channel(1);
 
     let request_id = registry.next_request_id();
@@ -385,32 +494,80 @@ async fn forward_to_tunnel(
 
     if let Err(e) = tunnel.request_tx.send(tunnel_msg).await {
         error!("Failed to send request to tunnel: {}", e);
-        stream
-            .write_all(b"HTTP/1.1 504 Gateway Timeout\r\n\r\nCLI not responding\r\n")
-            .await?;
-        return Ok(());
+        let error_response = b"HTTP/1.1 504 Gateway Timeout\r\n\r\nCLI not responding\r\n";
+        stream.write_all(error_response).await?;
+        return Ok(ForwardResult {
+            status: 504,
+            response_headers: None,
+            response_body: None,
+            original_response_size: None,
+        });
     }
 
     // Wait for response from CLI (7 minutes, matching ngrok)
     match timeout(Duration::from_secs(420), response_rx.recv()).await {
         Ok(Some(response_data)) => {
+            let status = parse_response_status(&response_data);
+            let response_headers = parse_response_headers(&response_data);
+
+            // Extract response body for logging (truncated)
+            let headers_end = response_data
+                .windows(4)
+                .position(|w| w == b"\r\n\r\n")
+                .map(|p| p + 4);
+
+            let (response_body, original_size) = headers_end
+                .and_then(|start| response_data.get(start..))
+                .filter(|body| !body.is_empty())
+                .map_or((None, None), |body| {
+                    let (truncated, orig) = truncate_body(body, MAX_BODY_SIZE);
+                    (Some(truncated), orig.map(|v| u32::try_from(v).unwrap_or(u32::MAX)))
+                });
+
             stream.write_all(&response_data).await?;
             stream.flush().await?;
-            info!("HTTP request for {} completed", host);
+            info!("HTTP request for {} completed (status: {})", host, status);
+
+            Ok(ForwardResult {
+                status,
+                response_headers,
+                response_body,
+                original_response_size: original_size,
+            })
         }
         Ok(None) => {
-            stream
-                .write_all(b"HTTP/1.1 502 Bad Gateway\r\n\r\nCLI disconnected\r\n")
-                .await?;
+            let error_response = b"HTTP/1.1 502 Bad Gateway\r\n\r\nCLI disconnected\r\n";
+            stream.write_all(error_response).await?;
+            Ok(ForwardResult {
+                status: 502,
+                response_headers: None,
+                response_body: None,
+                original_response_size: None,
+            })
         }
         Err(_) => {
-            stream
-                .write_all(b"HTTP/1.1 504 Gateway Timeout\r\n\r\nRequest timeout\r\n")
-                .await?;
+            let error_response = b"HTTP/1.1 504 Gateway Timeout\r\n\r\nRequest timeout\r\n";
+            stream.write_all(error_response).await?;
+            Ok(ForwardResult {
+                status: 504,
+                response_headers: None,
+                response_body: None,
+                original_response_size: None,
+            })
         }
     }
+}
 
-    Ok(())
+/// Parse HTTP status code from response
+fn parse_response_status(response: &[u8]) -> u16 {
+    // HTTP response format: "HTTP/1.1 200 OK\r\n..."
+    let response_str = std::str::from_utf8(response).unwrap_or("");
+    response_str
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|status| status.parse().ok())
+        .unwrap_or(0)
 }
 
 /// Find the end of HTTP headers (\r\n\r\n)

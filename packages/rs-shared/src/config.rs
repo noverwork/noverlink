@@ -1,7 +1,7 @@
 //! Application configuration module
 //!
 //! Provides type-safe configuration loading from environment variables.
-//! Similar to NestJS ConfigService pattern.
+//! Similar to NestJS `ConfigService` pattern.
 
 use std::env;
 use std::path::Path;
@@ -39,11 +39,13 @@ pub fn get_env(key: &str) -> Result<String, ConfigError> {
 }
 
 /// Get an optional environment variable with a default value
+#[must_use]
 pub fn get_env_or(key: &str, default: &str) -> String {
     env::var(key).unwrap_or_else(|_| default.to_string())
 }
 
 /// Get an optional environment variable
+#[must_use]
 pub fn get_env_opt(key: &str) -> Option<String> {
     env::var(key).ok()
 }
@@ -71,7 +73,7 @@ pub fn get_env_parse_or<T: std::str::FromStr>(key: &str, default: T) -> T {
 /// CLI configuration module
 #[cfg(feature = "cli")]
 pub mod cli {
-    /// API URL - baked in at compile time via NOVERLINK_API_URL env var
+    /// API URL - baked in at compile time via `NOVERLINK_API_URL` env var
     pub const API_URL: &str = match option_env!("NOVERLINK_API_URL") {
         Some(url) => url,
         None => "http://localhost:3000/api",
@@ -85,7 +87,7 @@ pub mod cli {
 /// Relay configuration module
 #[cfg(feature = "relay")]
 pub mod relay {
-    use super::*;
+    use super::{get_env, get_env_or, get_env_parse, load_dotenv, ConfigError, OnceLock};
 
     static CONFIG: OnceLock<RelayConfig> = OnceLock::new();
 
@@ -106,6 +108,15 @@ pub mod relay {
 
         /// Log level
         pub log_level: String,
+
+        /// Backend API URL for metrics reporting
+        pub backend_url: String,
+
+        /// Secret for authenticating with backend (X-Relay-Secret header)
+        pub relay_secret: String,
+
+        /// Unique identifier for this relay instance
+        pub relay_id: String,
     }
 
     impl RelayConfig {
@@ -121,16 +132,31 @@ pub mod relay {
                 ));
             }
 
+            let relay_secret = get_env("RELAY_SECRET")?;
+            if relay_secret.len() < 32 {
+                return Err(ConfigError::InvalidValue(
+                    "RELAY_SECRET".to_string(),
+                    "must be at least 32 characters".to_string(),
+                ));
+            }
+
             Ok(Self {
                 ws_port: get_env_parse("WS_PORT")?,
                 http_port: get_env_parse("HTTP_PORT")?,
                 base_domain: get_env("BASE_DOMAIN")?,
                 ticket_secret,
                 log_level: get_env_or("RUST_LOG", "info"),
+                backend_url: get_env("BACKEND_URL")?,
+                relay_secret,
+                relay_id: get_env_or("RELAY_ID", "relay-1"),
             })
         }
 
         /// Get or initialize the global configuration
+        ///
+        /// # Panics
+        /// Panics if configuration loading fails (missing or invalid env vars)
+        #[allow(clippy::expect_used)]
         pub fn global() -> &'static Self {
             CONFIG.get_or_init(|| Self::load().expect("Failed to load Relay config"))
         }

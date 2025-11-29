@@ -45,6 +45,11 @@ pub struct Tunnel {
     /// Domain name for this tunnel (e.g., "myapp.noverlink.io")
     #[allow(dead_code)] // Used for logging and debugging
     pub domain: String,
+    /// User ID who owns this tunnel
+    #[allow(dead_code)] // Stored for future use (e.g., rate limiting by user)
+    pub user_id: String,
+    /// Backend session ID for this tunnel
+    pub session_id: String,
     /// Channel to send requests to CLI
     pub request_tx: mpsc::Sender<TunnelMessage>,
     /// Local port on CLI side
@@ -118,17 +123,24 @@ impl TunnelRegistry {
     pub fn register(
         &self,
         domain: String,
+        user_id: String,
+        session_id: String,
         request_tx: mpsc::Sender<TunnelMessage>,
         local_port: u16,
     ) -> Arc<Tunnel> {
         let tunnel = Arc::new(Tunnel {
             domain: domain.clone(),
+            user_id: user_id.clone(),
+            session_id: session_id.clone(),
             request_tx,
             local_port,
         });
 
         self.tunnels.insert(domain.clone(), Arc::clone(&tunnel));
-        info!("Registered tunnel: {} -> localhost:{}", domain, local_port);
+        info!(
+            "Registered tunnel: {} -> localhost:{} (user: {}, session: {})",
+            domain, local_port, user_id, session_id
+        );
 
         tunnel
     }

@@ -32,7 +32,10 @@ async fn main() -> Result<()> {
 
         Commands::Logout => run_logout(),
 
-        Commands::Whoami => run_whoami(),
+        Commands::Whoami => {
+            run_whoami();
+            Ok(())
+        }
 
         Commands::Http { port } => run_http(port).await,
 

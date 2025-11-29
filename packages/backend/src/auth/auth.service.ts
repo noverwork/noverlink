@@ -138,7 +138,7 @@ export class AuthService {
     }
 
     // Check if OAuth connection already exists
-    let connection = await this.em.findOne(
+    const connection = await this.em.findOne(
       OAuthConnection,
       {
         provider,
@@ -148,7 +148,7 @@ export class AuthService {
     );
 
     if (connection) {
-      return this.generateTokens(connection.user);
+      return this.generateTokens(connection.user.$);
     }
 
     // Check if user exists with this email
@@ -167,13 +167,13 @@ export class AuthService {
     }
 
     // Create OAuth connection
-    connection = this.em.create(OAuthConnection, {
+    const newConnection = this.em.create(OAuthConnection, {
       provider,
       providerUserId: profile.id,
       user,
     });
 
-    await this.em.persistAndFlush([user, connection]);
+    await this.em.persistAndFlush([user, newConnection]);
 
     return this.generateTokens(user);
   }
