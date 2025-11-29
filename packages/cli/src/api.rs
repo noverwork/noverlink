@@ -102,7 +102,11 @@ impl ApiClient {
         if response.status().is_client_error() {
             // 4xx errors indicate pending or denied
             let body: serde_json::Value = response.json().await.unwrap_or_default();
-            let error = body["error"].as_str().unwrap_or("unknown").to_string();
+            let error = body
+                .get("error")
+                .and_then(|e| e.as_str())
+                .unwrap_or("unknown")
+                .to_string();
             return Ok(DevicePollResponse::Pending { error });
         }
 
@@ -151,6 +155,7 @@ impl ApiClient {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::unwrap_used)]
 mod tests {
     use super::*;
 
@@ -167,13 +172,13 @@ mod tests {
     #[test]
     fn test_ticket_request_serialization() {
         let request = CreateTicketRequest { subdomain: None };
-        let json = serde_json::to_string(&request).unwrap();
+        let json = serde_json::to_string(&request).expect("serialization should succeed");
         assert_eq!(json, "{}");
 
         let request2 = CreateTicketRequest {
             subdomain: Some("myapp".to_string()),
         };
-        let json2 = serde_json::to_string(&request2).unwrap();
+        let json2 = serde_json::to_string(&request2).expect("serialization should succeed");
         assert!(json2.contains("myapp"));
     }
 }

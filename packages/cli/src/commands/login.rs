@@ -1,5 +1,6 @@
 //! Login command - Device code flow authentication
 
+use std::io::Write;
 use std::time::Duration;
 
 use anyhow::{bail, Result};
@@ -38,6 +39,7 @@ pub async fn run_login() -> Result<()> {
 
     // Poll for completion
     let poll_interval = Duration::from_secs(device_response.interval.into());
+    #[allow(clippy::integer_division)]
     let max_attempts = device_response.expires_in / device_response.interval;
 
     for attempt in 0..max_attempts {
@@ -61,7 +63,6 @@ pub async fn run_login() -> Result<()> {
                         // Still waiting, continue polling
                         if attempt % 3 == 0 {
                             print!(".");
-                            use std::io::Write;
                             std::io::stdout().flush().ok();
                         }
                     }

@@ -6,6 +6,7 @@ import {
   OneToMany,
   Opt,
   Property,
+  Ref,
   Unique,
 } from '@mikro-orm/core';
 
@@ -15,9 +16,9 @@ import { User } from './user.entity';
 
 @Entity()
 export class Domain extends PgBaseEntity {
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { ref: true })
   @Index()
-  user!: User;
+  user!: Ref<User>;
 
   /** Subdomain (e.g., "myapp" for myapp.noverlink.io) OR custom domain (e.g., "tunnel.mycompany.com") */
   @Property({ type: 'string' })

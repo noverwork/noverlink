@@ -50,9 +50,12 @@ impl TicketVerifier {
         })?;
 
         // Check expiry
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)?
-            .as_secs() as i64;
+        let now = i64::try_from(
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)?
+                .as_secs(),
+        )
+        .unwrap_or(i64::MAX);
 
         if payload.exp < now {
             bail!("Ticket expired");
@@ -80,6 +83,7 @@ fn base64_url_decode(input: &str) -> Result<Vec<u8>> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
@@ -101,6 +105,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::as_conversions, clippy::cast_possible_wrap)]
     fn test_valid_ticket() {
         let verifier = TicketVerifier::new(TEST_SECRET);
 
@@ -129,6 +134,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::as_conversions, clippy::cast_possible_wrap)]
     fn test_expired_ticket() {
         let verifier = TicketVerifier::new(TEST_SECRET);
 
@@ -155,6 +161,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::as_conversions, clippy::cast_possible_wrap)]
     fn test_invalid_signature() {
         let verifier = TicketVerifier::new(TEST_SECRET);
 

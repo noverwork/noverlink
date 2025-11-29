@@ -40,7 +40,7 @@ pub enum WebSocketMessage {
     /// The CLI sends this message when establishing a new tunnel.
     /// The ticket is a signed JWT from the backend that authorizes the connection.
     Register {
-        /// Connection ticket from backend (HMAC-signed, contains user_id, plan, etc.)
+        /// Connection ticket from backend (HMAC-signed, contains `user_id`, plan, etc.)
         ticket: String,
         /// Local port on CLI side to forward traffic to
         local_port: u16,

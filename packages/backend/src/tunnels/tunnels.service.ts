@@ -1,5 +1,6 @@
 import * as crypto from 'node:crypto';
 
+import type { Loaded } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import type { User } from '@noverlink/backend-shared';
 
@@ -31,7 +32,7 @@ export class TunnelsService {
    * The ticket is signed with HMAC-SHA256 and can be verified by the relay
    * without needing to call back to the backend.
    */
-  createTicket(user: User, subdomain?: string): TicketResponse {
+  createTicket(user: Loaded<User, never>, subdomain?: string): TicketResponse {
     const { ticketSecret, relayUrl } = this.appConfigService.tunnel;
 
     const expiresIn = 60; // 60 seconds

@@ -1,3 +1,4 @@
+import type { Loaded } from '@mikro-orm/core';
 import {
   Body,
   Controller,
@@ -15,8 +16,8 @@ import { AppConfigService } from '../app-config';
 import { type AuthResponse, AuthService } from './auth.service';
 import { CurrentUser, Public } from './decorators';
 import {
-  DevicePollDto,
   type DeviceCodeResponse,
+  DevicePollDto,
   type DevicePollResponse,
   LoginDto,
   RefreshTokenDto,
@@ -112,7 +113,7 @@ export class AuthController {
   @Post('device/approve')
   async approveDeviceCode(
     @Body('user_code') userCode: string,
-    @CurrentUser() user: User
+    @CurrentUser() user: Loaded<User, never>
   ): Promise<{ success: boolean }> {
     const success = await this.authService.approveDeviceCode(userCode, user.id);
     return { success };
@@ -129,7 +130,7 @@ export class AuthController {
   // ==================== User Profile ====================
 
   @Get('me')
-  getProfile(@CurrentUser() user: User) {
+  getProfile(@CurrentUser() user: Loaded<User, never>) {
     return {
       id: user.id,
       name: user.name,

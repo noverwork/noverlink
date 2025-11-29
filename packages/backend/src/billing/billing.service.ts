@@ -59,7 +59,7 @@ export class BillingService {
   async handleSubscriptionActive(dto: SubscriptionActiveDto): Promise<void> {
     this.logger.log(`Subscription active: ${dto.subscriptionId}`);
 
-    let subscription = await this.em.findOne(
+    const subscription = await this.em.findOne(
       Subscription,
       { polarSubscriptionId: dto.subscriptionId },
       { populate: ['user'] }

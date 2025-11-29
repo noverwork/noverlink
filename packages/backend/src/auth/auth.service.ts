@@ -1,5 +1,6 @@
 import * as crypto from 'node:crypto';
 
+import type { Loaded } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
@@ -177,7 +178,7 @@ export class AuthService {
     return this.generateTokens(user);
   }
 
-  private generateTokens(user: User): AuthResponse {
+  private generateTokens(user: Loaded<User, never>): AuthResponse {
     const payload = { sub: user.id, email: user.email };
     const { jwt } = this.appConfigService;
 
@@ -295,7 +296,7 @@ export class AuthService {
    * Verify user code and approve device (called from web UI)
    */
   async approveDeviceCode(userCode: string, userId: string): Promise<boolean> {
-    for (const [deviceCode, data] of pendingDeviceCodes.entries()) {
+    for (const [_deviceCode, data] of pendingDeviceCodes.entries()) {
       if (data.userCode === userCode.toUpperCase() && data.expiresAt > Date.now()) {
         data.userId = userId;
         return true;
@@ -337,7 +338,7 @@ export class AuthService {
   /**
    * Generate long-lived CLI authentication token
    */
-  private async generateCliToken(user: User): Promise<string> {
+  private async generateCliToken(user: Loaded<User, never>): Promise<string> {
     const token = `nv_${crypto.randomBytes(32).toString('base64url')}`;
 
     // Save token to user (for now, plaintext; production should hash it)

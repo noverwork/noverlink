@@ -92,6 +92,9 @@ export default [
     },
     rules: {
       'mikro-orm/ensure-request-context-requires-entity-manager': 'error',
+      'mikro-orm/no-get-entity': 'error',
+      'mikro-orm/require-ref-for-relations': 'error',
+      'mikro-orm/require-loaded-type-for-entity-params': 'error',
     },
   },
 ];

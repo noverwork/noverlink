@@ -7,6 +7,7 @@ import {
   OneToMany,
   Opt,
   Property,
+  Ref,
 } from '@mikro-orm/core';
 
 import { PgBaseEntity } from '../base-entities';
@@ -25,9 +26,9 @@ export enum TunnelProtocol {
 
 @Entity()
 export class TunnelSession extends PgBaseEntity {
-  @ManyToOne(() => Domain)
+  @ManyToOne(() => Domain, { ref: true })
   @Index()
-  domain!: Domain;
+  domain!: Ref<Domain>;
 
   @Enum(() => TunnelProtocol)
   protocol: TunnelProtocol & Opt = TunnelProtocol.HTTP;

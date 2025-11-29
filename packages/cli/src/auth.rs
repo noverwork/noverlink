@@ -83,7 +83,7 @@ impl Config {
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
 
-        let config: Config = toml::from_str(&contents).context("Failed to parse config file")?;
+        let config: Self = toml::from_str(&contents).context("Failed to parse config file")?;
         Ok(config)
     }
 
@@ -155,6 +155,7 @@ pub fn is_logged_in() -> bool {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 

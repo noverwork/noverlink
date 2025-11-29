@@ -1,13 +1,13 @@
-import { Entity, Index, ManyToOne, Opt, Property } from '@mikro-orm/core';
+import { Entity, Index, ManyToOne, Opt, Property, Ref } from '@mikro-orm/core';
 
 import { PgBaseEntity } from '../base-entities';
 import { TunnelSession } from './tunnel-session.entity';
 
 @Entity()
 export class HttpRequest extends PgBaseEntity {
-  @ManyToOne(() => TunnelSession)
+  @ManyToOne(() => TunnelSession, { ref: true })
   @Index()
-  session!: TunnelSession;
+  session!: Ref<TunnelSession>;
 
   /** HTTP method */
   @Property({ type: 'string', length: 10 })

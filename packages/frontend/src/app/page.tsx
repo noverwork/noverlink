@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-
 import { GlowButton, TunnelConnection } from '@noverlink/ui-shared';
+import Link from 'next/link';
 
 export default function Page() {
   return (
@@ -181,6 +180,16 @@ function FeatureCard({ title, description }: { title: string; description: strin
   );
 }
 
+function getCardClassName(comingSoon?: boolean, highlighted?: boolean): string {
+  if (comingSoon) {
+    return 'border-white/8 bg-slate-900/50 opacity-60';
+  }
+  if (highlighted) {
+    return 'border-teal-500/30 bg-teal-500/5 hover:border-teal-500/50';
+  }
+  return 'border-white/8 bg-slate-900 hover:border-white/15';
+}
+
 function PricingCard({
   plan,
   price,
@@ -196,13 +205,7 @@ function PricingCard({
 }) {
   return (
     <div
-      className={`p-5 rounded-xl border transition-colors relative ${
-        comingSoon
-          ? 'border-white/8 bg-slate-900/50 opacity-60'
-          : highlighted
-            ? 'border-teal-500/30 bg-teal-500/5 hover:border-teal-500/50'
-            : 'border-white/8 bg-slate-900 hover:border-white/15'
-      }`}
+      className={`p-5 rounded-xl border transition-colors relative ${getCardClassName(comingSoon, highlighted)}`}
     >
       {comingSoon && (
         <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-slate-700 text-[10px] font-medium uppercase tracking-wider text-slate-300">

@@ -35,7 +35,7 @@ export class CliAuthGuard implements CanActivate {
     }
 
     // Attach user to request for use in controller
-    (request as any).user = user;
+    (request as Request & { user: typeof user }).user = user;
 
     return true;
   }

@@ -4,6 +4,7 @@ import {
   Index,
   ManyToOne,
   Property,
+  Ref,
   Unique,
 } from '@mikro-orm/core';
 
@@ -26,6 +27,6 @@ export class OAuthConnection extends PgBaseEntity {
   @Index()
   providerUserId!: string;
 
-  @ManyToOne(() => User)
-  user!: User;
+  @ManyToOne(() => User, { ref: true })
+  user!: Ref<User>;
 }

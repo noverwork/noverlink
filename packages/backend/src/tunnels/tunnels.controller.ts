@@ -4,7 +4,7 @@ import type { Request } from 'express';
 
 import { Public } from '../auth/decorators';
 import { CliAuthGuard } from './guards/cli-auth.guard';
-import { TunnelsService, type TicketResponse } from './tunnels.service';
+import { type TicketResponse,TunnelsService } from './tunnels.service';
 
 interface CreateTicketDto {
   subdomain?: string;

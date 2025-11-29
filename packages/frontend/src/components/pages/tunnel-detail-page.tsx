@@ -96,7 +96,7 @@ const mockLogs = [
   },
 ];
 
-export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
+export function TunnelDetailPage({ tunnelId: _tunnelId }: TunnelDetailPageProps) {
   const tunnel = mockTunnel;
   const logs = mockLogs;
 

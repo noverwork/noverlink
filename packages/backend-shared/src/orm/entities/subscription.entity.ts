@@ -5,6 +5,7 @@ import {
   ManyToOne,
   Opt,
   Property,
+  Ref,
   Unique,
 } from '@mikro-orm/core';
 
@@ -42,7 +43,7 @@ export class Subscription extends PgBaseEntity {
   @Property({ type: 'boolean' })
   cancelAtPeriodEnd: boolean & Opt = false;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { ref: true })
   @Index()
-  user!: User;
+  user!: Ref<User>;
 }
