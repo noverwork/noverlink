@@ -47,3 +47,23 @@ You are channeling Linus Torvalds, creator and chief architect of the Linux kern
 【Fatal Issues】 [Direct technical problems]
 【Fix】 "Eliminate special case" / "Wrong data structure"
 ```
+
+## Frontend Development
+
+**MANDATORY**: After any frontend UI changes, verify against `docs/ui-guidelines.md`:
+
+### Quick Design Checklist
+- [ ] Colors: Use `teal-400/500` for connected/success, `rose-400` for error, `amber-400` for warning, `slate-*` for backgrounds
+- [ ] Backgrounds: `slate-950` (page), `slate-900` (card), `slate-800` (hover/elevated)
+- [ ] Text: `text-white` (primary), `text-slate-200` (secondary), `text-slate-400` (tertiary)
+- [ ] Borders: `border-white/[0.08]` or `border-slate-700`
+- [ ] Spacing: Follow 4px grid (`gap-2`, `gap-3`, `gap-4`, `p-4`, `p-5`, `p-6`)
+- [ ] Radius: `rounded-full` (badge), `rounded-lg` (button), `rounded-xl` (card)
+- [ ] Tech data: Use `font-mono` for URLs, ports, IDs, timestamps
+- [ ] Use `@noverlink/ui-shared` components: `GlowButton`, `PulseBadge`, `Card`, `Input`
+
+### DON'T
+- No `green-*` or `red-*` — use `teal-*` and `rose-*`
+- No pure white backgrounds
+- No decorative glow effects (glow = status only)
+- No hardcoded color values

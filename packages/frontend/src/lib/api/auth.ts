@@ -55,4 +55,17 @@ export const authApi = {
   getGithubAuthUrl(): string {
     return `${env.apiUrl}/auth/github`;
   },
+
+  // Device code flow (CLI authentication)
+  approveDeviceCode(userCode: string): Promise<{ success: boolean }> {
+    return apiClient.post<{ success: boolean }>('/auth/device/approve', {
+      user_code: userCode,
+    });
+  },
+
+  denyDeviceCode(userCode: string): Promise<{ success: boolean }> {
+    return apiClient.post<{ success: boolean }>('/auth/device/deny', {
+      user_code: userCode,
+    });
+  },
 };
