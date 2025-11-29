@@ -10,6 +10,7 @@ import { AppConfigService } from '../app-config';
 import { AppConfigModule } from '../app-config/app-config.module';
 import { AuthModule, JwtAuthGuard } from '../auth';
 import { BillingModule } from '../billing';
+import { TunnelsModule } from '../tunnels';
 import { SERVICE_NAME } from './app.constant';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -44,6 +45,7 @@ import { AppService } from './app.service';
     }),
     AuthModule,
     BillingModule,
+    TunnelsModule,
   ],
   controllers: [AppController],
   providers: [

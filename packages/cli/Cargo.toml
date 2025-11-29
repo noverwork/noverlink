@@ -38,3 +38,10 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Concurrent data structures
 dashmap = "6.1"
+
+# HTTP client for backend API
+reqwest = { version = "0.12", features = ["json"] }
+
+# Config file handling
+toml = "0.8"
+dirs = "6.0"

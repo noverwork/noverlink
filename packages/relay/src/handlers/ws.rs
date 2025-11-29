@@ -13,12 +13,14 @@ use tracing::{error, info, warn};
 use noverlink_shared::WebSocketMessage;
 
 use crate::registry::{TunnelMessage, TunnelRegistry};
+use crate::ticket::TicketVerifier;
 
 /// Handle incoming CLI WebSocket connection
 #[allow(clippy::too_many_lines)]
 pub async fn handle_cli_connection(
     stream: TcpStream,
     registry: Arc<TunnelRegistry>,
+    ticket_verifier: Arc<TicketVerifier>,
 ) -> Result<()> {
     let ws_stream = accept_async(stream).await?;
     info!("WebSocket handshake completed");
@@ -40,39 +42,60 @@ pub async fn handle_cli_connection(
 
     let reg_data: WebSocketMessage = serde_json::from_str(&reg_msg.to_string())?;
 
-    let WebSocketMessage::Register { domain, local_port } = reg_data else {
+    let WebSocketMessage::Register { ticket, local_port } = reg_data else {
         warn!("Expected Register message, got something else");
         return Ok(());
     };
 
-    // Determine domain: use provided or generate random
-    let final_domain = match domain {
-        Some(d) => {
-            // Check if domain is available
-            if !registry.is_domain_available(&d) {
-                let error_msg = WebSocketMessage::Error {
-                    message: format!("Domain '{}' is already taken", d),
-                };
-                let json = serde_json::to_string(&error_msg)?;
-                ws_sink
-                    .send(tokio_tungstenite::tungstenite::Message::Text(json))
-                    .await?;
-                return Ok(());
-            }
-            d
+    // Verify ticket
+    let ticket_payload = match ticket_verifier.verify(&ticket) {
+        Ok(payload) => payload,
+        Err(e) => {
+            warn!("Ticket verification failed: {}", e);
+            let error_msg = WebSocketMessage::Error {
+                message: format!("Authentication failed: {}", e),
+            };
+            let json = serde_json::to_string(&error_msg)?;
+            ws_sink
+                .send(tokio_tungstenite::tungstenite::Message::Text(json))
+                .await?;
+            return Ok(());
         }
-        None => {
-            // Generate random subdomain
-            loop {
-                let subdomain = TunnelRegistry::generate_random_subdomain();
-                if registry.is_domain_available(&subdomain) {
-                    break subdomain;
-                }
+    };
+
+    info!(
+        "Authenticated user: {} (plan: {}, max_tunnels: {})",
+        ticket_payload.user_id, ticket_payload.plan, ticket_payload.max_tunnels
+    );
+
+    // Determine domain: use from ticket or generate random
+    let final_domain = if let Some(ref d) = ticket_payload.subdomain {
+        // Check if reserved domain is available
+        if !registry.is_domain_available(d) {
+            let error_msg = WebSocketMessage::Error {
+                message: format!("Domain '{}' is already in use", d),
+            };
+            let json = serde_json::to_string(&error_msg)?;
+            ws_sink
+                .send(tokio_tungstenite::tungstenite::Message::Text(json))
+                .await?;
+            return Ok(());
+        }
+        d.clone()
+    } else {
+        // Generate random subdomain
+        loop {
+            let subdomain = TunnelRegistry::generate_random_subdomain();
+            if registry.is_domain_available(&subdomain) {
+                break subdomain;
             }
         }
     };
 
-    info!("Tunnel registration: {} -> localhost:{}", final_domain, local_port);
+    info!(
+        "Tunnel registration: {} -> localhost:{} (user: {})",
+        final_domain, local_port, ticket_payload.user_id
+    );
 
     // Create channel for sending requests to CLI
     let (request_tx, mut request_rx) = mpsc::channel::<TunnelMessage>(100);

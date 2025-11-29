@@ -4,4 +4,4 @@
 
 pub mod protocol;
 
-pub use protocol::WebSocketMessage;
+pub use protocol::{TicketPayload, WebSocketMessage};

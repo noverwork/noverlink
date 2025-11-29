@@ -72,4 +72,13 @@ export class AppConfigService {
       },
     };
   }
+
+  get tunnel() {
+    return {
+      ticketSecret: this.configService.getOrThrow<string>(
+        EnvField.TicketSecret
+      ),
+      relayUrl: this.configService.getOrThrow<string>(EnvField.RelayUrl),
+    };
+  }
 }

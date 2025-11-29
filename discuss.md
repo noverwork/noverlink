@@ -243,7 +243,73 @@ $ noverlink --token nk_xxx --subdomain db --protocol tcp --port 5432
 
 ---
 
-## 待討論問題
+## API 設計
+
+### 1. Auth API
+
+| Method | Endpoint | 用途 |
+|--------|----------|------|
+| POST | `/auth/register` | 註冊 |
+| POST | `/auth/login` | 登入 |
+| POST | `/auth/logout` | 登出 |
+| GET | `/auth/oauth/github` | GitHub OAuth |
+| GET | `/auth/oauth/google` | Google OAuth |
+| GET | `/auth/oauth/callback` | OAuth callback |
+| POST | `/auth/token/generate` | 產生 CLI authToken |
+| DELETE | `/auth/token/revoke` | 撤銷 authToken |
+
+### 2. User API
+
+| Method | Endpoint | 用途 |
+|--------|----------|------|
+| GET | `/user/me` | 取得自己資訊 |
+| PATCH | `/user/me` | 更新資訊 |
+| GET | `/user/usage` | 本月用量統計 |
+
+### 3. Domain API
+
+| Method | Endpoint | 用途 |
+|--------|----------|------|
+| GET | `/domains` | 列出我的 domains |
+| POST | `/domains` | 建立/保留 subdomain |
+| DELETE | `/domains/:id` | 刪除 domain |
+| GET | `/domains/:id/sessions` | 該 domain 的連線記錄 |
+
+### 4. Session API
+
+| Method | Endpoint | 用途 |
+|--------|----------|------|
+| GET | `/sessions` | 列出所有連線 |
+| GET | `/sessions/active` | 目前 active 的連線 |
+| GET | `/sessions/:id` | 單一連線詳情 |
+| GET | `/sessions/:id/requests` | 該連線的 HTTP 請求 |
+
+### 5. Request API (HTTP Replay)
+
+| Method | Endpoint | 用途 |
+|--------|----------|------|
+| GET | `/requests` | 列出 HTTP 請求 |
+| GET | `/requests/:id` | 單一請求詳情 (含 body) |
+| POST | `/requests/:id/replay` | 重送請求 |
+
+### 6. Subscription API
+
+| Method | Endpoint | 用途 |
+|--------|----------|------|
+| GET | `/subscription` | 取得訂閱狀態 |
+| POST | `/subscription/checkout` | 產生 Polar checkout URL |
+| POST | `/subscription/cancel` | 取消訂閱 |
+| POST | `/webhooks/polar` | Polar webhook callback |
+
+### 7. CLI / Relay API (WebSocket)
+
+| Type | Endpoint | 用途 |
+|------|----------|------|
+| WS | `/tunnel/connect` | CLI 建立 tunnel 連線 |
+
+---
+
+## 已決定事項
 
 - [x] Request body 儲存限制？→ 先全存 PostgreSQL，之後再優化
 - [x] HttpRequest 保留政策？→ 先不刪，之後再處理

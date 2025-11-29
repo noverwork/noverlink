@@ -20,4 +20,7 @@ export enum EnvField {
   GithubCallbackUrl = 'GITHUB_CALLBACK_URL',
   // Frontend URL for OAuth redirects
   FrontendUrl = 'FRONTEND_URL',
+  // Tunnel/Relay
+  TicketSecret = 'TICKET_SECRET',
+  RelayUrl = 'RELAY_URL',
 }

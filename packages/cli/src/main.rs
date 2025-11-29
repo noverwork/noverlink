@@ -2,6 +2,8 @@
 //!
 //! Command-line tool for creating tunnels to expose local services.
 
+mod api;
+mod auth;
 mod cli;
 mod commands;
 mod forwarder;
@@ -11,7 +13,7 @@ use anyhow::Result;
 use clap::Parser;
 
 use cli::{Cli, Commands};
-use commands::{run_http, run_kill, run_status};
+use commands::{run_http, run_kill, run_login, run_logout, run_status, run_whoami};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -26,7 +28,13 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Http { port, domain } => run_http(port, domain).await,
+        Commands::Login => run_login().await,
+
+        Commands::Logout => run_logout(),
+
+        Commands::Whoami => run_whoami(),
+
+        Commands::Http { port } => run_http(port).await,
 
         Commands::Status => run_status(),
 
