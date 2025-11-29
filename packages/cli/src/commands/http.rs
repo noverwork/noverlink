@@ -8,7 +8,7 @@ use crate::auth;
 use crate::forwarder;
 use crate::relay::RelayConnection;
 
-pub async fn run_http(port: u16) -> Result<()> {
+pub async fn run_http(port: u16, subdomain: Option<String>) -> Result<()> {
     println!("🚀 Starting Noverlink tunnel...");
     println!();
 
@@ -18,7 +18,7 @@ pub async fn run_http(port: u16) -> Result<()> {
     // Get ticket from backend
     println!("📡 Authenticating with backend...");
     let api = ApiClient::from_config();
-    let ticket_response = api.get_ticket(&auth_token).await?;
+    let ticket_response = api.get_ticket(&auth_token, subdomain.as_deref()).await?;
 
     println!("🔗 Connecting to relay...");
 

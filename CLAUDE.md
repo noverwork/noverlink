@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project: Noverlink
 
 **What is it?** A local-to-global tunneling solution (like ngrok, but better and cheaper).
@@ -16,6 +18,68 @@
 - Relay must be fast. No excuses.
 - Support multiple simultaneous proxies (the whole point)
 - Keep it simple, keep it maintainable
+
+## Commands
+
+### Development
+```bash
+npm run dev                    # Start backend + frontend (parallel)
+npm run ms:start               # Start PostgreSQL (Docker)
+npm run migrator:up            # Run DB migrations
+npm run migrator:create <name> # Create new migration
+
+# Relay (Rust)
+cd packages/relay && WS_PORT=8444 HTTP_PORT=9444 BASE_DOMAIN=localhost cargo run
+
+# CLI (Rust)
+cd packages/cli && cargo run -- http 3000
+```
+
+### Build & Test
+```bash
+npm run typecheck              # Type check all packages
+npm run lint                   # Lint all packages
+npm run test                   # Run all tests
+cargo test -p relay            # Test relay only
+cargo test -p noverlink-cli    # Test CLI only
+```
+
+### Single Package Commands
+```bash
+npx nx serve @noverlink/backend
+npx nx dev @noverlink/frontend
+npx nx test @noverlink/backend
+npx nx lint @noverlink/frontend
+```
+
+## Architecture
+
+### Package Structure
+```
+packages/
+├── relay/          # Rust - WebSocket relay, HTTP proxy (tokio, tungstenite)
+├── cli/            # Rust - Client tunnel agent (clap, reqwest)
+├── rs-shared/      # Rust - Shared types between relay & cli
+├── backend/        # NestJS - API, auth (JWT/OAuth), billing
+├── frontend/       # Next.js - Dashboard
+├── backend-shared/ # TS - MikroORM entities (User, Domain, TunnelSession, etc.)
+├── ui-shared/      # React - Shared components (GlowButton, PulseBadge, Card)
+├── shared/         # TS - Common utilities & types
+├── migrator/       # MikroORM migration runner
+└── interfaces/     # Zod schemas & TypeScript interfaces
+```
+
+### Data Flow
+```
+Browser → Relay (HTTP:9444) → WebSocket → CLI → localhost:PORT
+                ↓
+         Backend (API:3000) ← Ticket auth
+```
+
+### Key Flows
+1. **Ticket Auth**: CLI calls Backend for ticket → Backend signs with HMAC-SHA256 → CLI connects to Relay with ticket → Relay verifies signature (no callback needed)
+2. **Tunnel Creation**: CLI sends `TunnelRequest` via WebSocket → Relay assigns subdomain → Returns `TunnelCreated` with public URL
+3. **HTTP Proxy**: Request hits Relay → Relay forwards via WebSocket to CLI → CLI proxies to local server → Response flows back
 
 ## Role Definition
 

@@ -23,6 +23,10 @@ pub enum Commands {
     Http {
         /// Local port to forward
         port: u16,
+
+        /// Custom subdomain (e.g., "myapp" for myapp.noverlink.io)
+        #[arg(short, long)]
+        subdomain: Option<String>,
     },
 
     /// Show tunnel status
