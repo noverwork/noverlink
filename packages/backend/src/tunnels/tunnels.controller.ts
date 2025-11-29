@@ -28,10 +28,10 @@ export class TunnelsController {
   @Public() // Skip JWT guard, we use CliAuthGuard instead
   @UseGuards(CliAuthGuard)
   @Post('ticket')
-  createTicket(
+  async createTicket(
     @Body() dto: CreateTicketDto,
     @Req() req: AuthenticatedRequest
-  ): TicketResponse {
+  ): Promise<TicketResponse> {
     return this.tunnelsService.createTicket(req.user, dto.subdomain);
   }
 }

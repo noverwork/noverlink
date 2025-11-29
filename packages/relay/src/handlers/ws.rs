@@ -73,27 +73,32 @@ pub async fn handle_cli_connection(
         ticket_payload.user_id, ticket_payload.plan, ticket_payload.max_tunnels
     );
 
-    // Determine domain: use from ticket or generate random
-    let final_domain = if let Some(ref d) = ticket_payload.subdomain {
-        // Check if reserved domain is available
-        if !registry.is_domain_available(d) {
+    // Get subdomain from ticket (backend always provides one now)
+    let final_domain = match ticket_payload.subdomain {
+        Some(ref d) => {
+            // Check if domain is available on this relay
+            if !registry.is_domain_available(d) {
+                let error_msg = WebSocketMessage::Error {
+                    message: format!("Domain '{}' is already in use on this relay", d),
+                };
+                let json = serde_json::to_string(&error_msg)?;
+                ws_sink
+                    .send(tokio_tungstenite::tungstenite::Message::Text(json))
+                    .await?;
+                return Ok(());
+            }
+            d.clone()
+        }
+        None => {
+            // Backend should always provide subdomain now
             let error_msg = WebSocketMessage::Error {
-                message: format!("Domain '{}' is already in use", d),
+                message: "Invalid ticket: missing subdomain".to_string(),
             };
             let json = serde_json::to_string(&error_msg)?;
             ws_sink
                 .send(tokio_tungstenite::tungstenite::Message::Text(json))
                 .await?;
             return Ok(());
-        }
-        d.clone()
-    } else {
-        // Generate random subdomain
-        loop {
-            let subdomain = TunnelRegistry::generate_random_subdomain();
-            if registry.is_domain_available(&subdomain) {
-                break subdomain;
-            }
         }
     };
 

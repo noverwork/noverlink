@@ -93,27 +93,6 @@ impl TunnelRegistry {
         format!("https://{}.{}", subdomain, self.base_domain)
     }
 
-    /// Generate a random human-readable subdomain
-    ///
-    /// Generates names like "happy-cat", "blue-moon", "lazy-dog"
-    /// using the petname library for memorable, unique subdomains.
-    /// This is a static method as it doesn't depend on registry state.
-    pub fn generate_random_subdomain() -> String {
-        // Generate 2-word petname with dash separator (e.g., "happy-cat")
-        // Using 2 words for balance between uniqueness and brevity
-        petname::petname(2, "-").unwrap_or_else(|| {
-            // Fallback to timestamp-based subdomain if petname fails
-            use std::time::{SystemTime, UNIX_EPOCH};
-            // SAFETY: System time should always be after UNIX_EPOCH on any modern system
-            #[allow(clippy::expect_used)]
-            let timestamp = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("System time is before UNIX_EPOCH")
-                .as_millis();
-            format!("tunnel-{}", timestamp % 100_000)
-        })
-    }
-
     /// Check if domain is available
     pub fn is_domain_available(&self, domain: &str) -> bool {
         !self.tunnels.contains_key(domain)

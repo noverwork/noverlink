@@ -34,24 +34,20 @@ export class RelayService {
       throw new NotFoundException(`User ${user_id} not found`);
     }
 
-    // Check if there's a reserved domain for this subdomain
-    const domain = await this.em.findOne(Domain, {
-      hostname: subdomain,
-      user: ref(user),
-    });
+    // Find domain (should exist, created by TunnelsService.createTicket)
+    const domain = await this.em.findOne(Domain, { hostname: subdomain });
+    if (!domain) {
+      throw new NotFoundException(`Domain ${subdomain} not found`);
+    }
 
     // Create session
     const session = new TunnelSession();
     session.user = ref(user);
-    session.subdomain = subdomain;
+    session.domain = ref(domain);
     session.localPort = local_port;
     session.relayId = relayId;
     session.clientIp = client_ip;
     session.clientVersion = client_version;
-
-    if (domain) {
-      session.domain = ref(domain);
-    }
 
     this.em.persist(session);
     await this.em.flush();

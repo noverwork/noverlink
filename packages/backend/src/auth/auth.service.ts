@@ -234,7 +234,7 @@ export class AuthService {
   startDeviceFlow(): DeviceCodeResponse {
     const deviceCode = crypto.randomBytes(32).toString('hex');
     const userCode = this.generateUserCode();
-    const expiresIn = 900; // 15 minutes
+    const expiresIn = 300; // 5 minutes
 
     pendingDeviceCodes.set(deviceCode, {
       userCode,

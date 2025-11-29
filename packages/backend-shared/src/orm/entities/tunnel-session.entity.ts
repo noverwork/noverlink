@@ -31,15 +31,10 @@ export class TunnelSession extends PgBaseEntity {
   @Index()
   user!: Ref<User>;
 
-  /** Reserved domain (nullable for random subdomains) */
-  @ManyToOne(() => Domain, { ref: true, nullable: true })
+  /** Domain used for this tunnel session */
+  @ManyToOne(() => Domain, { ref: true })
   @Index()
-  domain?: Ref<Domain>;
-
-  /** Actual subdomain used (always set, whether reserved or random) */
-  @Property({ type: 'string', length: 63 })
-  @Index()
-  subdomain!: string;
+  domain!: Ref<Domain>;
 
   /** Local port on CLI side */
   @Property({ type: 'number' })

@@ -123,7 +123,11 @@ impl ApiClient {
     }
 
     /// Get connection ticket for relay
-    pub async fn get_ticket(&self, auth_token: &str) -> Result<TicketResponse> {
+    pub async fn get_ticket(
+        &self,
+        auth_token: &str,
+        subdomain: Option<&str>,
+    ) -> Result<TicketResponse> {
         let url = format!("{}/tunnels/ticket", self.base_url);
 
         info!("Requesting connection ticket from backend");
@@ -132,7 +136,9 @@ impl ApiClient {
             .client
             .post(&url)
             .header("Authorization", format!("Bearer {}", auth_token))
-            .json(&CreateTicketRequest { subdomain: None })
+            .json(&CreateTicketRequest {
+                subdomain: subdomain.map(String::from),
+            })
             .send()
             .await
             .context("Failed to connect to backend")?;

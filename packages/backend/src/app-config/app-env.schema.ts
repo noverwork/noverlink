@@ -82,7 +82,7 @@ export class AppEnvSchema {
   @MinLength(16)
   [EnvField.TicketSecret]!: string;
 
-  @IsUrl({ require_tld: false })
+  @IsUrl({ require_tld: false, protocols: ['ws', 'wss'] })
   [EnvField.RelayUrl]!: string;
 
   @IsString()

@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
             Ok(())
         }
 
-        Commands::Http { port } => run_http(port).await,
+        Commands::Http { port, subdomain } => run_http(port, subdomain).await,
 
         Commands::Status => run_status(),
 
