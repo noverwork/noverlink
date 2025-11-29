@@ -106,17 +106,12 @@ pub fn run_logout() -> Result<()> {
 
 /// Show current login status
 pub fn run_whoami() -> Result<()> {
-    let config = auth::Config::load()?;
-
-    match config.auth_token {
-        Some(_) => {
-            println!("✅ You are logged in.");
-            println!("   API: {}", config.api_url);
-        }
-        None => {
-            println!("❌ You are not logged in.");
-            println!("   Run 'noverlink login' to authenticate.");
-        }
+    if auth::is_logged_in() {
+        println!("✅ You are logged in.");
+        println!("   API: {}", auth::api_url());
+    } else {
+        println!("❌ You are not logged in.");
+        println!("   Run 'noverlink login' to authenticate.");
     }
 
     Ok(())

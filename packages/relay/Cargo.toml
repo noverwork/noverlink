@@ -13,8 +13,8 @@ categories = ["network-programming", "web-programming"]
 workspace = true
 
 [dependencies]
-# Shared types
-noverlink-shared = { path = "../rs-shared" }
+# Shared types and config
+noverlink-shared = { path = "../rs-shared", features = ["relay"] }
 
 # Runtime
 tokio = { version = "1", features = ["rt-multi-thread", "net", "signal", "macros", "sync", "io-util", "fs", "time"] }
@@ -35,7 +35,6 @@ httparse = "1.9"
 # Utilities
 anyhow = "1.0"
 dashmap = "6.0"
-dotenvy = "0.15"
 petname = { version = "3.0.0-alpha.2", default-features = false, features = ["default-rng", "default-words"] }
 
 # Cryptography (for ticket verification)

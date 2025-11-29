@@ -12,34 +12,17 @@ use serde::{Deserialize, Serialize};
 const CONFIG_DIR: &str = ".noverlink";
 const CONFIG_FILE: &str = "config.toml";
 
+/// Get the API URL (compiled in at build time)
+pub fn api_url() -> &'static str {
+    noverlink_shared::API_URL
+}
+
 /// CLI configuration including authentication
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Config {
     /// Authentication token for backend API
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auth_token: Option<String>,
-
-    /// Backend API URL
-    #[serde(default = "default_api_url")]
-    pub api_url: String,
-
-    /// Relay WebSocket URL (optional, usually provided by backend)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub relay_url: Option<String>,
-}
-
-fn default_api_url() -> String {
-    "http://localhost:3000".to_string()
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            auth_token: None,
-            api_url: default_api_url(),
-            relay_url: None,
-        }
-    }
 }
 
 impl Config {
@@ -163,20 +146,22 @@ mod tests {
     fn test_default_config() {
         let config = Config::default();
         assert!(config.auth_token.is_none());
-        assert_eq!(config.api_url, "http://localhost:3000");
+    }
+
+    #[test]
+    fn test_api_url() {
+        // Default should be localhost when not set via env
+        assert!(!api_url().is_empty());
     }
 
     #[test]
     fn test_config_serialization() {
         let config = Config {
             auth_token: Some("nv_test123".to_string()),
-            api_url: "https://api.noverlink.io".to_string(),
-            relay_url: None,
         };
 
         let toml_str = toml::to_string(&config).unwrap();
         assert!(toml_str.contains("auth_token"));
-        assert!(toml_str.contains("api_url"));
 
         let parsed: Config = toml::from_str(&toml_str).unwrap();
         assert_eq!(parsed.auth_token, config.auth_token);

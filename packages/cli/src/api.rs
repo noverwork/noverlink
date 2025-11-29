@@ -7,7 +7,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
-use crate::auth::Config;
+use crate::auth::api_url;
 
 /// Response from POST /auth/device
 #[derive(Debug, Deserialize)]
@@ -58,10 +58,9 @@ impl ApiClient {
         }
     }
 
-    /// Create API client from config
+    /// Create API client with configured URL
     pub fn from_config() -> Result<Self> {
-        let config = Config::load()?;
-        Ok(Self::new(&config.api_url))
+        Ok(Self::new(api_url()))
     }
 
     /// Start device code flow for authentication
