@@ -201,4 +201,35 @@ mod tests {
         let content_length_lower = b"HTTP/1.1 200 OK\r\ncontent-length: 5\r\n\r\nHello";
         assert!(is_complete_http_response(content_length_lower));
     }
+
+    #[test]
+    fn test_create_502_response() {
+        let error = anyhow::anyhow!("Connection refused");
+        let response = create_502_response(&error);
+
+        let response_str = String::from_utf8(response).expect("Should be valid UTF-8");
+
+        assert!(response_str.starts_with("HTTP/1.1 502 Bad Gateway"));
+        assert!(response_str.contains("Content-Type: text/plain"));
+        assert!(response_str.contains("Connection: close"));
+        assert!(response_str.contains("Connection refused"));
+    }
+
+    #[test]
+    fn test_no_headers_end() {
+        let partial = b"HTTP/1.1 200 OK\r\nContent-Length: 5";
+        assert!(!is_complete_http_response(partial));
+    }
+
+    #[test]
+    fn test_empty_body_with_content_length_zero() {
+        let empty_body = b"HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n\r\n";
+        assert!(is_complete_http_response(empty_body));
+    }
+
+    #[test]
+    fn test_multiple_chunks() {
+        let multi_chunk = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n5\r\nWorld\r\n0\r\n\r\n";
+        assert!(is_complete_http_response(multi_chunk));
+    }
 }

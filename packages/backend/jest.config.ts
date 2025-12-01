@@ -18,4 +18,9 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: 'test-output/jest/coverage',
+  setupFiles: ['<rootDir>/jest.setup.ts'],
+  moduleNameMapper: {
+    '^../app-config$': '<rootDir>/src/__mocks__/app-config.ts',
+    '^../../app-config$': '<rootDir>/src/__mocks__/app-config.ts',
+  },
 };

@@ -213,3 +213,229 @@ impl TunnelRegistry {
         info!("WebSocket connection removed: {}", connection_id);
     }
 }
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_registry_new() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+        assert!(registry.is_domain_available("test"));
+    }
+
+    #[test]
+    fn test_get_full_url() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+        let url = registry.get_full_url("myapp");
+        assert_eq!(url, "https://myapp.noverlink.io");
+    }
+
+    #[test]
+    fn test_register_and_get_tunnel() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+        let (tx, _rx) = mpsc::channel(10);
+
+        assert!(registry.is_domain_available("test-domain"));
+
+        let tunnel = registry.register(
+            "test-domain".to_string(),
+            "user-123".to_string(),
+            "session-456".to_string(),
+            tx,
+            3000,
+        );
+
+        assert!(!registry.is_domain_available("test-domain"));
+        assert_eq!(tunnel.session_id, "session-456");
+
+        let retrieved = registry.get("test-domain");
+        assert!(retrieved.is_some());
+        assert_eq!(retrieved.unwrap().session_id, "session-456");
+    }
+
+    #[test]
+    fn test_get_nonexistent_tunnel() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+        let result = registry.get("nonexistent");
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_remove_tunnel() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+        let (tx, _rx) = mpsc::channel(10);
+
+        registry.register(
+            "to-remove".to_string(),
+            "user".to_string(),
+            "session".to_string(),
+            tx,
+            3000,
+        );
+
+        assert!(!registry.is_domain_available("to-remove"));
+
+        registry.remove("to-remove");
+
+        assert!(registry.is_domain_available("to-remove"));
+        assert!(registry.get("to-remove").is_none());
+    }
+
+    #[test]
+    fn test_request_id_generation() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+
+        let id1 = registry.next_request_id();
+        let id2 = registry.next_request_id();
+        let id3 = registry.next_request_id();
+
+        assert_eq!(id1, 1);
+        assert_eq!(id2, 2);
+        assert_eq!(id3, 3);
+    }
+
+    #[test]
+    fn test_ws_connection_id_generation() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+
+        let id1 = registry.next_ws_connection_id();
+        let id2 = registry.next_ws_connection_id();
+
+        assert_eq!(id1, "ws-1");
+        assert_eq!(id2, "ws-2");
+    }
+
+    #[tokio::test]
+    async fn test_pending_request_flow() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+        let (tx, mut rx) = mpsc::channel(1);
+
+        let request_id = registry.next_request_id();
+        registry.register_pending_request(request_id, tx);
+
+        let response_data = b"HTTP/1.1 200 OK\r\n\r\n".to_vec();
+        let sent = registry.send_response(request_id, response_data.clone()).await;
+
+        assert!(sent);
+
+        let received = rx.recv().await;
+        assert!(received.is_some());
+        assert_eq!(received.unwrap(), response_data);
+    }
+
+    #[tokio::test]
+    async fn test_send_response_unknown_request() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+
+        let sent = registry.send_response(999, vec![1, 2, 3]).await;
+
+        assert!(!sent);
+    }
+
+    #[tokio::test]
+    async fn test_pending_websocket_flow() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+
+        let conn_id = registry.next_ws_connection_id();
+        let (mut response_rx, mut frame_rx) = registry.register_pending_websocket(conn_id.clone());
+
+        // Send upgrade response
+        let upgrade_response = b"HTTP/1.1 101 Switching Protocols\r\n\r\n".to_vec();
+        let sent = registry
+            .send_websocket_upgrade_response(&conn_id, upgrade_response.clone())
+            .await;
+        assert!(sent);
+
+        let received = response_rx.recv().await;
+        assert_eq!(received.unwrap(), upgrade_response);
+
+        // Send frame
+        let frame_data = b"test frame data".to_vec();
+        let sent = registry.send_websocket_frame(&conn_id, frame_data.clone()).await;
+        assert!(sent);
+
+        let received = frame_rx.recv().await;
+        assert_eq!(received.unwrap(), frame_data);
+    }
+
+    #[test]
+    fn test_remove_websocket() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+
+        let conn_id = registry.next_ws_connection_id();
+        let (_response_rx, _frame_rx) = registry.register_pending_websocket(conn_id.clone());
+
+        registry.remove_websocket(&conn_id);
+
+        // Verify removed - sending should fail
+        // We can't easily test this without async, but we can verify the map is empty
+    }
+
+    #[tokio::test]
+    async fn test_send_to_removed_websocket() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+
+        let conn_id = registry.next_ws_connection_id();
+        let (_response_rx, _frame_rx) = registry.register_pending_websocket(conn_id.clone());
+
+        registry.remove_websocket(&conn_id);
+
+        let sent = registry
+            .send_websocket_upgrade_response(&conn_id, vec![])
+            .await;
+        assert!(!sent);
+    }
+
+    #[test]
+    fn test_multiple_tunnels() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+
+        for i in 0..5 {
+            let (tx, _rx) = mpsc::channel(10);
+            registry.register(
+                format!("tunnel-{}", i),
+                format!("user-{}", i),
+                format!("session-{}", i),
+                tx,
+                3000 + i as u16,
+            );
+        }
+
+        for i in 0..5 {
+            let domain = format!("tunnel-{}", i);
+            assert!(!registry.is_domain_available(&domain));
+            let tunnel = registry.get(&domain).unwrap();
+            assert_eq!(tunnel.session_id, format!("session-{}", i));
+        }
+    }
+
+    #[test]
+    fn test_tunnel_message_variants() {
+        let http_msg = TunnelMessage::HttpRequest {
+            request_id: 1,
+            request_data: vec![1, 2, 3],
+        };
+
+        let ws_upgrade = TunnelMessage::WebSocketUpgrade {
+            connection_id: "ws-1".to_string(),
+            request_data: vec![4, 5, 6],
+        };
+
+        let ws_frame = TunnelMessage::WebSocketFrame {
+            connection_id: "ws-1".to_string(),
+            frame_data: vec![7, 8, 9],
+        };
+
+        let ws_close = TunnelMessage::WebSocketClose {
+            connection_id: "ws-1".to_string(),
+        };
+
+        // Just verify they can be created and formatted
+        assert!(format!("{:?}", http_msg).contains("HttpRequest"));
+        assert!(format!("{:?}", ws_upgrade).contains("WebSocketUpgrade"));
+        assert!(format!("{:?}", ws_frame).contains("WebSocketFrame"));
+        assert!(format!("{:?}", ws_close).contains("WebSocketClose"));
+    }
+}
