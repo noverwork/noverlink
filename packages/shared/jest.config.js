@@ -1,16 +1,16 @@
- 
-import { readFileSync } from 'fs';
+const { readFileSync } = require('fs');
+const path = require('path');
 
 // Reading the SWC compilation config for the spec files
 const swcJestConfig = JSON.parse(
-  readFileSync(`${__dirname}/.spec.swcrc`, 'utf-8')
+  readFileSync(path.join(__dirname, '.spec.swcrc'), 'utf-8')
 );
 
 // Disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves
 swcJestConfig.swcrc = false;
 
-export default {
-  displayName: '@noverlink/interfaces',
+module.exports = {
+  displayName: 'shared',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
