@@ -21,16 +21,17 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 
 # Copy package files and configs
-COPY package.json package-lock.json tsconfig.base.json nx.json ./
+COPY package.json package-lock.json tsconfig.base.json tsconfig.json nx.json jest.preset.js eslint.config.mjs ./
 
 # Copy source files needed for build
 COPY packages/frontend ./packages/frontend
 COPY packages/ui-shared ./packages/ui-shared
 COPY packages/shared ./packages/shared
 COPY packages/interfaces ./packages/interfaces
+COPY packages/backend-shared ./packages/backend-shared
 
-# Build dependencies first (ui-shared, interfaces, shared)
-RUN npx nx run-many --target=build --projects=@noverlink/ui-shared,@noverlink/interfaces,shared
+# Sync NX workspace and build dependencies
+RUN npx nx sync --yes && npx nx run-many --target=build --projects=@noverlink/ui-shared,@noverlink/interfaces,shared
 
 # Build frontend
 ENV NEXT_TELEMETRY_DISABLED=1

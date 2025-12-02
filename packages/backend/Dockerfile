@@ -13,17 +13,17 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # Copy source files needed for build
-COPY tsconfig.base.json nx.json ./
+COPY tsconfig.base.json tsconfig.json nx.json jest.preset.js eslint.config.mjs ./
 COPY packages/backend ./packages/backend
 COPY packages/backend-shared ./packages/backend-shared
 COPY packages/shared ./packages/shared
 COPY packages/interfaces ./packages/interfaces
 
-# Build dependencies first
-RUN npx nx run-many --target=build --projects=@noverlink/interfaces,shared
+# Sync NX workspace and build dependencies
+RUN npx nx sync --yes && npx nx run-many --target=build --projects=@noverlink/interfaces,shared
 
 # Build backend
-RUN npm run backend:build
+RUN NX_DAEMON=false npm run backend:build
 
 # Stage 2: Runtime
 FROM node:22.14-slim AS runner

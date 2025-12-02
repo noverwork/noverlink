@@ -27,7 +27,7 @@ COPY package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
 
 COPY --from=builder /app/dist/apps/migrator ./dist/migrator
-COPY apps/migrator/docker-entrypoint.sh ./
+COPY packages/migrator/docker-entrypoint.sh ./
 RUN chmod +x ./docker-entrypoint.sh
 
 

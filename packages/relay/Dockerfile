@@ -19,6 +19,9 @@ COPY Cargo.toml Cargo.lock ./
 # Copy shared library
 COPY packages/rs-shared ./packages/rs-shared
 
+# Copy CLI (needed by Cargo workspace)
+COPY packages/cli ./packages/cli
+
 # Copy relay source
 COPY packages/relay ./packages/relay
 
