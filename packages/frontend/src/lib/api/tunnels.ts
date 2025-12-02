@@ -68,9 +68,8 @@ export const tunnelsApi = {
     if (params.limit) searchParams.set('limit', String(params.limit));
 
     const query = searchParams.toString();
-    return apiClient.get<ListSessionsResponse>(
-      `/tunnels/sessions${query ? `?${query}` : ''}`
-    );
+    const queryString = query ? `?${query}` : '';
+    return apiClient.get<ListSessionsResponse>(`/tunnels/sessions${queryString}`);
   },
 
   getSession(sessionId: string): Promise<TunnelSession> {
@@ -87,9 +86,8 @@ export const tunnelsApi = {
     if (params.method) searchParams.set('method', params.method);
 
     const query = searchParams.toString();
-    return apiClient.get<ListLogsResponse>(
-      `/tunnels/sessions/${sessionId}/logs${query ? `?${query}` : ''}`
-    );
+    const queryString = query ? `?${query}` : '';
+    return apiClient.get<ListLogsResponse>(`/tunnels/sessions/${sessionId}/logs${queryString}`);
   },
 
   getStats(): Promise<TunnelStats> {

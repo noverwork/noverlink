@@ -399,7 +399,7 @@ mod tests {
                 format!("user-{}", i),
                 format!("session-{}", i),
                 tx,
-                3000 + i as u16,
+                3000 + u16::try_from(i).unwrap(),
             );
         }
 

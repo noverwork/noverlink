@@ -128,10 +128,10 @@ describe('RelayService', () => {
       });
 
       expect(persistedSession).toBeTruthy();
-      expect(persistedSession!.localPort).toBe(8080);
-      expect(persistedSession!.relayId).toBe('relay-1');
-      expect(persistedSession!.clientIp).toBe('10.0.0.1');
-      expect(persistedSession!.clientVersion).toBe('2.0.0');
+      expect(persistedSession?.localPort).toBe(8080);
+      expect(persistedSession?.relayId).toBe('relay-1');
+      expect(persistedSession?.clientIp).toBe('10.0.0.1');
+      expect(persistedSession?.clientVersion).toBe('2.0.0');
     });
   });
 
@@ -304,8 +304,8 @@ describe('RelayService', () => {
       });
 
       expect(persistedRequest).toBeTruthy();
-      expect(persistedRequest!.requestBody?.toString()).toBe('request body data');
-      expect(persistedRequest!.responseBody?.toString()).toBe('response body data');
+      expect(persistedRequest?.requestBody?.toString()).toBe('request body data');
+      expect(persistedRequest?.responseBody?.toString()).toBe('response body data');
     });
 
     it('should handle requests without optional fields', async () => {
@@ -332,9 +332,9 @@ describe('RelayService', () => {
       });
 
       expect(persistedRequest).toBeTruthy();
-      expect(persistedRequest!.requestBody).toBeUndefined();
-      expect(persistedRequest!.responseBody).toBeUndefined();
-      expect(persistedRequest!.queryString).toBeUndefined();
+      expect(persistedRequest?.requestBody).toBeUndefined();
+      expect(persistedRequest?.responseBody).toBeUndefined();
+      expect(persistedRequest?.queryString).toBeUndefined();
     });
 
     it('should mark body as truncated when original size exceeds limit', async () => {
@@ -362,8 +362,8 @@ describe('RelayService', () => {
         ],
       });
 
-      expect(persistedRequest!.bodyTruncated).toBe(true);
-      expect(persistedRequest!.originalRequestSize).toBe(100000);
+      expect(persistedRequest?.bodyTruncated).toBe(true);
+      expect(persistedRequest?.originalRequestSize).toBe(100000);
     });
 
     it('should convert timestamp to Date object', async () => {
@@ -389,7 +389,7 @@ describe('RelayService', () => {
         ],
       });
 
-      expect(persistedRequest!.timestamp).toEqual(new Date(1704067200 * 1000));
+      expect(persistedRequest?.timestamp).toEqual(new Date(1704067200 * 1000));
     });
 
     it('should handle invalid JSON in headers gracefully', async () => {
@@ -415,7 +415,7 @@ describe('RelayService', () => {
         ],
       });
 
-      expect(persistedRequest!.requestHeaders).toEqual({});
+      expect(persistedRequest?.requestHeaders).toEqual({});
     });
   });
 });

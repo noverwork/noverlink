@@ -246,7 +246,7 @@ describe('AuthService', () => {
     });
 
     it('should link OAuth to existing email user', async () => {
-      em.findOne.mockImplementation(async (entity, query) => {
+      em.findOne.mockImplementation(async (entity, _query) => {
         if (entity === OAuthConnection) return null;
         if (entity === User) return mockUser;
         return null;

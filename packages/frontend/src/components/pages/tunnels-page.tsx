@@ -34,30 +34,16 @@ export function TunnelsPage() {
   const tunnels = data?.sessions ?? [];
   const hasTunnels = tunnels.length > 0;
 
-  return (
-    <DashboardLayout>
-      {/* Page Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-semibold text-white tracking-tight">
-            Active Tunnels
-          </h2>
-          <p className="text-slate-400 mt-1">
-            Live connections from your CLI sessions
-          </p>
-        </div>
-        {hasTunnels && (
-          <PulseBadge variant="connected" appearance="pill">
-            {tunnels.length} Connected
-          </PulseBadge>
-        )}
-      </div>
-
-      {isLoading ? (
+  const renderTunnelsContent = () => {
+    if (isLoading) {
+      return (
         <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
           <div className="text-center text-slate-400">Loading tunnels...</div>
         </div>
-      ) : hasTunnels ? (
+      );
+    }
+    if (hasTunnels) {
+      return (
         <div className="space-y-6">
           {/* Tunnel List */}
           <div className="space-y-3">
@@ -133,70 +119,94 @@ export function TunnelsPage() {
             </div>
           </div>
         </div>
-      ) : (
-        /* No active tunnels */
-        <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
-          <div className="text-center max-w-lg mx-auto">
-            {/* Visual */}
-            <div className="mb-8 opacity-50">
-              <TunnelConnection
-                localLabel="localhost"
-                localSublabel=":3000"
-                publicLabel="your-tunnel"
-                publicSublabel=".noverlink.com"
-                status="disconnected"
-                animated={false}
-              />
-            </div>
-
-            <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-              <TerminalIcon className="w-6 h-6 text-slate-500" />
-            </div>
-            <h3 className="text-lg font-medium text-white mb-2">
-              No active tunnels
-            </h3>
-            <p className="text-slate-400 mb-6 text-sm">
-              Start a tunnel from your terminal to see it here
-            </p>
-
-            {/* CLI Instructions */}
-            <div className="bg-slate-950 rounded-lg p-4 text-left mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-slate-500">Terminal</span>
-                <CopyButton text="noverlink http 3000" />
-              </div>
-              <code className="text-sm text-teal-400 font-mono">
-                $ noverlink http 3000
-              </code>
-            </div>
-
-            <p className="text-xs text-slate-500 mb-4">
-              Don&apos;t have the CLI installed?
-            </p>
-
-            {/* Install instructions */}
-            <div className="bg-slate-950 rounded-lg p-4 text-left mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-slate-500">Install CLI</span>
-                <CopyButton text="cargo install noverlink" />
-              </div>
-              <code className="text-sm text-slate-300 font-mono">
-                $ cargo install noverlink
-              </code>
-            </div>
-
-            <a
-              href="https://github.com/noverwork/noverlink"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <GlowButton variant="ghost" size="sm">
-                Documentation
-              </GlowButton>
-            </a>
+      );
+    }
+    // No active tunnels
+    return (
+      <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
+        <div className="text-center max-w-lg mx-auto">
+          {/* Visual */}
+          <div className="mb-8 opacity-50">
+            <TunnelConnection
+              localLabel="localhost"
+              localSublabel=":3000"
+              publicLabel="your-tunnel"
+              publicSublabel=".noverlink.com"
+              status="disconnected"
+              animated={false}
+            />
           </div>
+
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
+            <TerminalIcon className="w-6 h-6 text-slate-500" />
+          </div>
+          <h3 className="text-lg font-medium text-white mb-2">
+            No active tunnels
+          </h3>
+          <p className="text-slate-400 mb-6 text-sm">
+            Start a tunnel from your terminal to see it here
+          </p>
+
+          {/* CLI Instructions */}
+          <div className="bg-slate-950 rounded-lg p-4 text-left mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-slate-500">Terminal</span>
+              <CopyButton text="noverlink http 3000" />
+            </div>
+            <code className="text-sm text-teal-400 font-mono">
+              $ noverlink http 3000
+            </code>
+          </div>
+
+          <p className="text-xs text-slate-500 mb-4">
+            Don&apos;t have the CLI installed?
+          </p>
+
+          {/* Install instructions */}
+          <div className="bg-slate-950 rounded-lg p-4 text-left mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-slate-500">Install CLI</span>
+              <CopyButton text="cargo install noverlink" />
+            </div>
+            <code className="text-sm text-slate-300 font-mono">
+              $ cargo install noverlink
+            </code>
+          </div>
+
+          <a
+            href="https://github.com/noverwork/noverlink"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <GlowButton variant="ghost" size="sm">
+              Documentation
+            </GlowButton>
+          </a>
         </div>
-      )}
+      </div>
+    );
+  };
+
+  return (
+    <DashboardLayout>
+      {/* Page Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-semibold text-white tracking-tight">
+            Active Tunnels
+          </h2>
+          <p className="text-slate-400 mt-1">
+            Live connections from your CLI sessions
+          </p>
+        </div>
+        {hasTunnels && (
+          <PulseBadge variant="connected" appearance="pill">
+            {tunnels.length} Connected
+          </PulseBadge>
+        )}
+      </div>
+
+      {renderTunnelsContent()}
     </DashboardLayout>
   );
 }

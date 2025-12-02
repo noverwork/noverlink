@@ -49,6 +49,61 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
 
   const logs = logsData?.logs ?? [];
 
+  const renderLogEntries = () => {
+    if (logsLoading) {
+      return <div className="py-8 text-center text-slate-400">Loading logs...</div>;
+    }
+    if (logs.length === 0) {
+      return <div className="py-8 text-center text-slate-400">No requests yet</div>;
+    }
+    return (
+      <div className="divide-y divide-slate-800/50">
+        {logs.map((log) => (
+          <div
+            key={log.id}
+            className="grid grid-cols-12 gap-4 px-3 py-3 text-sm hover:bg-slate-800/30 transition-colors"
+          >
+            <div className="col-span-1">
+              <span
+                className={cn(
+                  'text-xs font-mono px-2 py-0.5 rounded',
+                  log.method === 'GET' && 'bg-teal-500/20 text-teal-400',
+                  log.method === 'POST' && 'bg-blue-500/20 text-blue-400',
+                  log.method === 'PUT' && 'bg-amber-500/20 text-amber-400',
+                  log.method === 'DELETE' && 'bg-rose-500/20 text-rose-400'
+                )}
+              >
+                {log.method}
+              </span>
+            </div>
+            <div className="col-span-5 font-mono text-slate-300 truncate">
+              {log.path}
+            </div>
+            <div className="col-span-2">
+              <span
+                className={cn(
+                  'font-mono text-xs',
+                  (log.status ?? 0) < 300 && 'text-teal-400',
+                  (log.status ?? 0) >= 300 && (log.status ?? 0) < 400 && 'text-amber-400',
+                  (log.status ?? 0) >= 400 && (log.status ?? 0) < 500 && 'text-orange-400',
+                  (log.status ?? 0) >= 500 && 'text-rose-400'
+                )}
+              >
+                {log.status ?? '-'}
+              </span>
+            </div>
+            <div className="col-span-2 font-mono text-slate-400">
+              {log.durationMs ? `${log.durationMs}ms` : '-'}
+            </div>
+            <div className="col-span-2 text-right font-mono text-slate-500">
+              {formatTime(log.timestamp)}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   if (tunnelLoading) {
     return (
       <DashboardLayout>
@@ -175,56 +230,7 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
         </div>
 
         {/* Log entries */}
-        {logsLoading ? (
-          <div className="py-8 text-center text-slate-400">Loading logs...</div>
-        ) : logs.length === 0 ? (
-          <div className="py-8 text-center text-slate-400">No requests yet</div>
-        ) : (
-          <div className="divide-y divide-slate-800/50">
-            {logs.map((log) => (
-              <div
-                key={log.id}
-                className="grid grid-cols-12 gap-4 px-3 py-3 text-sm hover:bg-slate-800/30 transition-colors"
-              >
-                <div className="col-span-1">
-                  <span
-                    className={cn(
-                      'text-xs font-mono px-2 py-0.5 rounded',
-                      log.method === 'GET' && 'bg-teal-500/20 text-teal-400',
-                      log.method === 'POST' && 'bg-blue-500/20 text-blue-400',
-                      log.method === 'PUT' && 'bg-amber-500/20 text-amber-400',
-                      log.method === 'DELETE' && 'bg-rose-500/20 text-rose-400'
-                    )}
-                  >
-                    {log.method}
-                  </span>
-                </div>
-                <div className="col-span-5 font-mono text-slate-300 truncate">
-                  {log.path}
-                </div>
-                <div className="col-span-2">
-                  <span
-                    className={cn(
-                      'font-mono text-xs',
-                      (log.status ?? 0) < 300 && 'text-teal-400',
-                      (log.status ?? 0) >= 300 && (log.status ?? 0) < 400 && 'text-amber-400',
-                      (log.status ?? 0) >= 400 && (log.status ?? 0) < 500 && 'text-orange-400',
-                      (log.status ?? 0) >= 500 && 'text-rose-400'
-                    )}
-                  >
-                    {log.status ?? '-'}
-                  </span>
-                </div>
-                <div className="col-span-2 font-mono text-slate-400">
-                  {log.durationMs ? `${log.durationMs}ms` : '-'}
-                </div>
-                <div className="col-span-2 text-right font-mono text-slate-500">
-                  {formatTime(log.timestamp)}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {renderLogEntries()}
 
         {/* Load more */}
         {logsData?.hasMore && (

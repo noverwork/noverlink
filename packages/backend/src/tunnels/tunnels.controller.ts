@@ -1,3 +1,4 @@
+import type { Loaded } from '@mikro-orm/core';
 import {
   Body,
   Controller,
@@ -36,7 +37,7 @@ export class TunnelsController {
    */
   @Get('sessions')
   async listSessions(
-    @CurrentUser() user: User,
+    @CurrentUser() user: Loaded<User, never>,
     @Query() query: ListSessionsQueryDto
   ) {
     const { sessions, nextCursor } = await this.tunnelsService.listSessions(
@@ -49,8 +50,8 @@ export class TunnelsController {
     return {
       sessions: sessions.map((s) => ({
         id: s.id,
-        subdomain: s.domain.getEntity().hostname,
-        publicUrl: `https://${s.domain.getEntity().hostname}.noverlink.dev`,
+        subdomain: s.domain.$.hostname,
+        publicUrl: `https://${s.domain.$.hostname}.noverlink.dev`,
         localPort: s.localPort,
         status: s.status,
         connectedAt: s.connectedAt.toISOString(),
@@ -68,15 +69,15 @@ export class TunnelsController {
    * Get a single session by ID
    */
   @Get('sessions/:id')
-  async getSession(@CurrentUser() user: User, @Param('id') sessionId: string) {
+  async getSession(@CurrentUser() user: Loaded<User, never>, @Param('id') sessionId: string) {
     const s = await this.tunnelsService.getSession(user.id, sessionId);
     const requestCount =
       await this.tunnelsService.getSessionRequestCount(sessionId);
 
     return {
       id: s.id,
-      subdomain: s.domain.getEntity().hostname,
-      publicUrl: `https://${s.domain.getEntity().hostname}.noverlink.dev`,
+      subdomain: s.domain.$.hostname,
+      publicUrl: `https://${s.domain.$.hostname}.noverlink.dev`,
       localPort: s.localPort,
       status: s.status,
       connectedAt: s.connectedAt.toISOString(),
@@ -94,7 +95,7 @@ export class TunnelsController {
    */
   @Get('sessions/:id/logs')
   async getSessionLogs(
-    @CurrentUser() user: User,
+    @CurrentUser() user: Loaded<User, never>,
     @Param('id') sessionId: string,
     @Query() query: ListLogsQueryDto
   ) {
@@ -125,7 +126,7 @@ export class TunnelsController {
    * Get aggregate stats for the current user
    */
   @Get('stats')
-  async getStats(@CurrentUser() user: User) {
+  async getStats(@CurrentUser() user: Loaded<User, never>) {
     return this.tunnelsService.getStats(user.id);
   }
 

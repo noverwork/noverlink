@@ -207,7 +207,7 @@ mod tests {
         let error = anyhow::anyhow!("Connection refused");
         let response = create_502_response(&error);
 
-        let response_str = String::from_utf8(response).expect("Should be valid UTF-8");
+        let response_str = String::from_utf8(response).unwrap_or_else(|_| String::from("Invalid UTF-8"));
 
         assert!(response_str.starts_with("HTTP/1.1 502 Bad Gateway"));
         assert!(response_str.contains("Content-Type: text/plain"));

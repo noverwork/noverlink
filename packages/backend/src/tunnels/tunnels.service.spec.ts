@@ -123,7 +123,7 @@ describe('TunnelsService', () => {
 
     it('should reject subdomain reserved by another user', async () => {
       const anotherUser = { id: 'another-user', isReserved: true };
-      em.findOne.mockImplementation(async (entity, query) => {
+      em.findOne.mockImplementation(async (entity, _query) => {
         if (entity === Domain) {
           return { hostname: 'reserved-subdomain', user: anotherUser, isReserved: true };
         }
@@ -136,7 +136,7 @@ describe('TunnelsService', () => {
     });
 
     it('should reject subdomain currently in use', async () => {
-      em.findOne.mockImplementation(async (entity, query) => {
+      em.findOne.mockImplementation(async (entity, _query) => {
         if (entity === Domain) {
           return null;
         }
@@ -169,7 +169,7 @@ describe('TunnelsService', () => {
   describe('subdomain generation', () => {
     it('should generate unique subdomains on collision', async () => {
       let callCount = 0;
-      em.findOne.mockImplementation(async (entity, query) => {
+      em.findOne.mockImplementation(async (entity, _query) => {
         if (entity === Domain && callCount < 2) {
           callCount++;
           return { isReserved: true }; // First two attempts collide
@@ -186,7 +186,7 @@ describe('TunnelsService', () => {
     });
 
     it('should fall back to timestamp-based subdomain after max attempts', async () => {
-      em.findOne.mockImplementation(async (entity, query) => {
+      em.findOne.mockImplementation(async (entity, _query) => {
         if (entity === Domain) {
           // Return a reserved domain owned by another user to trigger collision
           return {

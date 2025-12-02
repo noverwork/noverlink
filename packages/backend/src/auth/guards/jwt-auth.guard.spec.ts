@@ -21,7 +21,7 @@ describe('JwtAuthGuard', () => {
 
   const createMockContext = () => {
     return {
-      getHandler: jest.fn().mockReturnValue(() => {}),
+      getHandler: jest.fn().mockReturnValue(function noop() { /* handler */ }),
       getClass: jest.fn().mockReturnValue(class {}),
       switchToHttp: jest.fn().mockReturnValue({
         getRequest: jest.fn().mockReturnValue({ headers: {} }),

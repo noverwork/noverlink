@@ -213,8 +213,8 @@ export class TunnelsService {
   }
 
   private generateRandomSubdomain(): string {
-    const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
-    const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+    const adj = ADJECTIVES[crypto.randomInt(ADJECTIVES.length)];
+    const noun = NOUNS[crypto.randomInt(NOUNS.length)];
     return `${adj}-${noun}`;
   }
 
