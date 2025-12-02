@@ -72,7 +72,6 @@ jobs:
   build-backend:
     name: Build Backend
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,7 +93,6 @@ jobs:
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -116,7 +114,6 @@ jobs:
   build-migrator:
     name: Build Migrator
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -138,7 +135,6 @@ jobs:
   build-relay:
     name: Build Relay
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
