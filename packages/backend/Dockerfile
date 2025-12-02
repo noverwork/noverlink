@@ -6,14 +6,22 @@ FROM node:22.14-slim AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy root package files
 COPY package.json package-lock.json ./
 
-# Install all dependencies (including dev)
+# Copy workspace package.json files BEFORE npm ci so workspaces are set up
+COPY packages/backend/package.json ./packages/backend/package.json
+COPY packages/backend-shared/package.json ./packages/backend-shared/package.json
+COPY packages/shared/package.json ./packages/shared/package.json
+COPY packages/interfaces/package.json ./packages/interfaces/package.json
+
+# Install all dependencies (including dev) - this sets up workspace symlinks
 RUN npm ci
 
-# Copy source files needed for build
+# Copy config files
 COPY tsconfig.base.json tsconfig.json nx.json jest.preset.js eslint.config.mjs ./
+
+# Copy source files
 COPY packages/backend ./packages/backend
 COPY packages/backend-shared ./packages/backend-shared
 COPY packages/shared ./packages/shared
@@ -37,10 +45,10 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
 
 # Copy built application
-COPY --from=builder /app/dist/apps/backend ./dist/backend
+COPY --from=builder /app/packages/backend/dist ./dist/backend
 
 # Create non-root user
-RUN useradd -m -u 1000 backend && chown -R backend:backend /app
+RUN useradd -m backend && chown -R backend:backend /app
 USER backend
 
 # Expose port
