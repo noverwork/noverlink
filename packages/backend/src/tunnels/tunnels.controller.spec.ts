@@ -26,7 +26,7 @@ describe('TunnelsController', () => {
   };
 
   const mockDomain = {
-    $: { hostname: 'test-subdomain' },
+    getEntity: () => ({ hostname: 'test-subdomain' }),
   };
 
   const mockSession = {

@@ -50,8 +50,10 @@ export class TunnelsController {
     return {
       sessions: sessions.map((s) => ({
         id: s.id,
-        subdomain: s.domain.$.hostname,
-        publicUrl: `https://${s.domain.$.hostname}.noverlink.dev`,
+        // eslint-disable-next-line mikro-orm/no-get-entity
+        subdomain: s.domain.getEntity().hostname,
+        // eslint-disable-next-line mikro-orm/no-get-entity
+        publicUrl: `https://${s.domain.getEntity().hostname}.noverlink.dev`,
         localPort: s.localPort,
         status: s.status,
         connectedAt: s.connectedAt.toISOString(),
@@ -76,8 +78,10 @@ export class TunnelsController {
 
     return {
       id: s.id,
-      subdomain: s.domain.$.hostname,
-      publicUrl: `https://${s.domain.$.hostname}.noverlink.dev`,
+      // eslint-disable-next-line mikro-orm/no-get-entity
+      subdomain: s.domain.getEntity().hostname,
+      // eslint-disable-next-line mikro-orm/no-get-entity
+      publicUrl: `https://${s.domain.getEntity().hostname}.noverlink.dev`,
       localPort: s.localPort,
       status: s.status,
       connectedAt: s.connectedAt.toISOString(),
