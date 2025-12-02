@@ -4,6 +4,7 @@ import { PgBaseEntity } from '../base-entities';
 import { TunnelSession } from './tunnel-session.entity';
 
 @Entity()
+@Index({ properties: ['session', 'timestamp'] })
 export class HttpRequest extends PgBaseEntity {
   @ManyToOne(() => TunnelSession, { ref: true })
   @Index()

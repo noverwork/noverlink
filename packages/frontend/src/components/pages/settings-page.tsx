@@ -1,33 +1,10 @@
 'use client';
 
 import { GlowButton, PulseBadge } from '@noverlink/ui-shared';
-import { useState } from 'react';
 
 import { DashboardLayout } from '../dashboard-layout';
 
-// Mock data
-const mockApiKeys = [
-  {
-    id: 'key_1',
-    name: 'Development',
-    prefix: 'nv_dev_',
-    lastUsed: '2 hours ago',
-    createdAt: '2024-01-10',
-  },
-  {
-    id: 'key_2',
-    name: 'Production',
-    prefix: 'nv_prod_',
-    lastUsed: 'Never',
-    createdAt: '2024-01-15',
-  },
-];
-
 export function SettingsPage() {
-  const [apiKeys] = useState(mockApiKeys);
-  const [showNewKey, setShowNewKey] = useState(false);
-  const [newKeyValue] = useState('nv_dev_sk_abc123xyz789...');
-
   return (
     <DashboardLayout>
       {/* Page Header */}
@@ -36,84 +13,8 @@ export function SettingsPage() {
           Settings
         </h2>
         <p className="text-slate-400 mt-1">
-          Manage your API keys and account settings
+          Manage your account settings
         </p>
-      </div>
-
-      {/* API Keys Section */}
-      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-medium text-white">API Keys</h3>
-            <p className="text-sm text-slate-400 mt-1">
-              Use these keys to authenticate the CLI
-            </p>
-          </div>
-          <GlowButton size="sm" onClick={() => setShowNewKey(true)}>
-            <PlusIcon className="w-4 h-4 mr-2" />
-            Create Key
-          </GlowButton>
-        </div>
-
-        {/* New key display */}
-        {showNewKey && (
-          <div className="mb-6 p-4 rounded-lg bg-teal-500/10 border border-teal-500/30">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center flex-shrink-0">
-                <KeyIcon className="w-4 h-4 text-teal-400" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-teal-300 mb-1">
-                  New API Key Created
-                </div>
-                <p className="text-xs text-teal-400/70 mb-3">
-                  Copy this key now. You won&apos;t be able to see it again.
-                </p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 px-3 py-2 rounded bg-slate-950 font-mono text-sm text-white">
-                    {newKeyValue}
-                  </code>
-                  <CopyButton text={newKeyValue} />
-                </div>
-              </div>
-              <button
-                onClick={() => setShowNewKey(false)}
-                className="text-slate-400 hover:text-white"
-              >
-                <XIcon className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Key list */}
-        <div className="space-y-3">
-          {apiKeys.map((key) => (
-            <div
-              key={key.id}
-              className="flex items-center justify-between p-4 rounded-lg bg-slate-800/30 border border-slate-800"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center">
-                  <KeyIcon className="w-5 h-5 text-slate-400" />
-                </div>
-                <div>
-                  <div className="font-medium text-white">{key.name}</div>
-                  <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
-                    <span className="font-mono">{key.prefix}••••••••</span>
-                    <span>•</span>
-                    <span>Last used: {key.lastUsed}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <GlowButton variant="ghost" size="sm">
-                  <TrashIcon className="w-4 h-4 text-slate-400" />
-                </GlowButton>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* CLI Setup */}
@@ -133,7 +34,7 @@ export function SettingsPage() {
 
           <div>
             <div className="text-sm text-slate-400 mb-2">
-              2. Configure your API key
+              2. Login to your account
             </div>
             <div className="flex items-center gap-2">
               <code className="flex-1 px-4 py-3 rounded-lg bg-slate-950 font-mono text-sm text-slate-300">
@@ -224,38 +125,6 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function PlusIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-    </svg>
-  );
-}
-
-function KeyIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
-      />
-    </svg>
-  );
-}
-
 function CopyIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -292,20 +161,3 @@ function TrashIcon({ className }: { className?: string }) {
   );
 }
 
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M6 18L18 6M6 6l12 12"
-      />
-    </svg>
-  );
-}

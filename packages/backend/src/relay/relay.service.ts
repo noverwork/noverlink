@@ -14,6 +14,7 @@ import {
   CreateSessionDto,
   CreateSessionResponse,
   HttpRequestBatchDto,
+  UpdateStatsDto,
 } from './dto';
 
 @Injectable()
@@ -57,6 +58,23 @@ export class RelayService {
     );
 
     return { session_id: session.id };
+  }
+
+  async updateStats(sessionId: string, dto: UpdateStatsDto): Promise<void> {
+    const session = await this.em.findOne(TunnelSession, { id: sessionId });
+
+    if (!session) {
+      throw new NotFoundException(`Session ${sessionId} not found`);
+    }
+
+    session.bytesIn = BigInt(dto.bytes_in);
+    session.bytesOut = BigInt(dto.bytes_out);
+
+    await this.em.flush();
+
+    this.logger.debug(
+      `Stats updated for session ${sessionId}: in=${dto.bytes_in}, out=${dto.bytes_out}`
+    );
   }
 
   async closeSession(sessionId: string, dto: CloseSessionDto): Promise<void> {

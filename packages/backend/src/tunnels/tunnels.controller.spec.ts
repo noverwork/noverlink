@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { User, UserPlan } from '@noverlink/backend-shared';
+import { SessionStatus, User, UserPlan } from '@noverlink/backend-shared';
 import type { Request } from 'express';
 
 import { AuthService } from '../auth/auth.service';
@@ -25,9 +25,31 @@ describe('TunnelsController', () => {
     expires_in: 60,
   };
 
+  const mockDomain = {
+    getEntity: () => ({ hostname: 'test-subdomain' }),
+  };
+
+  const mockSession = {
+    id: 'session-123',
+    domain: mockDomain,
+    localPort: 3000,
+    status: SessionStatus.ACTIVE,
+    connectedAt: new Date('2024-01-15T10:00:00Z'),
+    disconnectedAt: null,
+    bytesIn: BigInt(1000),
+    bytesOut: BigInt(2000),
+    clientIp: '192.168.1.1',
+    clientVersion: '0.1.0',
+  };
+
   beforeEach(async () => {
     const mockTunnelsService = {
       createTicket: jest.fn(),
+      listSessions: jest.fn(),
+      getSession: jest.fn(),
+      getSessionLogs: jest.fn(),
+      getStats: jest.fn(),
+      getSessionRequestCount: jest.fn(),
     };
 
     const mockAuthService = {
@@ -126,6 +148,150 @@ describe('TunnelsController', () => {
         differentUser,
         undefined
       );
+    });
+  });
+
+  // ─── Session Query Endpoint Tests ─────────────────────────────
+
+  describe('listSessions', () => {
+    it('should return formatted session list', async () => {
+      tunnelsService.listSessions.mockResolvedValue({
+        sessions: [mockSession as never],
+        nextCursor: null,
+      });
+
+      const result = await controller.listSessions(mockUser, {});
+
+      expect(result.sessions).toHaveLength(1);
+      expect(result.sessions[0]).toEqual({
+        id: 'session-123',
+        subdomain: 'test-subdomain',
+        publicUrl: 'https://test-subdomain.noverlink.dev',
+        localPort: 3000,
+        status: SessionStatus.ACTIVE,
+        connectedAt: '2024-01-15T10:00:00.000Z',
+        disconnectedAt: null,
+        bytesIn: '1000',
+        bytesOut: '2000',
+        clientIp: '192.168.1.1',
+      });
+      expect(result.hasMore).toBe(false);
+    });
+
+    it('should pass query parameters to service', async () => {
+      tunnelsService.listSessions.mockResolvedValue({
+        sessions: [],
+        nextCursor: null,
+      });
+
+      await controller.listSessions(mockUser, {
+        status: SessionStatus.ACTIVE,
+        cursor: 'some-cursor',
+        limit: 50,
+      });
+
+      expect(tunnelsService.listSessions).toHaveBeenCalledWith(
+        'user-123',
+        SessionStatus.ACTIVE,
+        'some-cursor',
+        50
+      );
+    });
+  });
+
+  describe('getSession', () => {
+    it('should return formatted session detail', async () => {
+      tunnelsService.getSession.mockResolvedValue(mockSession as never);
+      tunnelsService.getSessionRequestCount.mockResolvedValue(150);
+
+      const result = await controller.getSession(mockUser, 'session-123');
+
+      expect(result).toEqual({
+        id: 'session-123',
+        subdomain: 'test-subdomain',
+        publicUrl: 'https://test-subdomain.noverlink.dev',
+        localPort: 3000,
+        status: SessionStatus.ACTIVE,
+        connectedAt: '2024-01-15T10:00:00.000Z',
+        disconnectedAt: null,
+        bytesIn: '1000',
+        bytesOut: '2000',
+        clientIp: '192.168.1.1',
+        clientVersion: '0.1.0',
+        requestCount: 150,
+      });
+    });
+  });
+
+  describe('getSessionLogs', () => {
+    const mockLogs = [
+      {
+        id: 'log-1',
+        method: 'GET',
+        path: '/api/users',
+        queryString: null,
+        responseStatus: 200,
+        durationMs: 45,
+        timestamp: new Date('2024-01-15T10:00:00Z'),
+      },
+    ];
+
+    it('should return formatted logs', async () => {
+      tunnelsService.getSessionLogs.mockResolvedValue({
+        logs: mockLogs as never[],
+        nextCursor: null,
+      });
+
+      const result = await controller.getSessionLogs(mockUser, 'session-123', {});
+
+      expect(result.logs).toHaveLength(1);
+      expect(result.logs[0]).toEqual({
+        id: 'log-1',
+        method: 'GET',
+        path: '/api/users',
+        queryString: null,
+        status: 200,
+        durationMs: 45,
+        timestamp: '2024-01-15T10:00:00.000Z',
+      });
+      expect(result.hasMore).toBe(false);
+    });
+
+    it('should pass method filter to service', async () => {
+      tunnelsService.getSessionLogs.mockResolvedValue({
+        logs: [],
+        nextCursor: null,
+      });
+
+      await controller.getSessionLogs(mockUser, 'session-123', {
+        method: 'POST',
+        limit: 100,
+      });
+
+      expect(tunnelsService.getSessionLogs).toHaveBeenCalledWith(
+        'user-123',
+        'session-123',
+        undefined,
+        100,
+        'POST'
+      );
+    });
+  });
+
+  describe('getStats', () => {
+    it('should return stats from service', async () => {
+      const mockStats = {
+        activeSessions: 2,
+        totalRequests: 1500,
+        bandwidthMb: 250,
+        tunnelMinutes: 4320,
+      };
+      tunnelsService.getStats.mockResolvedValue(mockStats);
+
+      const result = await controller.getStats(mockUser);
+
+      expect(result).toEqual(mockStats);
+      expect(tunnelsService.getStats).toHaveBeenCalledWith('user-123');
     });
   });
 });

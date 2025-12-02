@@ -26,6 +26,7 @@ export enum TunnelProtocol {
 }
 
 @Entity()
+@Index({ properties: ['user', 'status', 'connectedAt'] })
 export class TunnelSession extends PgBaseEntity {
   @ManyToOne(() => User, { ref: true })
   @Index()

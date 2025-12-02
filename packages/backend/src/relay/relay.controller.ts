@@ -14,6 +14,7 @@ import {
   CreateSessionDto,
   CreateSessionResponse,
   HttpRequestBatchDto,
+  UpdateStatsDto,
 } from './dto';
 import { RelayAuthGuard } from './guards';
 import { RelayService } from './relay.service';
@@ -30,6 +31,14 @@ export class RelayController {
     @Body() dto: CreateSessionDto
   ): Promise<CreateSessionResponse> {
     return this.relayService.createSession(relayId, dto);
+  }
+
+  @Patch('sessions/:id/stats')
+  async updateStats(
+    @Param('id') sessionId: string,
+    @Body() dto: UpdateStatsDto
+  ): Promise<void> {
+    return this.relayService.updateStats(sessionId, dto);
   }
 
   @Patch('sessions/:id/close')

@@ -7,37 +7,31 @@ import {
 } from '@noverlink/ui-shared';
 import Link from 'next/link';
 
+import { useSessions } from '../../lib/hooks';
 import { DashboardLayout } from '../dashboard-layout';
 
-// Mock data - will come from real-time API
-const mockActiveTunnels = [
-  {
-    id: 'tun_abc123',
-    name: 'happy-fox-42',
-    localPort: 3000,
-    publicUrl: 'happy-fox-42.noverlink.com',
-    status: 'online' as const,
-    requests: 1247,
-    bandwidth: '23.4 MB',
-    connectedAt: '2024-01-15T10:30:00Z',
-    uptime: '2h 15m',
-  },
-  {
-    id: 'tun_def456',
-    name: 'cool-tiger-88',
-    localPort: 8080,
-    publicUrl: 'cool-tiger-88.noverlink.com',
-    status: 'online' as const,
-    requests: 89,
-    bandwidth: '1.2 MB',
-    connectedAt: '2024-01-15T12:30:00Z',
-    uptime: '15m',
-  },
-];
+function formatBytes(bytes: string): string {
+  const num = parseInt(bytes, 10);
+  if (num < 1024) return `${num} B`;
+  if (num < 1024 * 1024) return `${(num / 1024).toFixed(1)} KB`;
+  return `${(num / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatUptime(connectedAt: string): string {
+  const now = Date.now();
+  const connected = new Date(connectedAt).getTime();
+  const diffMs = now - connected;
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 60) return `${diffMins}m`;
+  const hours = Math.floor(diffMins / 60);
+  const mins = diffMins % 60;
+  return `${hours}h ${mins}m`;
+}
 
 export function TunnelsPage() {
-  // Real-time data from API/WebSocket
-  const tunnels = mockActiveTunnels;
+  const { data, isLoading } = useSessions({ status: 'active' });
+
+  const tunnels = data?.sessions ?? [];
   const hasTunnels = tunnels.length > 0;
 
   return (
@@ -59,7 +53,11 @@ export function TunnelsPage() {
         )}
       </div>
 
-      {hasTunnels ? (
+      {isLoading ? (
+        <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
+          <div className="text-center text-slate-400">Loading tunnels...</div>
+        </div>
+      ) : hasTunnels ? (
         <div className="space-y-6">
           {/* Tunnel List */}
           <div className="space-y-3">
@@ -71,7 +69,7 @@ export function TunnelsPage() {
                       <div className="w-3 h-3 rounded-full bg-teal-400 animate-pulse" />
                       <div>
                         <div className="font-medium text-white">
-                          {tunnel.name}
+                          {tunnel.subdomain}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
                           <span className="font-mono">
@@ -79,7 +77,7 @@ export function TunnelsPage() {
                           </span>
                           <span>→</span>
                           <span className="font-mono text-teal-400">
-                            {tunnel.publicUrl}
+                            {tunnel.subdomain}.noverlink.dev
                           </span>
                         </div>
                       </div>
@@ -87,7 +85,7 @@ export function TunnelsPage() {
                     <div className="text-right">
                       <div className="text-xs text-slate-500">Uptime</div>
                       <div className="text-sm font-mono text-slate-300">
-                        {tunnel.uptime}
+                        {formatUptime(tunnel.connectedAt)}
                       </div>
                     </div>
                   </div>
@@ -95,15 +93,15 @@ export function TunnelsPage() {
                   {/* Stats row */}
                   <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800">
                     <div>
-                      <div className="text-xs text-slate-500">Requests</div>
+                      <div className="text-xs text-slate-500">Bytes In</div>
                       <div className="text-sm font-mono text-white">
-                        {tunnel.requests.toLocaleString()}
+                        {formatBytes(tunnel.bytesIn)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-slate-500">Bandwidth</div>
+                      <div className="text-xs text-slate-500">Bytes Out</div>
                       <div className="text-sm font-mono text-white">
-                        {tunnel.bandwidth}
+                        {formatBytes(tunnel.bytesOut)}
                       </div>
                     </div>
                     <div className="text-right">
@@ -187,22 +185,15 @@ export function TunnelsPage() {
               </code>
             </div>
 
-            <div className="flex items-center justify-center gap-4">
-              <Link href="/settings">
-                <GlowButton variant="secondary" size="sm">
-                  Get API Key
-                </GlowButton>
-              </Link>
-              <a
-                href="https://github.com/noverwork/noverlink"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <GlowButton variant="ghost" size="sm">
-                  Documentation
-                </GlowButton>
-              </a>
-            </div>
+            <a
+              href="https://github.com/noverwork/noverlink"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <GlowButton variant="ghost" size="sm">
+                Documentation
+              </GlowButton>
+            </a>
           </div>
         </div>
       )}

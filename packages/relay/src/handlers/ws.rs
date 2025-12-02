@@ -2,14 +2,16 @@
 
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::Result;
 use base64::Engine;
 use futures_util::{SinkExt, StreamExt};
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;
+use tokio::time::interval;
 use tokio_tungstenite::accept_async;
-use tracing::{error, info, warn};
+use tracing::{debug, error, info, warn};
 
 use noverlink_shared::WebSocketMessage;
 
@@ -159,9 +161,26 @@ pub async fn handle_cli_connection(
 
     info!("Tunnel established: {} (session: {})", final_domain, session_id);
 
+    // Stats update interval (every 60 seconds)
+    let mut stats_interval = interval(Duration::from_secs(60));
+    stats_interval.tick().await; // Skip first immediate tick
+
     // Main message loop
     loop {
         tokio::select! {
+            // Periodic stats update
+            _ = stats_interval.tick() => {
+                let current_bytes_in = bytes_in.load(Ordering::Relaxed);
+                let current_bytes_out = bytes_out.load(Ordering::Relaxed);
+                debug!(
+                    "Sending stats update for session {}: in={}, out={}",
+                    session_id, current_bytes_in, current_bytes_out
+                );
+                session_client
+                    .update_stats(&session_id, current_bytes_in, current_bytes_out)
+                    .await;
+            }
+
             // Receive message from HTTP handler → send to CLI
             Some(tunnel_msg) = request_rx.recv() => {
                 match tunnel_msg {

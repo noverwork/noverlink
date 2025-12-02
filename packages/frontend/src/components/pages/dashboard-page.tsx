@@ -10,40 +10,38 @@ import {
 } from '@noverlink/ui-shared';
 import Link from 'next/link';
 
+import { useSessionLogs, useSessions, useStats } from '../../lib/hooks';
 import { DashboardLayout } from '../dashboard-layout';
 
-// Mock data - will come from API
-const mockActiveTunnels = [
-  {
-    id: 'tun_abc123',
-    name: 'happy-fox-42',
-    localPort: 3000,
-    publicUrl: 'happy-fox-42.noverlink.com',
-    status: 'online' as const,
-    requests: 1247,
-    bandwidth: '23.4 MB',
-    connectedAt: '2 hours ago',
-  },
-  {
-    id: 'tun_def456',
-    name: 'cool-tiger-88',
-    localPort: 8080,
-    publicUrl: 'cool-tiger-88.noverlink.com',
-    status: 'online' as const,
-    requests: 89,
-    bandwidth: '1.2 MB',
-    connectedAt: '15 min ago',
-  },
-];
+function formatBytes(bytes: string): string {
+  const num = parseInt(bytes, 10);
+  if (num < 1024) return `${num} B`;
+  if (num < 1024 * 1024) return `${(num / 1024).toFixed(1)} KB`;
+  return `${(num / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatTimeAgo(timestamp: string): string {
+  const now = Date.now();
+  const time = new Date(timestamp).getTime();
+  const diffSec = Math.floor((now - time) / 1000);
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  return `${Math.floor(diffMin / 60)}h ago`;
+}
 
 export function DashboardPage() {
-  // In production, this comes from real-time API/WebSocket
-  const activeTunnels = mockActiveTunnels;
-  const hasActiveTunnels = activeTunnels.length > 0;
+  const { data: sessionsData } = useSessions({ status: 'active' });
+  const { data: statsData } = useStats();
 
-  // Stats
-  const totalRequests = activeTunnels.reduce((sum, t) => sum + t.requests, 0);
-  const totalBandwidth = '24.6 MB'; // calculated from tunnels
+  const activeTunnels = sessionsData?.sessions ?? [];
+  const hasActiveTunnels = activeTunnels.length > 0;
+  const firstSessionId = activeTunnels[0]?.id;
+
+  const { data: logsData } = useSessionLogs(firstSessionId ?? '', { limit: 4 });
+  const recentLogs = logsData?.logs ?? [];
+
+  const stats = statsData ?? { activeSessions: 0, totalRequests: 0, bandwidthMb: 0, tunnelMinutes: 0 };
 
   return (
     <DashboardLayout>
@@ -67,17 +65,25 @@ export function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <MetricCard
-          value={activeTunnels.length}
+          value={stats.activeSessions}
           label="Active Tunnels"
           sublabel="right now"
         />
         <MetricCard
-          value={totalRequests.toLocaleString()}
+          value={stats.totalRequests.toLocaleString()}
           label="Requests"
-          sublabel="this session"
+          sublabel="this month"
         />
-        <MetricCard value={totalBandwidth} label="Bandwidth" sublabel="today" />
-        <MetricCard value="23ms" label="Avg Latency" sublabel="p50" />
+        <MetricCard
+          value={`${stats.bandwidthMb.toFixed(1)} MB`}
+          label="Bandwidth"
+          sublabel="this month"
+        />
+        <MetricCard
+          value={stats.tunnelMinutes.toLocaleString()}
+          label="Tunnel Minutes"
+          sublabel="this month"
+        />
       </div>
 
       {/* Active Connections */}
@@ -100,10 +106,10 @@ export function DashboardPage() {
             <TunnelConnection
               localLabel="localhost"
               localSublabel={`:${activeTunnels[0].localPort}`}
-              publicLabel={activeTunnels[0].name}
-              publicSublabel=".noverlink.com"
+              publicLabel={activeTunnels[0].subdomain}
+              publicSublabel=".noverlink.dev"
               status="connected"
-              tunnelName={activeTunnels[0].name}
+              tunnelName={activeTunnels[0].subdomain}
               animated
             />
 
@@ -112,11 +118,11 @@ export function DashboardPage() {
               {activeTunnels.map((tunnel) => (
                 <Link key={tunnel.id} href={`/tunnels/${tunnel.id}`}>
                   <TunnelCard
-                    name={tunnel.name}
-                    status={tunnel.status}
+                    name={tunnel.subdomain}
+                    status={tunnel.status === 'active' ? 'online' : 'offline'}
                     localPort={tunnel.localPort}
-                    publicUrl={tunnel.publicUrl}
-                    stats={`${tunnel.requests.toLocaleString()} requests`}
+                    publicUrl={`${tunnel.subdomain}.noverlink.dev`}
+                    stats={`${formatBytes(tunnel.bytesIn)} in / ${formatBytes(tunnel.bytesOut)} out`}
                     className="cursor-pointer"
                   />
                 </Link>
@@ -175,94 +181,64 @@ export function DashboardPage() {
               </code>
             </div>
 
-            <div className="flex items-center justify-center gap-4">
-              <Link href="/settings">
-                <GlowButton variant="secondary" size="sm">
-                  Get API Key
-                </GlowButton>
-              </Link>
-              <a
-                href="https://github.com/noverwork/noverlink"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <GlowButton variant="ghost" size="sm">
-                  View Docs
-                </GlowButton>
-              </a>
-            </div>
+            <a
+              href="https://github.com/noverwork/noverlink"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <GlowButton variant="ghost" size="sm">
+                View Docs
+              </GlowButton>
+            </a>
           </div>
         </div>
       )}
 
       {/* Recent Activity */}
-      {hasActiveTunnels && (
+      {hasActiveTunnels && recentLogs.length > 0 && (
         <div className="mt-8 p-6 rounded-xl bg-slate-900/50 border border-slate-800">
           <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">
             Recent Requests
           </h3>
           <div className="space-y-2">
-            {[
-              {
-                method: 'GET',
-                path: '/api/users',
-                status: 200,
-                time: '2s ago',
-              },
-              {
-                method: 'POST',
-                path: '/api/auth/login',
-                status: 200,
-                time: '5s ago',
-              },
-              {
-                method: 'GET',
-                path: '/api/products',
-                status: 200,
-                time: '12s ago',
-              },
-              {
-                method: 'GET',
-                path: '/health',
-                status: 200,
-                time: '15s ago',
-              },
-            ].map((req, i) => (
+            {recentLogs.map((log) => (
               <div
-                key={i}
+                key={log.id}
                 className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/30"
               >
                 <div className="flex items-center gap-3">
                   <span
                     className={cn(
                       'text-xs font-mono px-2 py-0.5 rounded',
-                      req.method === 'GET' && 'bg-teal-500/20 text-teal-400',
-                      req.method === 'POST' && 'bg-blue-500/20 text-blue-400',
-                      req.method === 'PUT' && 'bg-amber-500/20 text-amber-400',
-                      req.method === 'DELETE' && 'bg-rose-500/20 text-rose-400'
+                      log.method === 'GET' && 'bg-teal-500/20 text-teal-400',
+                      log.method === 'POST' && 'bg-blue-500/20 text-blue-400',
+                      log.method === 'PUT' && 'bg-amber-500/20 text-amber-400',
+                      log.method === 'DELETE' && 'bg-rose-500/20 text-rose-400'
                     )}
                   >
-                    {req.method}
+                    {log.method}
                   </span>
                   <span className="text-sm font-mono text-slate-300">
-                    {req.path}
+                    {log.path}
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
                   <span
                     className={cn(
                       'text-xs font-mono',
-                      req.status < 400 ? 'text-teal-400' : 'text-rose-400'
+                      (log.status ?? 0) < 400 ? 'text-teal-400' : 'text-rose-400'
                     )}
                   >
-                    {req.status}
+                    {log.status ?? '-'}
                   </span>
-                  <span className="text-xs text-slate-500">{req.time}</span>
+                  <span className="text-xs text-slate-500">
+                    {formatTimeAgo(log.timestamp)}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-          <Link href="/tunnels">
+          <Link href={`/tunnels/${firstSessionId}`}>
             <GlowButton variant="ghost" size="sm" className="w-full mt-4">
               View All Logs
             </GlowButton>

@@ -41,6 +41,18 @@ export interface CreateSessionResponse {
   session_id: string;
 }
 
+// ─── Update Stats (periodic) ────────────────────────────────────
+
+export class UpdateStatsDto {
+  @IsInt()
+  @Min(0)
+  bytes_in!: number;
+
+  @IsInt()
+  @Min(0)
+  bytes_out!: number;
+}
+
 // ─── Close Session ─────────────────────────────────────────────
 
 export class CloseSessionDto {

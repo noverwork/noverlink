@@ -30,6 +30,12 @@ struct CreateSessionResponse {
 }
 
 #[derive(Debug, Serialize)]
+struct UpdateStatsRequest {
+    bytes_in: u64,
+    bytes_out: u64,
+}
+
+#[derive(Debug, Serialize)]
 struct CloseSessionRequest {
     bytes_in: u64,
     bytes_out: u64,
@@ -126,6 +132,42 @@ impl SessionClient {
                 }
             }
             Err(e) => Err(format!("Failed to connect to backend: {}", e)),
+        }
+    }
+
+    /// Update session stats (periodic)
+    pub async fn update_stats(&self, session_id: &str, bytes_in: u64, bytes_out: u64) {
+        let url = format!("{}/relay/sessions/{}/stats", self.backend_url, session_id);
+
+        let request = UpdateStatsRequest { bytes_in, bytes_out };
+
+        match self
+            .client
+            .patch(&url)
+            .header("X-Relay-Secret", &self.relay_secret)
+            .header("X-Relay-Id", &self.relay_id)
+            .json(&request)
+            .timeout(Duration::from_secs(5))
+            .send()
+            .await
+        {
+            Ok(response) => {
+                if response.status().is_success() {
+                    debug!(
+                        "Stats updated for session {}: in={}, out={}",
+                        session_id, bytes_in, bytes_out
+                    );
+                } else {
+                    warn!(
+                        "Failed to update stats: {} - {}",
+                        response.status(),
+                        response.text().await.unwrap_or_default()
+                    );
+                }
+            }
+            Err(e) => {
+                warn!("Failed to connect to backend for stats update: {}", e);
+            }
         }
     }
 

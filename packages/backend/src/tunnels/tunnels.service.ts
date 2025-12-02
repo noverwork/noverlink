@@ -1,12 +1,18 @@
 import * as crypto from 'node:crypto';
 
-import { type Loaded, ref } from '@mikro-orm/core';
+import { type FilterQuery, type Loaded, ref } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Domain,
+  HttpRequest,
   SessionStatus,
   TunnelSession,
+  UsageQuota,
   User,
 } from '@noverlink/backend-shared';
 
@@ -210,5 +216,173 @@ export class TunnelsService {
     const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
     const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
     return `${adj}-${noun}`;
+  }
+
+  // ─── Session Query Methods ─────────────────────────────────────
+
+  /**
+   * List tunnel sessions for a user with cursor-based pagination
+   */
+  async listSessions(
+    userId: string,
+    status?: SessionStatus,
+    cursor?: string,
+    limit = 20
+  ): Promise<{ sessions: TunnelSession[]; nextCursor: string | null }> {
+    const where: FilterQuery<TunnelSession> = { user: userId };
+    if (status) {
+      where.status = status;
+    }
+
+    // Decode cursor for pagination
+    if (cursor) {
+      try {
+        const decoded = JSON.parse(
+          Buffer.from(cursor, 'base64url').toString()
+        ) as { id: string; t: string };
+        where.$or = [
+          { connectedAt: { $lt: new Date(decoded.t) } },
+          { connectedAt: new Date(decoded.t), id: { $lt: decoded.id } },
+        ];
+      } catch {
+        throw new BadRequestException('Invalid cursor format');
+      }
+    }
+
+    const sessions = await this.em.find(TunnelSession, where, {
+      populate: ['domain'],
+      orderBy: { connectedAt: 'DESC', id: 'DESC' },
+      limit: limit + 1, // Fetch one extra to check hasMore
+    });
+
+    const hasMore = sessions.length > limit;
+    if (hasMore) {
+      sessions.pop();
+    }
+
+    const nextCursor =
+      hasMore && sessions.length > 0
+        ? Buffer.from(
+            JSON.stringify({
+              id: sessions[sessions.length - 1].id,
+              t: sessions[sessions.length - 1].connectedAt.toISOString(),
+            })
+          ).toString('base64url')
+        : null;
+
+    return { sessions, nextCursor };
+  }
+
+  /**
+   * Get a single session by ID (with ownership check)
+   */
+  async getSession(userId: string, sessionId: string): Promise<TunnelSession> {
+    const session = await this.em.findOne(
+      TunnelSession,
+      { id: sessionId, user: userId },
+      { populate: ['domain'] }
+    );
+
+    if (!session) {
+      throw new NotFoundException(`Session ${sessionId} not found`);
+    }
+
+    return session;
+  }
+
+  /**
+   * Get HTTP request logs for a session with cursor-based pagination
+   */
+  async getSessionLogs(
+    userId: string,
+    sessionId: string,
+    cursor?: string,
+    limit = 50,
+    method?: string
+  ): Promise<{ logs: HttpRequest[]; nextCursor: string | null }> {
+    // Verify session ownership
+    const session = await this.em.findOne(TunnelSession, {
+      id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      throw new NotFoundException(`Session ${sessionId} not found`);
+    }
+
+    const where: FilterQuery<HttpRequest> = { session: sessionId };
+    if (method) {
+      where.method = method.toUpperCase();
+    }
+
+    // Decode cursor for pagination
+    if (cursor) {
+      try {
+        const decoded = JSON.parse(
+          Buffer.from(cursor, 'base64url').toString()
+        ) as { id: string; t: string };
+        where.$or = [
+          { timestamp: { $lt: new Date(decoded.t) } },
+          { timestamp: new Date(decoded.t), id: { $lt: decoded.id } },
+        ];
+      } catch {
+        throw new BadRequestException('Invalid cursor format');
+      }
+    }
+
+    const logs = await this.em.find(HttpRequest, where, {
+      orderBy: { timestamp: 'DESC', id: 'DESC' },
+      limit: limit + 1,
+    });
+
+    const hasMore = logs.length > limit;
+    if (hasMore) {
+      logs.pop();
+    }
+
+    const nextCursor =
+      hasMore && logs.length > 0
+        ? Buffer.from(
+            JSON.stringify({
+              id: logs[logs.length - 1].id,
+              t: logs[logs.length - 1].timestamp.toISOString(),
+            })
+          ).toString('base64url')
+        : null;
+
+    return { logs, nextCursor };
+  }
+
+  /**
+   * Get aggregate stats for a user
+   */
+  async getStats(userId: string): Promise<{
+    activeSessions: number;
+    totalRequests: number;
+    bandwidthMb: number;
+    tunnelMinutes: number;
+  }> {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    const [activeSessions, quota] = await Promise.all([
+      this.em.count(TunnelSession, { user: userId, status: SessionStatus.ACTIVE }),
+      this.em.findOne(UsageQuota, { user: userId, year, month }),
+    ]);
+
+    return {
+      activeSessions,
+      totalRequests: quota?.requestCount ?? 0,
+      bandwidthMb: quota?.bandwidthUsedMb ?? 0,
+      tunnelMinutes: quota?.tunnelMinutes ?? 0,
+    };
+  }
+
+  /**
+   * Get request count for a session
+   */
+  async getSessionRequestCount(sessionId: string): Promise<number> {
+    return this.em.count(HttpRequest, { session: sessionId });
   }
 }
