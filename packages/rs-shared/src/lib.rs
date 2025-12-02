@@ -5,7 +5,7 @@
 pub mod config;
 pub mod protocol;
 
-pub use config::{get_env, get_env_or, get_env_opt, get_env_parse, get_env_parse_or, load_dotenv};
+pub use config::{get_env, get_env_opt, get_env_or, get_env_parse, get_env_parse_or, load_dotenv};
 pub use protocol::{TicketPayload, WebSocketMessage};
 
 #[cfg(feature = "cli")]

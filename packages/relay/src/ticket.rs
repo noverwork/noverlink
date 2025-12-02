@@ -45,17 +45,14 @@ impl TicketVerifier {
         let mut payload: TicketPayload = serde_json::from_str(&ticket_str)?;
 
         // Extract and remove signature for verification
-        let received_sig = payload.sig.take().ok_or_else(|| {
-            anyhow::anyhow!("Ticket missing signature")
-        })?;
+        let received_sig = payload
+            .sig
+            .take()
+            .ok_or_else(|| anyhow::anyhow!("Ticket missing signature"))?;
 
         // Check expiry
-        let now = i64::try_from(
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)?
-                .as_secs(),
-        )
-        .unwrap_or(i64::MAX);
+        let now = i64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs())
+            .unwrap_or(i64::MAX);
 
         if payload.exp < now {
             bail!("Ticket expired");

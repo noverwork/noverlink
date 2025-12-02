@@ -192,7 +192,10 @@ mod tests {
         let decoded: WebSocketMessage = serde_json::from_str(&json).unwrap();
 
         match decoded {
-            WebSocketMessage::Request { request_id, payload } => {
+            WebSocketMessage::Request {
+                request_id,
+                payload,
+            } => {
                 assert_eq!(request_id, 12345);
                 assert_eq!(payload, "SEVMTE8gV09STEQ=");
             }

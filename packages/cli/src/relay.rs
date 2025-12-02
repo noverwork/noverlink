@@ -151,15 +151,14 @@ impl RelayConnection {
                         payload,
                     } => {
                         // Decode base64 payload
-                        let payload_bytes = match base64::engine::general_purpose::STANDARD
-                            .decode(&payload)
-                        {
-                            Ok(b) => b,
-                            Err(e) => {
-                                error!("Failed to decode request payload: {}", e);
-                                continue;
-                            }
-                        };
+                        let payload_bytes =
+                            match base64::engine::general_purpose::STANDARD.decode(&payload) {
+                                Ok(b) => b,
+                                Err(e) => {
+                                    error!("Failed to decode request payload: {}", e);
+                                    continue;
+                                }
+                            };
 
                         let request = IncomingRequest {
                             id: request_id,
@@ -171,7 +170,10 @@ impl RelayConnection {
                             break;
                         }
                     }
-                    WebSocketMessage::WebSocketUpgrade { connection_id, initial_request } => {
+                    WebSocketMessage::WebSocketUpgrade {
+                        connection_id,
+                        initial_request,
+                    } => {
                         info!("WebSocket upgrade request: {}", connection_id);
 
                         let ws_connections = Arc::clone(&ws_connections_clone);
@@ -185,21 +187,27 @@ impl RelayConnection {
                                 local_port,
                                 ws_msg_tx,
                                 ws_connections,
-                            ).await {
+                            )
+                            .await
+                            {
                                 error!("WebSocket connection error: {}", e);
                             }
                         });
                     }
-                    WebSocketMessage::WebSocketFrame { connection_id, data } => {
+                    WebSocketMessage::WebSocketFrame {
+                        connection_id,
+                        data,
+                    } => {
                         // Forward frame to local WebSocket
                         if let Some(tx) = ws_connections_clone.get(&connection_id) {
-                            let frame_bytes = match base64::engine::general_purpose::STANDARD.decode(&data) {
-                                Ok(b) => b,
-                                Err(e) => {
-                                    error!("Failed to decode WebSocket frame: {}", e);
-                                    continue;
-                                }
-                            };
+                            let frame_bytes =
+                                match base64::engine::general_purpose::STANDARD.decode(&data) {
+                                    Ok(b) => b,
+                                    Err(e) => {
+                                        error!("Failed to decode WebSocket frame: {}", e);
+                                        continue;
+                                    }
+                                };
 
                             if tx.send(frame_bytes).await.is_err() {
                                 debug!("WebSocket connection closed: {}", connection_id);
@@ -396,7 +404,10 @@ async fn handle_websocket_connection(
 
     // Verify it's a 101 response
     if !response_buf.starts_with(b"HTTP/1.1 101") {
-        error!("Expected 101 response, got: {:?}", String::from_utf8_lossy(&response_buf[..20.min(response_buf.len())]));
+        error!(
+            "Expected 101 response, got: {:?}",
+            String::from_utf8_lossy(&response_buf[..20.min(response_buf.len())])
+        );
         bail!("WebSocket upgrade failed");
     }
 

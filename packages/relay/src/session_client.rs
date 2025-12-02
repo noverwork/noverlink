@@ -139,7 +139,10 @@ impl SessionClient {
     pub async fn update_stats(&self, session_id: &str, bytes_in: u64, bytes_out: u64) {
         let url = format!("{}/relay/sessions/{}/stats", self.backend_url, session_id);
 
-        let request = UpdateStatsRequest { bytes_in, bytes_out };
+        let request = UpdateStatsRequest {
+            bytes_in,
+            bytes_out,
+        };
 
         match self
             .client
@@ -175,7 +178,10 @@ impl SessionClient {
     pub async fn close_session(&self, session_id: &str, bytes_in: u64, bytes_out: u64) {
         let url = format!("{}/relay/sessions/{}/close", self.backend_url, session_id);
 
-        let request = CloseSessionRequest { bytes_in, bytes_out };
+        let request = CloseSessionRequest {
+            bytes_in,
+            bytes_out,
+        };
 
         match self
             .client

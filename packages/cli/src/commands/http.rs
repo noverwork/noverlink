@@ -23,13 +23,10 @@ pub async fn run_http(port: u16, subdomain: Option<String>) -> Result<()> {
     println!("🔗 Connecting to relay...");
 
     // Connect to relay with ticket
-    let mut relay = RelayConnection::connect(
-        &ticket_response.relay_url,
-        &ticket_response.ticket,
-        port,
-    )
-    .await
-    .context("Failed to connect to relay server")?;
+    let mut relay =
+        RelayConnection::connect(&ticket_response.relay_url, &ticket_response.ticket, port)
+            .await
+            .context("Failed to connect to relay server")?;
 
     let tunnel_url = relay.tunnel_url().to_string();
 

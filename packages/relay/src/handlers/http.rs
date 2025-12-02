@@ -87,9 +87,9 @@ async fn handle_http_request(
     let (buf, headers_end) = read_http_headers(&mut stream).await?;
 
     // Parse and extract host (include \r\n\r\n for httparse)
-    let headers_slice = buf.get(..headers_end + 4).ok_or_else(|| {
-        anyhow::anyhow!("Headers end position out of bounds")
-    })?;
+    let headers_slice = buf
+        .get(..headers_end + 4)
+        .ok_or_else(|| anyhow::anyhow!("Headers end position out of bounds"))?;
     let host = parse_and_extract_host(headers_slice, &mut stream).await?;
 
     // Parse request info for logging
@@ -110,9 +110,9 @@ async fn handle_http_request(
     let session_id = tunnel.session_id.clone();
 
     // Check if this is a WebSocket upgrade request
-    let headers_slice = buf.get(..headers_end + 4).ok_or_else(|| {
-        anyhow::anyhow!("Headers end position out of bounds")
-    })?;
+    let headers_slice = buf
+        .get(..headers_end + 4)
+        .ok_or_else(|| anyhow::anyhow!("Headers end position out of bounds"))?;
 
     if is_websocket_upgrade(headers_slice) {
         info!("WebSocket upgrade request detected for {}", host);
@@ -157,7 +157,9 @@ async fn handle_http_request(
         response_body: forward_result.response_body.map(|b| base64_encode(&b)),
         duration_ms: u32::try_from(timer.elapsed_ms()).unwrap_or(u32::MAX),
         timestamp,
-        original_request_size: request_body.as_ref().and_then(|(_, s)| s.map(|v| u32::try_from(v).unwrap_or(u32::MAX))),
+        original_request_size: request_body
+            .as_ref()
+            .and_then(|(_, s)| s.map(|v| u32::try_from(v).unwrap_or(u32::MAX))),
         original_response_size: forward_result.original_response_size,
     };
 
@@ -175,7 +177,9 @@ struct ForwardResult {
 }
 
 /// Parse HTTP request info for logging
-fn parse_request_info(headers_buf: &[u8]) -> (String, String, Option<String>, HashMap<String, String>) {
+fn parse_request_info(
+    headers_buf: &[u8],
+) -> (String, String, Option<String>, HashMap<String, String>) {
     let mut headers = [httparse::EMPTY_HEADER; 64];
     let mut req = httparse::Request::new(&mut headers);
 
@@ -235,9 +239,9 @@ async fn read_http_headers(stream: &mut TcpStream) -> Result<(Vec<u8>, usize)> {
 
         buf.resize(total_read + 1024, 0);
 
-        let read_buf = buf.get_mut(total_read..).ok_or_else(|| {
-            anyhow::anyhow!("Buffer indexing error")
-        })?;
+        let read_buf = buf
+            .get_mut(total_read..)
+            .ok_or_else(|| anyhow::anyhow!("Buffer indexing error"))?;
 
         let n = match timeout(Duration::from_secs(10), stream.read(read_buf)).await {
             Ok(Ok(n)) if n > 0 => n,
@@ -256,9 +260,9 @@ async fn read_http_headers(stream: &mut TcpStream) -> Result<(Vec<u8>, usize)> {
 
         total_read += n;
 
-        let header_slice = buf.get(..total_read).ok_or_else(|| {
-            anyhow::anyhow!("Buffer slicing error")
-        })?;
+        let header_slice = buf
+            .get(..total_read)
+            .ok_or_else(|| anyhow::anyhow!("Buffer slicing error"))?;
 
         if let Some(pos) = find_headers_end(header_slice) {
             return Ok((buf, pos));
@@ -326,9 +330,9 @@ async fn read_full_request(
     let mut headers = [httparse::EMPTY_HEADER; 64];
     let mut req = httparse::Request::new(&mut headers);
 
-    let headers_slice = buf.get(..headers_end + 4).ok_or_else(|| {
-        anyhow::anyhow!("Headers end position out of bounds")
-    })?;
+    let headers_slice = buf
+        .get(..headers_end + 4)
+        .ok_or_else(|| anyhow::anyhow!("Headers end position out of bounds"))?;
     req.parse(headers_slice)?;
 
     let content_length = req
@@ -345,9 +349,9 @@ async fn read_full_request(
     while total_read < total_length {
         buf.resize(total_length, 0);
 
-        let read_buf = buf.get_mut(total_read..).ok_or_else(|| {
-            anyhow::anyhow!("Buffer indexing error during body read")
-        })?;
+        let read_buf = buf
+            .get_mut(total_read..)
+            .ok_or_else(|| anyhow::anyhow!("Buffer indexing error during body read"))?;
 
         let n = stream.read(read_buf).await?;
         if n == 0 {
@@ -370,10 +374,14 @@ async fn handle_websocket_proxy(
 ) -> Result<()> {
     // Generate unique connection ID
     let connection_id = registry.next_ws_connection_id();
-    info!("Starting WebSocket proxy: {} for {}", connection_id, subdomain);
+    info!(
+        "Starting WebSocket proxy: {} for {}",
+        connection_id, subdomain
+    );
 
     // Register pending WebSocket and get channels
-    let (mut upgrade_response_rx, mut frame_rx) = registry.register_pending_websocket(connection_id.clone());
+    let (mut upgrade_response_rx, mut frame_rx) =
+        registry.register_pending_websocket(connection_id.clone());
 
     // Send WebSocket upgrade request to CLI
     let upgrade_msg = TunnelMessage::WebSocketUpgrade {
@@ -390,7 +398,8 @@ async fn handle_websocket_proxy(
     }
 
     // Wait for 101 Switching Protocols response from CLI
-    let upgrade_response = match timeout(Duration::from_secs(30), upgrade_response_rx.recv()).await {
+    let upgrade_response = match timeout(Duration::from_secs(30), upgrade_response_rx.recv()).await
+    {
         Ok(Some(response)) => response,
         Ok(None) => {
             error!("WebSocket upgrade response channel closed");
@@ -534,7 +543,10 @@ async fn forward_to_tunnel(
                 .filter(|body| !body.is_empty())
                 .map_or((None, None), |body| {
                     let (truncated, orig) = truncate_body(body, MAX_BODY_SIZE);
-                    (Some(truncated), orig.map(|v| u32::try_from(v).unwrap_or(u32::MAX)))
+                    (
+                        Some(truncated),
+                        orig.map(|v| u32::try_from(v).unwrap_or(u32::MAX)),
+                    )
                 });
 
             stream.write_all(&response_data).await?;

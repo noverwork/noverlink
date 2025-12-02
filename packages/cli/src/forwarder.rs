@@ -8,7 +8,11 @@ use tracing::{debug, warn};
 
 /// Forward HTTP request to localhost and get response
 pub async fn forward_to_localhost(request: &[u8], local_port: u16) -> Result<Vec<u8>> {
-    debug!("Forwarding {} bytes to localhost:{}", request.len(), local_port);
+    debug!(
+        "Forwarding {} bytes to localhost:{}",
+        request.len(),
+        local_port
+    );
 
     // Connect to localhost with timeout
     let mut stream = timeout(
@@ -180,7 +184,8 @@ mod tests {
         assert!(!is_complete_http_response(incomplete));
 
         // Chunked encoding - simple case
-        let chunked = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n0\r\n\r\n";
+        let chunked =
+            b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n0\r\n\r\n";
         assert!(is_complete_http_response(chunked));
 
         // Chunked encoding - lowercase header
@@ -207,7 +212,8 @@ mod tests {
         let error = anyhow::anyhow!("Connection refused");
         let response = create_502_response(&error);
 
-        let response_str = String::from_utf8(response).unwrap_or_else(|_| String::from("Invalid UTF-8"));
+        let response_str =
+            String::from_utf8(response).unwrap_or_else(|_| String::from("Invalid UTF-8"));
 
         assert!(response_str.starts_with("HTTP/1.1 502 Bad Gateway"));
         assert!(response_str.contains("Content-Type: text/plain"));

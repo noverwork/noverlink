@@ -126,7 +126,9 @@ impl TunnelRegistry {
 
     /// Get tunnel by domain
     pub fn get(&self, domain: &str) -> Option<Arc<Tunnel>> {
-        self.tunnels.get(domain).map(|entry| Arc::clone(entry.value()))
+        self.tunnels
+            .get(domain)
+            .map(|entry| Arc::clone(entry.value()))
     }
 
     /// Remove tunnel by domain
@@ -316,7 +318,9 @@ mod tests {
         registry.register_pending_request(request_id, tx);
 
         let response_data = b"HTTP/1.1 200 OK\r\n\r\n".to_vec();
-        let sent = registry.send_response(request_id, response_data.clone()).await;
+        let sent = registry
+            .send_response(request_id, response_data.clone())
+            .await;
 
         assert!(sent);
 
@@ -353,7 +357,9 @@ mod tests {
 
         // Send frame
         let frame_data = b"test frame data".to_vec();
-        let sent = registry.send_websocket_frame(&conn_id, frame_data.clone()).await;
+        let sent = registry
+            .send_websocket_frame(&conn_id, frame_data.clone())
+            .await;
         assert!(sent);
 
         let received = frame_rx.recv().await;

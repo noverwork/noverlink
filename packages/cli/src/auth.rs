@@ -111,9 +111,9 @@ impl Config {
 pub fn load_token() -> Result<String> {
     let config = Config::load()?;
 
-    config.auth_token.ok_or_else(|| {
-        anyhow::anyhow!("Not logged in. Run 'noverlink login' first.")
-    })
+    config
+        .auth_token
+        .ok_or_else(|| anyhow::anyhow!("Not logged in. Run 'noverlink login' first."))
 }
 
 /// Save authentication token to config

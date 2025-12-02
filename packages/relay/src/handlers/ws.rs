@@ -159,7 +159,10 @@ pub async fn handle_cli_connection(
         .send(tokio_tungstenite::tungstenite::Message::Text(ack_json))
         .await?;
 
-    info!("Tunnel established: {} (session: {})", final_domain, session_id);
+    info!(
+        "Tunnel established: {} (session: {})",
+        final_domain, session_id
+    );
 
     // Stats update interval (every 60 seconds)
     let mut stats_interval = interval(Duration::from_secs(60));
