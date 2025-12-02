@@ -184,7 +184,9 @@ describe('BillingService', () => {
 
       await service.handleSubscriptionActive({
         subscriptionId: 'sub_123',
+        customerId: 'cus_123',
         productId: 'prod_pro_monthly',
+        status: 'active',
         currentPeriodEnd: '2025-12-31T23:59:59Z',
       });
 
@@ -205,7 +207,9 @@ describe('BillingService', () => {
 
       await service.handleSubscriptionActive({
         subscriptionId: 'sub_123',
+        customerId: 'cus_123',
         productId: 'prod_hobbyist',
+        status: 'active',
         currentPeriodEnd: '2025-06-15T12:00:00Z',
       });
 
@@ -217,7 +221,9 @@ describe('BillingService', () => {
 
       await service.handleSubscriptionActive({
         subscriptionId: 'sub_unknown',
+        customerId: 'cus_unknown',
         productId: 'prod_pro',
+        status: 'active',
       });
 
       expect(em.flush).not.toHaveBeenCalled();

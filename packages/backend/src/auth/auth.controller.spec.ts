@@ -9,7 +9,6 @@ import { AuthService } from './auth.service';
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthService>;
-  let appConfigService: jest.Mocked<AppConfigService>;
 
   const mockAuthResponse = {
     accessToken: 'access-token-123',
@@ -63,7 +62,6 @@ describe('AuthController', () => {
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get(AuthService);
-    appConfigService = module.get(AppConfigService);
   });
 
   afterEach(() => {

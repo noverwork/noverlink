@@ -8,7 +8,6 @@ import {
   HttpRequest,
   SessionStatus,
   TunnelSession,
-  UsageQuota,
   User,
   UserPlan,
 } from '@noverlink/backend-shared';
@@ -19,7 +18,6 @@ import { TunnelsService } from './tunnels.service';
 describe('TunnelsService', () => {
   let service: TunnelsService;
   let em: jest.Mocked<EntityManager>;
-  let appConfigService: jest.Mocked<AppConfigService>;
 
   const mockUser = {
     id: 'user-123',
@@ -56,7 +54,6 @@ describe('TunnelsService', () => {
 
     service = module.get<TunnelsService>(TunnelsService);
     em = module.get(EntityManager);
-    appConfigService = module.get(AppConfigService);
   });
 
   describe('createTicket', () => {

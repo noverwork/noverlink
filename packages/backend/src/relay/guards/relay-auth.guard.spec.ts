@@ -6,7 +6,6 @@ import { RelayAuthGuard } from './relay-auth.guard';
 
 describe('RelayAuthGuard', () => {
   let guard: RelayAuthGuard;
-  let configService: jest.Mocked<AppConfigService>;
 
   const mockExecutionContext = (relaySecret?: string) => {
     const request = {
@@ -37,7 +36,6 @@ describe('RelayAuthGuard', () => {
     }).compile();
 
     guard = module.get<RelayAuthGuard>(RelayAuthGuard);
-    configService = module.get(AppConfigService);
   });
 
   describe('canActivate', () => {

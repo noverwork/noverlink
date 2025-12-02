@@ -116,6 +116,7 @@ describe('RelayService', () => {
       let persistedSession: TunnelSession | null = null;
       em.persist.mockImplementation((entity) => {
         persistedSession = entity as TunnelSession;
+        return em;
       });
 
       await service.createSession('relay-1', {
@@ -150,7 +151,7 @@ describe('RelayService', () => {
         if (entity === UsageQuota) return null;
         return null;
       });
-      em.persist.mockImplementation(() => {});
+      em.persist.mockImplementation(() => em);
 
       await service.closeSession('session-123', {
         bytes_in: 1024000,
@@ -188,12 +189,7 @@ describe('RelayService', () => {
         return null;
       });
 
-      let createdQuota: UsageQuota | null = null;
-      em.persist.mockImplementation((entity) => {
-        if (entity instanceof UsageQuota) {
-          createdQuota = entity;
-        }
-      });
+      em.persist.mockImplementation(() => em);
 
       await service.closeSession('session-123', {
         bytes_in: 1048576, // 1 MB
@@ -241,6 +237,7 @@ describe('RelayService', () => {
       const persistedRequests: HttpRequest[] = [];
       em.persist.mockImplementation((entity) => {
         persistedRequests.push(entity as HttpRequest);
+        return em;
       });
 
       const result = await service.addRequests('session-123', {
@@ -288,6 +285,7 @@ describe('RelayService', () => {
       let persistedRequest: HttpRequest | null = null;
       em.persist.mockImplementation((entity) => {
         persistedRequest = entity as HttpRequest;
+        return em;
       });
 
       await service.addRequests('session-123', {
@@ -317,6 +315,7 @@ describe('RelayService', () => {
       let persistedRequest: HttpRequest | null = null;
       em.persist.mockImplementation((entity) => {
         persistedRequest = entity as HttpRequest;
+        return em;
       });
 
       await service.addRequests('session-123', {
@@ -345,6 +344,7 @@ describe('RelayService', () => {
       let persistedRequest: HttpRequest | null = null;
       em.persist.mockImplementation((entity) => {
         persistedRequest = entity as HttpRequest;
+        return em;
       });
 
       await service.addRequests('session-123', {
@@ -373,6 +373,7 @@ describe('RelayService', () => {
       let persistedRequest: HttpRequest | null = null;
       em.persist.mockImplementation((entity) => {
         persistedRequest = entity as HttpRequest;
+        return em;
       });
 
       await service.addRequests('session-123', {
@@ -398,6 +399,7 @@ describe('RelayService', () => {
       let persistedRequest: HttpRequest | null = null;
       em.persist.mockImplementation((entity) => {
         persistedRequest = entity as HttpRequest;
+        return em;
       });
 
       await service.addRequests('session-123', {

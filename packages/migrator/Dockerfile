@@ -1,4 +1,4 @@
-FROM 172.16.0.22:5000/base-images/node:22.14.0-slim AS builder
+FROM node:22.14-slim AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ ENV NODE_ENV=production
 RUN npm run migrator:build
 
 # Runner stage
-FROM 172.16.0.22:5000/base-images/node:22.14.0-slim AS runner
+FROM node:22.14-slim AS runner
 
 WORKDIR /app
 

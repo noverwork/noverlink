@@ -18,7 +18,6 @@ describe('AuthService', () => {
   let service: AuthService;
   let em: jest.Mocked<EntityManager>;
   let jwtService: jest.Mocked<JwtService>;
-  let appConfigService: jest.Mocked<AppConfigService>;
 
   const mockUser = {
     id: 'user-123',
@@ -65,7 +64,6 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     em = module.get(EntityManager);
     jwtService = module.get(JwtService);
-    appConfigService = module.get(AppConfigService);
   });
 
   afterEach(() => {
@@ -144,7 +142,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException for inactive account', async () => {
-      em.findOne.mockResolvedValue({ ...mockUser, isActive: false });
+      em.findOne.mockResolvedValue({ ...mockUser, isActive: false } as unknown as User);
       (argon2.verify as jest.Mock).mockResolvedValue(true);
 
       await expect(
@@ -156,7 +154,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException for OAuth-only user (no password)', async () => {
-      em.findOne.mockResolvedValue({ ...mockUser, password: null });
+      em.findOne.mockResolvedValue({ ...mockUser, password: null } as unknown as User);
 
       await expect(
         service.login({
@@ -192,7 +190,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException for inactive user', async () => {
       jwtService.verify.mockReturnValue({ sub: 'user-123', email: 'test@example.com' });
-      em.findOne.mockResolvedValue({ ...mockUser, isActive: false });
+      em.findOne.mockResolvedValue({ ...mockUser, isActive: false } as unknown as User);
 
       await expect(
         service.refreshToken({ refreshToken: 'valid-token' })
@@ -221,7 +219,7 @@ describe('AuthService', () => {
       em.create.mockImplementation((entity, data) => ({ ...data, id: 'new-user' }));
       em.persistAndFlush.mockResolvedValue(undefined);
 
-      const result = await service.validateOAuthLogin(OAuthProvider.GOOGLE, {
+      await service.validateOAuthLogin(OAuthProvider.GOOGLE, {
         id: 'google-456',
         email: 'new@example.com',
         name: 'New User',
@@ -380,7 +378,7 @@ describe('AuthService', () => {
     });
 
     it('should return null for inactive user', async () => {
-      em.findOne.mockResolvedValue({ ...mockUser, isActive: false });
+      em.findOne.mockResolvedValue({ ...mockUser, isActive: false } as unknown as User);
 
       const result = await service.validateCliToken('nv_test-token');
 
@@ -395,24 +393,16 @@ describe('AuthService', () => {
       em.persistAndFlush.mockResolvedValue(undefined);
       (argon2.hash as jest.Mock).mockResolvedValue('hashed');
 
-      // Access private method through actual JWT generation
-      const mockAppConfig = appConfigService as any;
-      mockAppConfig.jwt = {
-        secret: 'test',
-        expiresIn: '30s',
-        refreshSecret: 'test',
-        refreshExpiresIn: '1h',
-      };
-
-      const result = await service.register({
+      await service.register({
         email: 'new@example.com',
         password: 'pass',
         name: 'Test',
       });
 
+      // Verify JWT sign was called with numeric expiresIn (parsed from config '15m' = 900 seconds)
       expect(jwtService.sign).toHaveBeenCalledWith(
         expect.any(Object),
-        expect.objectContaining({ expiresIn: 30 })
+        expect.objectContaining({ expiresIn: 900 })
       );
     });
   });

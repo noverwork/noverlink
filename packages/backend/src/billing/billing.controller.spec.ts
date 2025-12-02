@@ -65,7 +65,9 @@ describe('BillingController', () => {
 
       const dto = {
         subscriptionId: 'sub_123',
+        customerId: 'cus_123',
         productId: 'prod_pro',
+        status: 'active',
         currentPeriodEnd: '2025-12-31',
       };
 
