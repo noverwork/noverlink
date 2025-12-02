@@ -19,6 +19,9 @@ COPY packages/backend-shared ./packages/backend-shared
 COPY packages/shared ./packages/shared
 COPY packages/interfaces ./packages/interfaces
 
+# Build dependencies first
+RUN npx nx run-many --target=build --projects=@noverlink/interfaces,shared
+
 # Build backend
 RUN npm run backend:build
 

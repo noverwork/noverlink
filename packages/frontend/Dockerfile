@@ -29,6 +29,9 @@ COPY packages/ui-shared ./packages/ui-shared
 COPY packages/shared ./packages/shared
 COPY packages/interfaces ./packages/interfaces
 
+# Build dependencies first (ui-shared, interfaces, shared)
+RUN npx nx run-many --target=build --projects=@noverlink/ui-shared,@noverlink/interfaces,shared
+
 # Build frontend
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run frontend:build
