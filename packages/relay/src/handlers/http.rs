@@ -7,6 +7,7 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::Result;
+use askama::Template;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::timeout;
@@ -14,6 +15,13 @@ use tracing::{error, info, warn};
 
 use crate::registry::{TunnelMessage, TunnelRegistry};
 use crate::session_client::{base64_encode, truncate_body, HttpRequestLog, RequestLogger};
+
+/// 404 error page template
+#[derive(Template)]
+#[template(path = "404.html")]
+struct NotFoundTemplate<'a> {
+    host: &'a str,
+}
 
 const MAX_BODY_SIZE: usize = 65536; // 64KB max body for logging
 
@@ -290,15 +298,20 @@ async fn parse_and_extract_host(headers_buf: &[u8], stream: &mut TcpStream) -> R
     }
 }
 
-/// Send 502 response when no tunnel is found
+/// Send 404 response when no tunnel is found
 async fn send_no_tunnel_response(stream: &mut TcpStream, host: &str) -> Result<()> {
+    let template = NotFoundTemplate { host };
+    let body = template.render()?;
+
     let response = format!(
-        "HTTP/1.1 502 Bad Gateway\r\n\
-         Content-Type: text/plain\r\n\
-         Content-Length: 52\r\n\
+        "HTTP/1.1 404 Not Found\r\n\
+         Content-Type: text/html; charset=utf-8\r\n\
+         Content-Length: {}\r\n\
+         Cache-Control: no-cache\r\n\
          \r\n\
-         No tunnel registered for domain: {}",
-        host
+         {}",
+        body.len(),
+        body
     );
     stream.write_all(response.as_bytes()).await?;
     Ok(())
