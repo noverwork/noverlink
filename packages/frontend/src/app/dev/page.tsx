@@ -423,7 +423,7 @@ export default function DevPage() {
               {
                 key: 'status',
                 header: 'Status',
-                render: (value) => (
+                render: (value: unknown) => (
                   <PulseBadge variant={getStatusVariant(value)} size="sm">
                     {String(value)}
                   </PulseBadge>
@@ -434,7 +434,7 @@ export default function DevPage() {
                 key: 'latency',
                 header: 'Latency',
                 align: 'right',
-                render: (value) => (
+                render: (value: unknown) => (
                   <DataCell value={`${value}ms`} variant={getLatencyVariant(Number(value))} />
                 ),
               },
