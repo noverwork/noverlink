@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
 RUN useradd -m -u 1000 relay
 
 # Copy binary from builder
-COPY --from=builder /app/packages/relay/target/release/relay /usr/local/bin/relay
+COPY --from=builder /app/target/release/relay /usr/local/bin/relay
 
 # Set ownership
 RUN chown relay:relay /usr/local/bin/relay
