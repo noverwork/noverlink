@@ -30,7 +30,7 @@ export default function Page() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-10">
           Secure tunnels for webhooks, demos, and development.
-          A better alternative to ngrok with unlimited tunnels.
+          Unlimited tunnels. One simple price.
         </p>
         <div className="flex items-center justify-center gap-4">
           <GlowButton variant="primary" size="lg" asChild>
