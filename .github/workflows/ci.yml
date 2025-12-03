@@ -297,7 +297,7 @@ jobs:
         working-directory: packages/npm
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          if npm view @noverlink/tunnel@$VERSION version 2>/dev/null; then
+          if npm view @noverlink/cli@$VERSION version 2>/dev/null; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Version $VERSION already published, skipping"
           else
