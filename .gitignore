@@ -51,7 +51,6 @@ out
 
 # Rust
 target/
-Cargo.lock
 
 # Environment variables
 .env
