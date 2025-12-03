@@ -10,24 +10,31 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Create app directory
 WORKDIR /app
 
-# Copy workspace files
+# Step 1: Copy only Cargo manifests for dependency caching
 COPY Cargo.toml Cargo.lock ./
+COPY packages/rs-shared/Cargo.toml ./packages/rs-shared/Cargo.toml
+COPY packages/cli/Cargo.toml ./packages/cli/Cargo.toml
+COPY packages/relay/Cargo.toml ./packages/relay/Cargo.toml
 
-# Copy shared library
+# Step 2: Create dummy source files to build dependencies
+RUN mkdir -p packages/rs-shared/src packages/cli/src packages/relay/src && \
+    echo "fn main() {}" > packages/cli/src/main.rs && \
+    echo "fn main() {}" > packages/relay/src/main.rs && \
+    echo "" > packages/rs-shared/src/lib.rs
+
+# Step 3: Build dependencies only (this layer gets cached!)
+RUN cargo build --release --package relay
+
+# Step 4: Copy real source code
 COPY packages/rs-shared ./packages/rs-shared
-
-# Copy CLI (needed by Cargo workspace)
 COPY packages/cli ./packages/cli
-
-# Copy relay source
 COPY packages/relay ./packages/relay
 
-# Build relay in release mode
-WORKDIR /app/packages/relay
-RUN cargo build --release
+# Step 5: Touch source files to invalidate cache and rebuild only our code
+RUN touch packages/rs-shared/src/lib.rs packages/relay/src/main.rs && \
+    cargo build --release --package relay
 
 # Stage 2: Runtime
 FROM debian:bookworm-slim

@@ -33,16 +33,25 @@ RUN npx nx sync --yes && npx nx run-many --target=build --projects=@noverlink/in
 # Build backend
 RUN NX_DAEMON=false npm run backend:build
 
-# Stage 2: Runtime
+# Stage 2: Prune dev dependencies
+FROM node:22.14-slim AS pruner
+
+WORKDIR /app
+
+# Copy package files and node_modules from builder
+COPY --from=builder /app/package.json /app/package-lock.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+# Prune dev dependencies (faster than fresh npm ci)
+RUN npm prune --omit=dev
+
+# Stage 3: Runtime
 FROM node:22.14-slim AS runner
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json ./
-
-# Install production dependencies only
-RUN npm ci --omit=dev --ignore-scripts
+# Copy pruned node_modules from pruner stage
+COPY --from=pruner /app/node_modules ./node_modules
 
 # Copy built application
 COPY --from=builder /app/packages/backend/dist ./dist/backend
