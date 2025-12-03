@@ -6,6 +6,12 @@ const path = require("path");
 const { execSync } = require("child_process");
 const zlib = require("zlib");
 
+// Skip download in development/CI build environment
+if (process.env.NOVERLINK_SKIP_DOWNLOAD || process.env.npm_config_ignore_scripts) {
+  console.log("Skipping binary download (NOVERLINK_SKIP_DOWNLOAD set)");
+  process.exit(0);
+}
+
 const VERSION = require("./package.json").version;
 const CDN_BASE =
   process.env.NOVERLINK_CDN_URL ||
