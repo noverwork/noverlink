@@ -7,8 +7,14 @@ const { execSync } = require("child_process");
 const zlib = require("zlib");
 
 // Skip download in development/CI build environment
-if (process.env.NOVERLINK_SKIP_DOWNLOAD || process.env.npm_config_ignore_scripts) {
-  console.log("Skipping binary download (NOVERLINK_SKIP_DOWNLOAD set)");
+if (
+  process.env.NOVERLINK_SKIP_DOWNLOAD ||
+  process.env.npm_config_ignore_scripts ||
+  process.env.CI ||
+  process.env.GITHUB_ACTIONS ||
+  process.env.GITEA_ACTIONS
+) {
+  console.log("Skipping binary download (CI environment detected)");
   process.exit(0);
 }
 
