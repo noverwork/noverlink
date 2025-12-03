@@ -12,29 +12,29 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Step 1: Copy only Cargo manifests for dependency caching
+# Step 1: Copy Cargo manifests and shared library (small, rarely changes)
 COPY Cargo.toml Cargo.lock ./
-COPY packages/rs-shared/Cargo.toml ./packages/rs-shared/Cargo.toml
+COPY packages/rs-shared ./packages/rs-shared
 COPY packages/cli/Cargo.toml ./packages/cli/Cargo.toml
 COPY packages/relay/Cargo.toml ./packages/relay/Cargo.toml
 
-# Step 2: Create dummy source files to build dependencies
-RUN mkdir -p packages/rs-shared/src packages/cli/src packages/relay/src && \
+# Step 2: Create dummy source files for cli and relay
+RUN mkdir -p packages/cli/src packages/relay/src && \
     echo "fn main() {}" > packages/cli/src/main.rs && \
-    echo "fn main() {}" > packages/relay/src/main.rs && \
-    echo "" > packages/rs-shared/src/lib.rs
+    echo "fn main() {}" > packages/relay/src/main.rs
 
 # Step 3: Build dependencies only (this layer gets cached!)
-RUN cargo build --release --package relay
+RUN cargo build --release --package relay 2>/dev/null || true
+# Clean up dummy builds so real source compiles fresh
+RUN rm -rf target/release/.fingerprint/relay-* target/release/deps/relay-* \
+    target/release/.fingerprint/noverlink_cli-* target/release/deps/noverlink_cli-*
 
 # Step 4: Copy real source code
-COPY packages/rs-shared ./packages/rs-shared
 COPY packages/cli ./packages/cli
 COPY packages/relay ./packages/relay
 
-# Step 5: Touch source files to invalidate cache and rebuild only our code
-RUN touch packages/rs-shared/src/lib.rs packages/relay/src/main.rs && \
-    cargo build --release --package relay
+# Step 5: Build relay
+RUN cargo build --release --package relay
 
 # Stage 2: Runtime
 FROM debian:bookworm-slim

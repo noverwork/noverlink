@@ -13,7 +13,7 @@ packages/*/out-tsc
 # Rust build artifacts
 target
 packages/*/target
-Cargo.lock
+# Note: Cargo.lock is NOT excluded - needed for reproducible builds
 
 # Development files
 .env
