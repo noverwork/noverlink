@@ -49,6 +49,13 @@ RUN npx nx sync --yes && NX_DAEMON=false npx nx run-many --target=build --projec
 
 # Build frontend
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Build-time environment variables (can be overridden via --build-arg)
+ARG NEXT_PUBLIC_API_URL=http://localhost:3000
+ARG NEXT_PUBLIC_APP_URL=http://localhost:4200
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+
 RUN NX_DAEMON=false npm run frontend:build
 
 # Stage 3: Runtime
