@@ -1,0 +1,352 @@
+---
+kind: pipeline
+type: kubernetes
+name: lint-and-test
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+    - pull_request
+
+steps:
+  - name: install
+    image: node:22-bookworm
+    commands:
+      - npm ci
+
+  - name: build-deps
+    image: node:22-bookworm
+    commands:
+      - npx nx run-many --target=build --projects=@noverlink/ui-shared,@noverlink/interfaces,shared
+    depends_on:
+      - install
+
+  - name: typecheck
+    image: node:22-bookworm
+    commands:
+      - npm run typecheck
+    depends_on:
+      - build-deps
+
+  - name: lint-eslint
+    image: node:22-bookworm
+    commands:
+      - npm run lint
+    depends_on:
+      - build-deps
+
+  - name: lint-cargo-fmt
+    image: rust:1.83-bookworm
+    commands:
+      - rustup component add rustfmt
+      - cargo fmt --all -- --check
+
+  - name: lint-clippy
+    image: rust:1.83-bookworm
+    commands:
+      - rustup component add clippy
+      - cargo clippy --all-targets --all-features -- -D warnings
+
+  - name: test
+    image: node:22-bookworm
+    commands:
+      - npm run test
+    depends_on:
+      - build-deps
+
+---
+kind: pipeline
+type: kubernetes
+name: build-and-push
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
+depends_on:
+  - lint-and-test
+
+steps:
+  - name: build-backend
+    image: plugins/docker
+    settings:
+      registry: gitea.noverwork.com
+      repo: gitea.noverwork.com/noverwork/noverlink-backend
+      dockerfile: packages/backend/Dockerfile
+      tags:
+        - ${DRONE_COMMIT_SHA}
+        - latest
+      username:
+        from_secret: registry_username
+      password:
+        from_secret: registry_password
+
+  - name: build-frontend
+    image: plugins/docker
+    settings:
+      registry: gitea.noverwork.com
+      repo: gitea.noverwork.com/noverwork/noverlink-frontend
+      dockerfile: packages/frontend/Dockerfile
+      tags:
+        - ${DRONE_COMMIT_SHA}
+        - latest
+      username:
+        from_secret: registry_username
+      password:
+        from_secret: registry_password
+
+  - name: build-migrator
+    image: plugins/docker
+    settings:
+      registry: gitea.noverwork.com
+      repo: gitea.noverwork.com/noverwork/noverlink-migrator
+      dockerfile: packages/migrator/Dockerfile
+      tags:
+        - ${DRONE_COMMIT_SHA}
+        - latest
+      username:
+        from_secret: registry_username
+      password:
+        from_secret: registry_password
+
+  - name: build-relay
+    image: plugins/docker
+    settings:
+      registry: gitea.noverwork.com
+      repo: gitea.noverwork.com/noverwork/noverlink-relay
+      dockerfile: packages/relay/Dockerfile
+      tags:
+        - ${DRONE_COMMIT_SHA}
+        - latest
+      username:
+        from_secret: registry_username
+      password:
+        from_secret: registry_password
+
+---
+kind: pipeline
+type: kubernetes
+name: build-cli-linux-x64
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+    - pull_request
+
+depends_on:
+  - lint-and-test
+
+steps:
+  - name: build
+    image: rust:1.83-bookworm
+    commands:
+      - cargo build --release --package noverlink-cli --target x86_64-unknown-linux-gnu
+
+  - name: package
+    image: alpine:latest
+    commands:
+      - cd target/x86_64-unknown-linux-gnu/release
+      - tar czf ../../../noverlink-linux-x64.tar.gz noverlink
+    depends_on:
+      - build
+
+  - name: upload
+    image: plugins/s3
+    settings:
+      bucket: noverlink-artifacts
+      source: noverlink-linux-x64.tar.gz
+      target: /cli/${DRONE_COMMIT_SHA}/
+      access_key:
+        from_secret: s3_access_key
+      secret_key:
+        from_secret: s3_secret_key
+      endpoint:
+        from_secret: s3_endpoint
+    depends_on:
+      - package
+    when:
+      event:
+        - push
+      branch:
+        - main
+
+---
+kind: pipeline
+type: kubernetes
+name: build-cli-linux-arm64
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+    - pull_request
+
+depends_on:
+  - lint-and-test
+
+node_selector:
+  kubernetes.io/arch: arm64
+
+steps:
+  - name: build
+    image: rust:1.83-bookworm
+    commands:
+      - cargo build --release --package noverlink-cli
+
+  - name: package
+    image: alpine:latest
+    commands:
+      - cd target/release
+      - tar czf ../../noverlink-linux-arm64.tar.gz noverlink
+    depends_on:
+      - build
+
+  - name: upload
+    image: plugins/s3
+    settings:
+      bucket: noverlink-artifacts
+      source: noverlink-linux-arm64.tar.gz
+      target: /cli/${DRONE_COMMIT_SHA}/
+      access_key:
+        from_secret: s3_access_key
+      secret_key:
+        from_secret: s3_secret_key
+      endpoint:
+        from_secret: s3_endpoint
+    depends_on:
+      - package
+    when:
+      event:
+        - push
+      branch:
+        - main
+
+---
+kind: pipeline
+type: kubernetes
+name: release-cli
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
+depends_on:
+  - build-cli-linux-x64
+  - build-cli-linux-arm64
+
+steps:
+  - name: download-artifacts
+    image: plugins/s3
+    settings:
+      bucket: noverlink-artifacts
+      source: /cli/${DRONE_COMMIT_SHA}/*
+      target: artifacts/
+      access_key:
+        from_secret: s3_access_key
+      secret_key:
+        from_secret: s3_secret_key
+      endpoint:
+        from_secret: s3_endpoint
+
+  - name: generate-checksums
+    image: alpine:latest
+    commands:
+      - cd artifacts
+      - sha256sum noverlink-* > checksums.txt
+      - cat checksums.txt
+    depends_on:
+      - download-artifacts
+
+  - name: release-gitea
+    image: alpine:latest
+    environment:
+      GITEA_TOKEN:
+        from_secret: gitea_token
+    commands:
+      - apk add --no-cache curl jq
+      - |
+        VERSION="0.1.0"
+        REPO="noverwork/noverlink"
+        API="https://gitea.noverwork.com/api/v1"
+
+        RELEASE_ID=$(curl -s -H "Authorization: token $GITEA_TOKEN" \
+          "$API/repos/$REPO/releases/tags/v$VERSION" | jq -r '.id // empty')
+
+        if [ -z "$RELEASE_ID" ]; then
+          RELEASE_ID=$(curl -s -X POST -H "Authorization: token $GITEA_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag_name\": \"v$VERSION\", \"name\": \"v$VERSION\", \"body\": \"Release v$VERSION\", \"draft\": false}" \
+            "$API/repos/$REPO/releases" | jq -r '.id')
+          echo "Created release: $RELEASE_ID"
+        else
+          curl -s -H "Authorization: token $GITEA_TOKEN" \
+            "$API/repos/$REPO/releases/$RELEASE_ID/assets" | jq -r '.[].id' | while read ASSET_ID; do
+            curl -s -X DELETE -H "Authorization: token $GITEA_TOKEN" \
+              "$API/repos/$REPO/releases/$RELEASE_ID/assets/$ASSET_ID"
+          done
+          echo "Updated release: $RELEASE_ID"
+        fi
+
+        for file in artifacts/*; do
+          filename=$(basename "$file")
+          echo "Uploading $filename..."
+          curl -s -X POST -H "Authorization: token $GITEA_TOKEN" \
+            -F "attachment=@$file" \
+            "$API/repos/$REPO/releases/$RELEASE_ID/assets?name=$filename"
+        done
+    depends_on:
+      - generate-checksums
+
+---
+kind: pipeline
+type: kubernetes
+name: publish-npm
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
+depends_on:
+  - release-cli
+
+steps:
+  - name: check-version
+    image: node:22-bookworm
+    commands:
+      - cd packages/npm
+      - VERSION=$(node -p "require('./package.json').version")
+      - |
+        if npm view @noverlink/cli@$VERSION version 2>/dev/null; then
+          echo "Version $VERSION already published, skipping"
+          echo "skip" > /drone/src/.publish_skip
+        else
+          echo "Version $VERSION not found, will publish"
+        fi
+
+  - name: publish
+    image: node:22-bookworm
+    environment:
+      NODE_AUTH_TOKEN:
+        from_secret: npm_token
+    commands:
+      - |
+        if [ -f /drone/src/.publish_skip ]; then
+          echo "Skipping publish"
+          exit 0
+        fi
+      - cd packages/npm
+      - echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
+      - npm publish --access public
+    depends_on:
+      - check-version
