@@ -324,7 +324,7 @@ steps:
   - name: check-version
     image: node:22-bookworm
     commands:
-      - cd packages/npm
+      - cd packages/npm-cli
       - VERSION=$(node -p "require('./package.json').version")
       - |
         if npm view @noverlink/cli@$VERSION version 2>/dev/null; then
@@ -345,7 +345,7 @@ steps:
           echo "Skipping publish"
           exit 0
         fi
-      - cd packages/npm
+      - cd packages/npm-cli
       - echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
       - npm publish --access public
     depends_on:
