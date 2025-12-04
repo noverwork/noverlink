@@ -11,10 +11,26 @@ trigger:
     - pull_request
 
 steps:
+  - name: debug-network
+    image: node:22-bookworm
+    commands:
+      - echo "=== DNS Config ==="
+      - cat /etc/resolv.conf
+      - echo "=== Test DNS Resolution ==="
+      - nslookup registry.npmjs.org || true
+      - echo "=== Test HTTP Connectivity ==="
+      - curl -v --connect-timeout 10 https://registry.npmjs.org/ 2>&1 | head -50 || true
+      - echo "=== Network Interfaces ==="
+      - ip addr || ifconfig || true
+      - echo "=== Route Table ==="
+      - ip route || route || true
+
   - name: install
     image: node:22-bookworm
     commands:
       - npm ci
+    depends_on:
+      - debug-network
 
   - name: build-deps
     image: node:22-bookworm
