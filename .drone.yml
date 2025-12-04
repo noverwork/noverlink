@@ -130,143 +130,46 @@ steps:
 ---
 kind: pipeline
 type: kubernetes
-name: build-cli-linux-x64
+name: build-and-release-cli
 
 trigger:
   branch:
     - main
   event:
     - push
-    - pull_request
 
 depends_on:
   - lint-and-test
 
 steps:
-  - name: build
+  - name: build-linux-x64
     image: rust:1.83-bookworm
     commands:
       - cargo build --release --package noverlink-cli --target x86_64-unknown-linux-gnu
+      - mkdir -p artifacts
+      - cp target/x86_64-unknown-linux-gnu/release/noverlink-cli artifacts/noverlink
+      - cd artifacts && tar czf noverlink-linux-x64.tar.gz noverlink && rm noverlink
 
-  - name: package
-    image: alpine:latest
-    commands:
-      - cd target/x86_64-unknown-linux-gnu/release
-      - mv noverlink-cli noverlink
-      - tar czf ../../../noverlink-linux-x64.tar.gz noverlink
-    depends_on:
-      - build
-
-  - name: upload
-    image: plugins/s3
-    settings:
-      bucket: noverlink-artifacts
-      source: noverlink-linux-x64.tar.gz
-      target: /cli/${DRONE_COMMIT_SHA}/
-      access_key:
-        from_secret: s3_access_key
-      secret_key:
-        from_secret: s3_secret_key
-      endpoint:
-        from_secret: s3_endpoint
-    depends_on:
-      - package
-    when:
-      event:
-        - push
-      branch:
-        - main
-
----
-kind: pipeline
-type: kubernetes
-name: build-cli-linux-arm64
-
-trigger:
-  branch:
-    - main
-  event:
-    - push
-    - pull_request
-
-depends_on:
-  - lint-and-test
-
-steps:
-  - name: build
+  - name: build-linux-arm64
     image: rust:1.83-bookworm
     commands:
       - apt-get update && apt-get install -y gcc-aarch64-linux-gnu
       - rustup target add aarch64-unknown-linux-gnu
       - export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
       - cargo build --release --package noverlink-cli --target aarch64-unknown-linux-gnu
-
-  - name: package
-    image: alpine:latest
-    commands:
-      - cd target/aarch64-unknown-linux-gnu/release
-      - mv noverlink-cli noverlink
-      - tar czf ../../../noverlink-linux-arm64.tar.gz noverlink
-    depends_on:
-      - build
-
-  - name: upload
-    image: plugins/s3
-    settings:
-      bucket: noverlink-artifacts
-      source: noverlink-linux-arm64.tar.gz
-      target: /cli/${DRONE_COMMIT_SHA}/
-      access_key:
-        from_secret: s3_access_key
-      secret_key:
-        from_secret: s3_secret_key
-      endpoint:
-        from_secret: s3_endpoint
-    depends_on:
-      - package
-    when:
-      event:
-        - push
-      branch:
-        - main
-
----
-kind: pipeline
-type: kubernetes
-name: release-cli
-
-trigger:
-  branch:
-    - main
-  event:
-    - push
-
-depends_on:
-  - build-cli-linux-x64
-  - build-cli-linux-arm64
-
-steps:
-  - name: download-artifacts
-    image: plugins/s3
-    settings:
-      bucket: noverlink-artifacts
-      source: /cli/${DRONE_COMMIT_SHA}/*
-      target: artifacts/
-      access_key:
-        from_secret: s3_access_key
-      secret_key:
-        from_secret: s3_secret_key
-      endpoint:
-        from_secret: s3_endpoint
+      - mkdir -p artifacts
+      - cp target/aarch64-unknown-linux-gnu/release/noverlink-cli artifacts/noverlink
+      - cd artifacts && tar czf noverlink-linux-arm64.tar.gz noverlink && rm noverlink
 
   - name: generate-checksums
     image: alpine:latest
     commands:
       - cd artifacts
-      - sha256sum noverlink-* > checksums.txt
+      - sha256sum noverlink-*.tar.gz > checksums.txt
       - cat checksums.txt
     depends_on:
-      - download-artifacts
+      - build-linux-x64
+      - build-linux-arm64
 
   - name: release-gitea
     image: alpine:latest
@@ -320,7 +223,7 @@ trigger:
     - push
 
 depends_on:
-  - release-cli
+  - build-and-release-cli
 
 steps:
   - name: check-version
