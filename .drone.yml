@@ -192,21 +192,21 @@ trigger:
 depends_on:
   - lint-and-test
 
-node_selector:
-  kubernetes.io/arch: arm64
-
 steps:
   - name: build
     image: rust:1.83-bookworm
     commands:
-      - cargo build --release --package noverlink-cli
+      - apt-get update && apt-get install -y gcc-aarch64-linux-gnu
+      - rustup target add aarch64-unknown-linux-gnu
+      - export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+      - cargo build --release --package noverlink-cli --target aarch64-unknown-linux-gnu
 
   - name: package
     image: alpine:latest
     commands:
-      - cd target/release
+      - cd target/aarch64-unknown-linux-gnu/release
       - mv noverlink-cli noverlink
-      - tar czf ../../noverlink-linux-arm64.tar.gz noverlink
+      - tar czf ../../../noverlink-linux-arm64.tar.gz noverlink
     depends_on:
       - build
 
