@@ -1,9 +1,12 @@
-name: Release CLI
+name: Build CLI
 
 on:
   push:
+    branches: [main]
     tags:
       - "v*"
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
