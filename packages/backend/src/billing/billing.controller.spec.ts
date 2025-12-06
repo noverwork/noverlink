@@ -1,7 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { AppConfigService } from '../app-config';
 import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
+import { PolarWebhookGuard } from './guards';
+
+// Polar webhook payload type (simplified for testing)
+interface PolarWebhookPayload {
+  type: string;
+  data: {
+    id?: string;
+    status?: string;
+    customerId?: string | null;
+    customerEmail?: string | null;
+    productId?: string;
+    subscriptionId?: string | null;
+    currentPeriodEnd?: Date | null;
+  };
+}
 
 describe('BillingController', () => {
   let controller: BillingController;
@@ -15,12 +31,20 @@ describe('BillingController', () => {
       getUserSubscription: jest.fn(),
     };
 
+    const mockConfigService = {
+      polar: { webhookSecret: 'test-secret' },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BillingController],
       providers: [
         { provide: BillingService, useValue: mockBillingService },
+        { provide: AppConfigService, useValue: mockConfigService },
       ],
-    }).compile();
+    })
+      .overrideGuard(PolarWebhookGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<BillingController>(BillingController);
     billingService = module.get(BillingService);
@@ -30,66 +54,124 @@ describe('BillingController', () => {
     jest.clearAllMocks();
   });
 
-  describe('webhookCheckout', () => {
-    it('should call syncCheckout and return ok', async () => {
+  describe('handlePolarWebhook', () => {
+    it('should handle checkout.updated with succeeded status', async () => {
       billingService.syncCheckout.mockResolvedValue(undefined);
 
-      const dto = {
+      const payload: PolarWebhookPayload = {
+        type: 'checkout.updated',
+        data: {
+          status: 'succeeded',
+          customerId: 'cus_123',
+          customerEmail: 'test@example.com',
+          productId: 'prod_123',
+          subscriptionId: 'sub_456',
+        },
+      };
+
+      const mockReq = { polarPayload: payload } as never;
+      const result = await controller.handlePolarWebhook(mockReq);
+
+      expect(result).toEqual({ ok: true });
+      expect(billingService.syncCheckout).toHaveBeenCalledWith({
+        customerId: 'cus_123',
         customerEmail: 'test@example.com',
         productId: 'prod_123',
         subscriptionId: 'sub_456',
-        customerId: 'cus_789',
+      });
+    });
+
+    it('should not call syncCheckout for non-succeeded checkout', async () => {
+      const payload: PolarWebhookPayload = {
+        type: 'checkout.updated',
+        data: {
+          status: 'pending',
+          productId: 'prod_123',
+        },
       };
 
-      const result = await controller.webhookCheckout(dto);
+      const mockReq = { polarPayload: payload } as never;
+      const result = await controller.handlePolarWebhook(mockReq);
 
       expect(result).toEqual({ ok: true });
-      expect(billingService.syncCheckout).toHaveBeenCalledWith(dto);
+      expect(billingService.syncCheckout).not.toHaveBeenCalled();
     });
 
-    it('should propagate errors from service', async () => {
-      billingService.syncCheckout.mockRejectedValue(new Error('DB error'));
-
-      await expect(
-        controller.webhookCheckout({
-          customerEmail: 'test@example.com',
-          productId: 'prod_123',
-        })
-      ).rejects.toThrow('DB error');
-    });
-  });
-
-  describe('webhookSubscriptionActive', () => {
-    it('should call handleSubscriptionActive and return ok', async () => {
+    it('should handle subscription.active', async () => {
       billingService.handleSubscriptionActive.mockResolvedValue(undefined);
 
-      const dto = {
+      const payload: PolarWebhookPayload = {
+        type: 'subscription.active',
+        data: {
+          id: 'sub_123',
+          customerId: 'cus_123',
+          productId: 'prod_pro',
+          status: 'active',
+          currentPeriodEnd: new Date('2025-12-31'),
+        },
+      };
+
+      const mockReq = { polarPayload: payload } as never;
+      const result = await controller.handlePolarWebhook(mockReq);
+
+      expect(result).toEqual({ ok: true });
+      expect(billingService.handleSubscriptionActive).toHaveBeenCalledWith({
         subscriptionId: 'sub_123',
         customerId: 'cus_123',
         productId: 'prod_pro',
         status: 'active',
-        currentPeriodEnd: '2025-12-31',
-      };
-
-      const result = await controller.webhookSubscriptionActive(dto);
-
-      expect(result).toEqual({ ok: true });
-      expect(billingService.handleSubscriptionActive).toHaveBeenCalledWith(dto);
+        currentPeriodEnd: '2025-12-31T00:00:00.000Z',
+      });
     });
-  });
 
-  describe('webhookSubscriptionCanceled', () => {
-    it('should call handleSubscriptionCanceled and return ok', async () => {
+    it('should handle subscription.canceled', async () => {
       billingService.handleSubscriptionCanceled.mockResolvedValue(undefined);
 
-      const dto = {
-        subscriptionId: 'sub_123',
+      const payload: PolarWebhookPayload = {
+        type: 'subscription.canceled',
+        data: {
+          id: 'sub_123',
+        },
       };
 
-      const result = await controller.webhookSubscriptionCanceled(dto);
+      const mockReq = { polarPayload: payload } as never;
+      const result = await controller.handlePolarWebhook(mockReq);
 
       expect(result).toEqual({ ok: true });
-      expect(billingService.handleSubscriptionCanceled).toHaveBeenCalledWith(dto);
+      expect(billingService.handleSubscriptionCanceled).toHaveBeenCalledWith({
+        subscriptionId: 'sub_123',
+      });
+    });
+
+    it('should handle subscription.revoked', async () => {
+      billingService.handleSubscriptionCanceled.mockResolvedValue(undefined);
+
+      const payload: PolarWebhookPayload = {
+        type: 'subscription.revoked',
+        data: {
+          id: 'sub_123',
+        },
+      };
+
+      const mockReq = { polarPayload: payload } as never;
+      const result = await controller.handlePolarWebhook(mockReq);
+
+      expect(result).toEqual({ ok: true });
+      expect(billingService.handleSubscriptionCanceled).toHaveBeenCalledWith({
+        subscriptionId: 'sub_123',
+      });
+    });
+
+    it('should handle unknown webhook types gracefully', async () => {
+      const payload: PolarWebhookPayload = {
+        type: 'unknown.event',
+        data: {},
+      };
+
+      const mockReq = { polarPayload: payload } as never;
+      const result = await controller.handlePolarWebhook(mockReq);
+
+      expect(result).toEqual({ ok: true });
     });
   });
 

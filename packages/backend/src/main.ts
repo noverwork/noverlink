@@ -8,6 +8,7 @@ import { AppConfigService } from './app-config';
 async function bootstrap() {
   const app = await NestFactory.create<NestApplication>(AppModule, {
     bufferLogs: true,
+    rawBody: true, // Required for Polar webhook signature verification
   });
 
   const appConfigService = app.get(AppConfigService);

@@ -87,4 +87,12 @@ export class AppConfigService {
       secret: this.configService.getOrThrow<string>(EnvField.RelaySecret),
     };
   }
+
+  get polar() {
+    return {
+      webhookSecret: this.configService.getOrThrow<string>(
+        EnvField.PolarWebhookSecret
+      ),
+    };
+  }
 }

@@ -38,11 +38,21 @@ FROM node:22.14-slim AS runner
 
 WORKDIR /app
 
-# Copy package files and install production dependencies only
-COPY package.json package-lock.json ./
+# Copy package files for workspace structure
+COPY --from=builder /app/package.json /app/package-lock.json ./
+COPY --from=builder /app/packages/migrator/package.json ./packages/migrator/package.json
+COPY --from=builder /app/packages/backend-shared/package.json ./packages/backend-shared/package.json
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
+COPY --from=builder /app/packages/interfaces/package.json ./packages/interfaces/package.json
+
+# Install production dependencies
 RUN npm ci --omit=dev --ignore-scripts --retry 3 || (sleep 5 && npm ci --omit=dev --ignore-scripts --retry 3)
 
+# Copy built migrator and its dependencies
 COPY --from=builder /app/dist/apps/migrator ./dist/migrator
+COPY --from=builder /app/dist/shared ./dist/shared
+COPY --from=builder /app/dist/interfaces ./dist/interfaces
+
 COPY packages/migrator/docker-entrypoint.sh ./
 RUN chmod +x ./docker-entrypoint.sh
 

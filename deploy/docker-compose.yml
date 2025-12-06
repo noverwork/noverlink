@@ -1,63 +1,143 @@
 # Noverlink Production Docker Compose
 #
-# Full production stack: relay, caddy, postgres, redis
+# Full production stack: backend, frontend, relay, migrator, caddy, postgres
 #
 # Prerequisites:
-#   - Set environment variables in .env file
+#   - Set environment variables in .env file (copy from .env.example)
 #   - Ensure DNS records point to this server:
-#     - *.noverlink.com -> server IP
-#     - ws.noverlink.com -> server IP
+#     - noverlink.com -> server IP (API + Frontend)
+#     - *.noverlink.com -> server IP (Tunnel subdomains)
+#     - ws.noverlink.com -> server IP [Cloudflare DNS only, no proxy]
 #   - Open ports 80, 443 in firewall
+#   - Place Cloudflare Origin CA certs in ./caddy/certs/
 #
 # Usage:
 #   cd deploy
+#   cp .env.example .env  # Edit with your values
 #   docker compose up -d
+#
+# View logs:
+#   docker compose logs -f
+#   docker compose logs -f backend
 
 services:
-  # Reverse proxy with Cloudflare Origin CA
+  # =============================================================================
+  # Reverse Proxy
+  # =============================================================================
   caddy:
     image: caddy:2-alpine
     container_name: noverlink-caddy
     ports:
-      - "80:80"     # HTTP (redirects to HTTPS)
-      - "443:443"   # HTTPS
+      - "80:80"
+      - "443:443"
     environment:
       BASE_DOMAIN: ${BASE_DOMAIN}
     volumes:
-      # Caddyfile configuration
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      # Cloudflare Origin CA certificates (must be generated manually)
       - ./caddy/certs:/etc/caddy/certs:ro
-      # Caddy data and config persistence
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
       relay:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - noverlink
 
-  # Relay server (Rust)
+  # =============================================================================
+  # Application Services
+  # =============================================================================
+  backend:
+    image: gitea.noverwork.com/noverwork/noverlink-backend:${IMAGE_TAG:-latest}
+    container_name: noverlink-backend
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      APP_BIND: 0.0.0.0
+      APP_PORT: 3000
+      DB_CLIENT_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DB_DEBUG: "false"
+      DB_SSL: "false"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      FRONTEND_URL: https://${BASE_DOMAIN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: https://api.${BASE_DOMAIN}/api/auth/google/callback
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_CALLBACK_URL: https://api.${BASE_DOMAIN}/api/auth/github/callback
+      TICKET_SECRET: ${TICKET_SECRET}
+      RELAY_URL: wss://ws.${BASE_DOMAIN}
+      RELAY_SECRET: ${RELAY_SECRET}
+      POLAR_WEBHOOK_SECRET: ${POLAR_WEBHOOK_SECRET}
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - noverlink
+
+  frontend:
+    image: gitea.noverwork.com/noverwork/noverlink-frontend:${IMAGE_TAG:-latest}
+    container_name: noverlink-frontend
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: https://api.${BASE_DOMAIN}/api
+      NEXT_PUBLIC_APP_URL: https://${BASE_DOMAIN}
+      POLAR_ACCESS_TOKEN: ${POLAR_ACCESS_TOKEN:-}
+      POLAR_SERVER: ${POLAR_SERVER:-production}
+      NEXT_PUBLIC_POLAR_HOBBYIST_PRODUCT_ID: ${POLAR_HOBBYIST_PRODUCT_ID:-}
+      NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID: ${POLAR_PRO_PRODUCT_ID:-}
+    expose:
+      - "4200"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4200', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - noverlink
+
   relay:
-    build:
-      context: ../packages/relay
-      dockerfile: Dockerfile
+    image: gitea.noverwork.com/noverwork/noverlink-relay:${IMAGE_TAG:-latest}
     container_name: noverlink-relay
     environment:
       WS_PORT: 8444
       HTTP_PORT: 8080
       BASE_DOMAIN: ${BASE_DOMAIN}
       RUST_LOG: ${RUST_LOG:-info}
+      TICKET_SECRET: ${TICKET_SECRET}
+      BACKEND_URL: http://backend:3000/api
+      RELAY_SECRET: ${RELAY_SECRET}
+      RELAY_ID: ${RELAY_ID:-relay-1}
     expose:
       - "8080"
       - "8444"
     depends_on:
       postgres:
         condition: service_healthy
-      # Redis not needed for MVP
-      # redis:
-      #   condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8080"]
@@ -68,7 +148,21 @@ services:
     networks:
       - noverlink
 
-  # PostgreSQL database
+  migrator:
+    image: gitea.noverwork.com/noverwork/noverlink-migrator:${IMAGE_TAG:-latest}
+    container_name: noverlink-migrator
+    environment:
+      DB_CLIENT_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - noverlink
+
+  # =============================================================================
+  # Data Services
+  # =============================================================================
   postgres:
     image: postgres:16-alpine
     container_name: noverlink-postgres
@@ -89,9 +183,7 @@ services:
     networks:
       - noverlink
 
-  # Redis cache (OPTIONAL - not currently used by relay)
-  # Uncomment when implementing multi-relay support or session persistence
-  #
+  # Redis cache (OPTIONAL - uncomment when needed)
   # redis:
   #   image: redis:7-alpine
   #   container_name: noverlink-redis
@@ -117,4 +209,4 @@ volumes:
   caddy_data:
   caddy_config:
   postgres_data:
-  redis_data:
+  # redis_data:

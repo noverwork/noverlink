@@ -24,4 +24,6 @@ export enum EnvField {
   TicketSecret = 'TICKET_SECRET',
   RelayUrl = 'RELAY_URL',
   RelaySecret = 'RELAY_SECRET',
+  // Polar.sh
+  PolarWebhookSecret = 'POLAR_WEBHOOK_SECRET',
 }

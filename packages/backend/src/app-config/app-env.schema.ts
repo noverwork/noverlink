@@ -88,4 +88,9 @@ export class AppEnvSchema {
   @IsString()
   @MinLength(16)
   [EnvField.RelaySecret]!: string;
+
+  // Polar.sh
+  @IsString()
+  @MinLength(16)
+  [EnvField.PolarWebhookSecret]!: string;
 }

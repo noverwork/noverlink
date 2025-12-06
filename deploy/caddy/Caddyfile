@@ -7,37 +7,51 @@
 #   1. Generate Cloudflare Origin CA certificate (see certs/README.md)
 #   2. Place origin.pem and origin.key in deploy/caddy/certs/
 #   3. Set Cloudflare SSL/TLS mode to "Full (strict)"
-#   4. DNS: *.noverlink.com → server IP [Proxied ON]
-#   5. DNS: ws.noverlink.com → server IP [Proxied OFF]
+#   4. DNS: noverlink.com → server IP [Proxied ON]
+#   5. DNS: api.noverlink.com → server IP [Proxied ON]
+#   6. DNS: *.noverlink.com → server IP [Proxied ON]
+#   7. DNS: ws.noverlink.com → server IP [Proxied OFF - DNS only]
 
-# Wildcard subdomain routing for tunnels
-# Example: funny-cat-123.noverlink.com -> relay HTTP handler
-*.{$BASE_DOMAIN} {
-    # Use Cloudflare Origin CA certificate
-    # This certificate is trusted by Cloudflare but NOT by browsers
-    # Only use when Cloudflare proxy is enabled (orange cloud)
+# Frontend - main domain
+{$BASE_DOMAIN} {
     tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
 
-    # Forward to relay HTTP handler (container name in Docker network)
-    reverse_proxy relay:8080 {
-        # Health check
+    reverse_proxy frontend:4200 {
+        health_uri /
+        health_interval 10s
+        health_timeout 5s
+    }
+}
+
+# Backend API
+api.{$BASE_DOMAIN} {
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+
+    reverse_proxy backend:3000 {
         health_uri /health
         health_interval 10s
         health_timeout 5s
     }
 }
 
+# Wildcard subdomain routing for tunnels
+# Example: funny-cat-123.noverlink.com -> relay HTTP handler
+*.{$BASE_DOMAIN} {
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+
+    # Skip api subdomain (handled above)
+    @not_api not host api.{$BASE_DOMAIN}
+    handle @not_api {
+        reverse_proxy relay:8080
+    }
+}
+
 # WebSocket endpoint for CLI connections
 # Example: ws.noverlink.com -> relay WebSocket handler
+# NOTE: This uses Let's Encrypt because Cloudflare proxy is OFF (DNS only)
 ws.{$BASE_DOMAIN} {
     # Let's Encrypt automatic certificate (DNS only mode)
     # No tls directive = Caddy automatically obtains Let's Encrypt cert
-    # This works because ws.noverlink.com has Cloudflare proxy OFF (DNS only)
 
-    # Forward to relay WebSocket handler
-    reverse_proxy relay:8444 {
-        health_uri /health
-        health_interval 10s
-        health_timeout 5s
-    }
+    reverse_proxy relay:8444
 }
