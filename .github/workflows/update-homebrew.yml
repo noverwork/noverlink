@@ -1,0 +1,89 @@
+name: Update Homebrew Formula
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for release assets
+        run: sleep 30
+
+      - name: Download checksums
+        run: |
+          curl -sL https://github.com/noverwork/noverlink/releases/download/${{ github.event.release.tag_name }}/checksums.txt -o checksums.txt
+          cat checksums.txt
+
+      - name: Parse checksums
+        id: checksums
+        run: |
+          echo "darwin_arm64=$(grep darwin-arm64 checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "darwin_x64=$(grep darwin-x64 checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "linux_arm64=$(grep linux-arm64 checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "linux_x64=$(grep linux-x64 checksums.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: Checkout homebrew-noverlink
+        uses: actions/checkout@v4
+        with:
+          repository: noverwork/homebrew-noverlink
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: Update formula
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+          SHA_DARWIN_ARM64: ${{ steps.checksums.outputs.darwin_arm64 }}
+          SHA_DARWIN_X64: ${{ steps.checksums.outputs.darwin_x64 }}
+          SHA_LINUX_ARM64: ${{ steps.checksums.outputs.linux_arm64 }}
+          SHA_LINUX_X64: ${{ steps.checksums.outputs.linux_x64 }}
+        run: |
+          # Strip 'v' prefix for version
+          CLEAN_VERSION="${VERSION#v}"
+
+          cat > Formula/noverlink.rb << EOF
+          class Noverlink < Formula
+            desc "Local-to-global tunneling CLI - expose localhost to the internet"
+            homepage "https://github.com/noverwork/noverlink"
+            version "${CLEAN_VERSION}"
+            license "MIT"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/noverwork/noverlink/releases/download/${VERSION}/noverlink-darwin-arm64.tar.gz"
+                sha256 "${SHA_DARWIN_ARM64}"
+              end
+              on_intel do
+                url "https://github.com/noverwork/noverlink/releases/download/${VERSION}/noverlink-darwin-x64.tar.gz"
+                sha256 "${SHA_DARWIN_X64}"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "https://github.com/noverwork/noverlink/releases/download/${VERSION}/noverlink-linux-arm64.tar.gz"
+                sha256 "${SHA_LINUX_ARM64}"
+              end
+              on_intel do
+                url "https://github.com/noverwork/noverlink/releases/download/${VERSION}/noverlink-linux-x64.tar.gz"
+                sha256 "${SHA_LINUX_X64}"
+              end
+            end
+
+            def install
+              bin.install "noverlink"
+            end
+
+            test do
+              assert_match "noverlink", shell_output("#{bin}/noverlink --version")
+            end
+          end
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/noverlink.rb
+          git commit -m "feat: Update noverlink to ${{ github.event.release.tag_name }}"
+          git push
