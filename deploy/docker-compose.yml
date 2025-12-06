@@ -52,7 +52,7 @@ services:
   # Application Services
   # =============================================================================
   backend:
-    image: gitea.noverwork.com/noverwork/noverlink-backend:${IMAGE_TAG:-latest}
+    image: ghcr.io/noverwork/noverlink-backend:${IMAGE_TAG:-latest}
     container_name: noverlink-backend
     environment:
       NODE_ENV: production
@@ -94,7 +94,7 @@ services:
       - noverlink
 
   frontend:
-    image: gitea.noverwork.com/noverwork/noverlink-frontend:${IMAGE_TAG:-latest}
+    image: ghcr.io/noverwork/noverlink-frontend:${IMAGE_TAG:-latest}
     container_name: noverlink-frontend
     environment:
       NODE_ENV: production
@@ -120,7 +120,7 @@ services:
       - noverlink
 
   relay:
-    image: gitea.noverwork.com/noverwork/noverlink-relay:${IMAGE_TAG:-latest}
+    image: ghcr.io/noverwork/noverlink-relay:${IMAGE_TAG:-latest}
     container_name: noverlink-relay
     environment:
       WS_PORT: 8444
@@ -148,7 +148,7 @@ services:
       - noverlink
 
   migrator:
-    image: gitea.noverwork.com/noverwork/noverlink-migrator:${IMAGE_TAG:-latest}
+    image: ghcr.io/noverwork/noverlink-migrator:${IMAGE_TAG:-latest}
     container_name: noverlink-migrator
     environment:
       DB_CLIENT_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
