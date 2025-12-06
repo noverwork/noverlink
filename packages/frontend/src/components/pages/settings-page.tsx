@@ -25,10 +25,11 @@ export function SettingsPage() {
           <div>
             <div className="text-sm text-slate-400 mb-2">1. Install the CLI</div>
             <div className="flex items-center gap-2">
-              <code className="flex-1 px-4 py-3 rounded-lg bg-slate-950 font-mono text-sm text-teal-400">
-                cargo install noverlink
-              </code>
-              <CopyButton text="cargo install noverlink" />
+              <div className="flex-1 px-4 py-3 rounded-lg bg-slate-950 font-mono text-sm">
+                <div className="text-teal-400">brew tap noverwork/noverlink</div>
+                <div className="text-slate-300 mt-1">brew install noverlink</div>
+              </div>
+              <CopyButton text="brew tap noverwork/noverlink && brew install noverlink" />
             </div>
           </div>
 

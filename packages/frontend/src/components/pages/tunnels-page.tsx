@@ -165,11 +165,14 @@ export function TunnelsPage() {
           {/* Install instructions */}
           <div className="bg-slate-950 rounded-lg p-4 text-left mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-500">Install CLI</span>
-              <CopyButton text="cargo install noverlink" />
+              <span className="text-xs text-slate-500">Install CLI (macOS/Linux)</span>
+              <CopyButton text="brew tap noverwork/noverlink && brew install noverlink" />
             </div>
-            <code className="text-sm text-slate-300 font-mono">
-              $ cargo install noverlink
+            <code className="text-sm text-slate-300 font-mono block">
+              $ brew tap noverwork/noverlink
+            </code>
+            <code className="text-sm text-slate-300 font-mono block mt-1">
+              $ brew install noverlink
             </code>
           </div>
 

@@ -27,11 +27,7 @@
 api.{$BASE_DOMAIN} {
     tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
 
-    reverse_proxy backend:3000 {
-        health_uri /health
-        health_interval 10s
-        health_timeout 5s
-    }
+    reverse_proxy backend:3000
 }
 
 # Wildcard subdomain routing for tunnels
