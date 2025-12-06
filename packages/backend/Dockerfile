@@ -1,71 +1,56 @@
 # Noverlink Backend Dockerfile
-# Multi-stage build for optimized production image
 
-# Stage 1: Build
-FROM node:22.14-slim AS builder
-
+# ===== Stage 1: Dependencies =====
+FROM node:22.14-slim AS dependencies
 WORKDIR /app
 
-# Copy root package files
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json nx.json tsconfig.base.json ./
+COPY packages/interfaces/package.json ./packages/interfaces/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/backend-shared/package.json ./packages/backend-shared/
+COPY packages/backend/package.json ./packages/backend/
 
-# Copy workspace package.json files BEFORE npm ci so workspaces are set up
-COPY packages/backend/package.json ./packages/backend/package.json
-COPY packages/backend-shared/package.json ./packages/backend-shared/package.json
-COPY packages/shared/package.json ./packages/shared/package.json
-COPY packages/interfaces/package.json ./packages/interfaces/package.json
+RUN npm ci
 
-# Install all dependencies (including dev) - this sets up workspace symlinks
-RUN npm ci --retry 3 || (sleep 5 && npm ci --retry 3)
+# ===== Stage 2: Builder =====
+FROM dependencies AS builder
 
-# Copy config files
-COPY tsconfig.base.json tsconfig.json nx.json jest.preset.js eslint.config.mjs ./
-
-# Copy source files
-COPY packages/backend ./packages/backend
-COPY packages/backend-shared ./packages/backend-shared
-COPY packages/shared ./packages/shared
+COPY tsconfig.json ./
 COPY packages/interfaces ./packages/interfaces
+COPY packages/shared ./packages/shared
+COPY packages/backend-shared ./packages/backend-shared
+COPY packages/backend ./packages/backend
 
-# Sync NX workspace and build dependencies
-RUN npx nx sync --yes && npx nx run-many --target=build --projects=@noverlink/interfaces,shared
+RUN npx nx sync --yes && NX_DAEMON=false npx nx run @noverlink/backend:build
 
-# Build backend
-RUN NX_DAEMON=false npm run backend:build
-
-# Stage 2: Prune dev dependencies
-FROM node:22.14-slim AS pruner
-
-WORKDIR /app
-
-# Copy package files and node_modules from builder
-COPY --from=builder /app/package.json /app/package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-
-# Prune dev dependencies (faster than fresh npm ci)
-RUN npm prune --omit=dev
-
-# Stage 3: Runtime
+# ===== Stage 3: Runner =====
 FROM node:22.14-slim AS runner
-
 WORKDIR /app
 
-# Copy pruned node_modules from pruner stage
-COPY --from=pruner /app/node_modules ./node_modules
+# Copy node_modules (includes all deps - can't prune without losing backend deps)
+COPY --from=dependencies /app/node_modules ./node_modules
+RUN rm -rf ./node_modules/@noverlink
 
-# Copy built application
+# Copy built workspace modules
+COPY --from=builder /app/packages/interfaces/dist ./node_modules/@noverlink/interfaces/dist
+COPY --from=builder /app/packages/interfaces/package.json ./node_modules/@noverlink/interfaces/
+COPY --from=builder /app/packages/shared/dist ./node_modules/@noverlink/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./node_modules/@noverlink/shared/
+# backend-shared uses src directly (no build step)
+COPY --from=builder /app/packages/backend-shared/src ./node_modules/@noverlink/backend-shared/src
+COPY --from=builder /app/packages/backend-shared/package.json ./node_modules/@noverlink/backend-shared/
+
+# Copy built app
 COPY --from=builder /app/packages/backend/dist ./dist/backend
 
 # Create non-root user
 RUN useradd -m backend && chown -R backend:backend /app
 USER backend
 
-# Expose port
+ENV NODE_ENV=production
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
-# Run backend
 CMD ["node", "dist/backend/main.js"]
