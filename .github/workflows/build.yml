@@ -71,6 +71,9 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}-frontend:${{ github.sha }}
             ${{ env.IMAGE_PREFIX }}-frontend:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
