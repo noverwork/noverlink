@@ -84,6 +84,8 @@ steps:
         from_secret: registry_username
       password:
         from_secret: registry_password
+    depends_on:
+      - clone
 
   - name: build-frontend
     image: plugins/docker
@@ -98,6 +100,8 @@ steps:
         from_secret: registry_username
       password:
         from_secret: registry_password
+    depends_on:
+      - clone
 
   - name: build-migrator
     image: plugins/docker
@@ -112,6 +116,8 @@ steps:
         from_secret: registry_username
       password:
         from_secret: registry_password
+    depends_on:
+      - clone
 
   - name: build-relay
     image: plugins/docker
@@ -126,6 +132,8 @@ steps:
         from_secret: registry_username
       password:
         from_secret: registry_password
+    depends_on:
+      - clone
 
 ---
 kind: pipeline
