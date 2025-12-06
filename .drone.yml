@@ -5,7 +5,9 @@ name: build-ci-image
 
 trigger:
   event:
-    - custom
+    - promote
+  target:
+    - ci-image
 
 steps:
   - name: build-and-push
