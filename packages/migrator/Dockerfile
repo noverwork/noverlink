@@ -1,70 +1,50 @@
 # Noverlink Migrator Dockerfile
-# Multi-stage build for optimized production image
 
-# Stage 1: Build
-FROM node:22.14-slim AS builder
-
+# ===== Stage 1: Dependencies =====
+FROM node:22.14-slim AS dependencies
 WORKDIR /app
 
-# Copy root package files
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json nx.json tsconfig.base.json ./
+COPY packages/interfaces/package.json ./packages/interfaces/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/backend-shared/package.json ./packages/backend-shared/
+COPY packages/migrator/package.json ./packages/migrator/
 
-# Copy workspace package.json files BEFORE npm ci so workspaces are set up
-COPY packages/migrator/package.json ./packages/migrator/package.json
-COPY packages/backend-shared/package.json ./packages/backend-shared/package.json
-COPY packages/shared/package.json ./packages/shared/package.json
-COPY packages/interfaces/package.json ./packages/interfaces/package.json
+RUN npm ci
 
-# Install all dependencies (including dev) - this sets up workspace symlinks
-RUN npm ci --retry 3 || (sleep 5 && npm ci --retry 3)
+# ===== Stage 2: Builder =====
+FROM dependencies AS builder
 
-# Copy config files
-COPY tsconfig.base.json tsconfig.json nx.json jest.preset.js eslint.config.mjs ./
-
-# Copy source files
-COPY packages/migrator ./packages/migrator
-COPY packages/backend-shared ./packages/backend-shared
-COPY packages/shared ./packages/shared
+COPY tsconfig.json ./
 COPY packages/interfaces ./packages/interfaces
+COPY packages/shared ./packages/shared
+COPY packages/backend-shared ./packages/backend-shared
+COPY packages/migrator ./packages/migrator
 
-# Sync NX workspace and build dependencies
-RUN npx nx sync --yes && npx nx run-many --target=build --projects=@noverlink/interfaces,shared
+RUN npx nx sync --yes && NX_DAEMON=false npx nx run @noverlink/migrator:build
 
-# Build migrator
-RUN NX_DAEMON=false npm run migrator:build
-
-# Stage 2: Prune dev dependencies
-FROM node:22.14-slim AS pruner
-
-WORKDIR /app
-
-# Copy package files and node_modules from builder
-COPY --from=builder /app/package.json /app/package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-
-# Prune dev dependencies (faster than fresh npm ci)
-RUN npm prune --omit=dev
-
-# Stage 3: Runtime
+# ===== Stage 3: Runner =====
 FROM node:22.14-slim AS runner
-
 WORKDIR /app
 
-# Copy pruned node_modules from pruner stage
-COPY --from=pruner /app/node_modules ./node_modules
+# Copy package.json for npm prune reference
+COPY package.json ./
 
-# Copy built migrator
-COPY --from=builder /app/dist/apps/migrator ./dist/migrator
+# Copy full node_modules then prune dev deps
+COPY --from=dependencies /app/node_modules ./node_modules
+RUN rm -rf ./node_modules/@noverlink && npm prune --omit=dev
 
+# Copy built workspace modules
+COPY --from=builder /app/packages/interfaces/dist ./node_modules/@noverlink/interfaces/dist
+COPY --from=builder /app/packages/interfaces/package.json ./node_modules/@noverlink/interfaces/
+COPY --from=builder /app/packages/shared/dist ./node_modules/@noverlink/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./node_modules/@noverlink/shared/
+
+# Copy built app
+COPY --from=builder /app/dist/apps/migrator/main.js ./dist/migrator/
 COPY packages/migrator/docker-entrypoint.sh ./
 RUN chmod +x ./docker-entrypoint.sh
 
-# Optional: Set migrator command via environment variable
-# ENV MIGRATOR_COMMAND=up
-# Valid values: up, down, refresh, create
-# Can be overridden at runtime: docker run -e MIGRATOR_COMMAND=down ...
-
-# Set entrypoint and default command
+ENV NODE_ENV=production
 ENTRYPOINT ["./docker-entrypoint.sh"]
-# CMD can be overridden with command line args or MIGRATOR_COMMAND env var
 CMD ["up"]
