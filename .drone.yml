@@ -1,6 +1,31 @@
 ---
 kind: pipeline
 type: kubernetes
+name: build-ci-image
+
+trigger:
+  event:
+    - custom
+
+steps:
+  - name: build-and-push
+    image: plugins/docker
+    settings:
+      registry: gitea.noverwork.com
+      repo: gitea.noverwork.com/noverwork/noverlink-ci
+      dockerfile: docker/ci/Dockerfile
+      context: docker/ci
+      tags:
+        - latest
+        - node22-rust1.83
+      username:
+        from_secret: registry_username
+      password:
+        from_secret: registry_password
+
+---
+kind: pipeline
+type: kubernetes
 name: lint-and-test
 
 trigger:
@@ -12,45 +37,35 @@ trigger:
 
 steps:
   - name: install
-    image: node:22-bookworm
+    image: gitea.noverwork.com/noverwork/noverlink-ci:latest
     commands:
       - npm ci --retry 3 || (sleep 5 && npm ci --retry 3)
+      - cargo fetch
 
   - name: build-deps
-    image: node:22-bookworm
+    image: gitea.noverwork.com/noverwork/noverlink-ci:latest
     commands:
       - npx nx run-many --target=build --projects=@noverlink/ui-shared,@noverlink/interfaces,shared
     depends_on:
       - install
 
+  - name: lint
+    image: gitea.noverwork.com/noverwork/noverlink-ci:latest
+    commands:
+      - cargo fmt --all -- --check
+      - npm run lint
+    depends_on:
+      - build-deps
+
   - name: typecheck
-    image: node:22-bookworm
+    image: gitea.noverwork.com/noverwork/noverlink-ci:latest
     commands:
       - npm run typecheck
     depends_on:
       - build-deps
 
-  - name: lint-eslint
-    image: node:22-bookworm
-    commands:
-      - npm run lint
-    depends_on:
-      - build-deps
-
-  - name: lint-cargo-fmt
-    image: rust:1.83-bookworm
-    commands:
-      - rustup component add rustfmt
-      - cargo fmt --all -- --check
-
-  - name: lint-clippy
-    image: rust:1.83-bookworm
-    commands:
-      - rustup component add clippy
-      - cargo clippy --all-targets --all-features -- -D warnings
-
   - name: test
-    image: node:22-bookworm
+    image: gitea.noverwork.com/noverwork/noverlink-ci:latest
     commands:
       - npm run test
     depends_on:
