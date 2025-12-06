@@ -16,6 +16,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUST_VERSION: "1.83"
+  NOVERLINK_API_URL: ${{ vars.NOVERLINK_API_URL }}
 
 jobs:
   build-linux-x64:

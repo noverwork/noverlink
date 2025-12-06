@@ -76,7 +76,7 @@ pub mod cli {
     /// API URL - baked in at compile time via `NOVERLINK_API_URL` env var
     pub const API_URL: &str = match option_env!("NOVERLINK_API_URL") {
         Some(url) => url,
-        None => "http://localhost:3000/api",
+        None => "http://localhost:3000",
     };
 }
 

@@ -24,7 +24,7 @@ COPY packages/ui-shared ./packages/ui-shared
 COPY packages/frontend ./packages/frontend
 
 # Build-time environment variables (NEXT_PUBLIC_* are embedded at build time)
-ARG NEXT_PUBLIC_API_URL=http://localhost:3000/api
+ARG NEXT_PUBLIC_API_URL=http://localhost:3000
 ARG NEXT_PUBLIC_APP_URL=http://localhost:4200
 ARG NEXT_PUBLIC_POLAR_HOBBYIST_PRODUCT_ID
 ARG NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID

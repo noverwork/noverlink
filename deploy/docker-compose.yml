@@ -89,7 +89,7 @@ services:
     container_name: noverlink-frontend
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: https://api.${BASE_DOMAIN}/api
+      NEXT_PUBLIC_API_URL: https://api.${BASE_DOMAIN}
       NEXT_PUBLIC_APP_URL: https://${BASE_DOMAIN}
       POLAR_ACCESS_TOKEN: ${POLAR_ACCESS_TOKEN:-}
       POLAR_SERVER: ${POLAR_SERVER:-production}
@@ -112,7 +112,7 @@ services:
       BASE_DOMAIN: ${BASE_DOMAIN}
       RUST_LOG: ${RUST_LOG:-info}
       TICKET_SECRET: ${TICKET_SECRET}
-      BACKEND_URL: http://backend:3000/api
+      BACKEND_URL: http://backend:3000
       RELAY_SECRET: ${RELAY_SECRET}
       RELAY_ID: ${RELAY_ID:-relay-1}
     expose:

@@ -41,8 +41,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Global prefix
-  app.setGlobalPrefix('api');
 
   // Enable graceful shutdown hooks
   app.enableShutdownHooks();
@@ -65,7 +63,7 @@ async function bootstrap() {
 
   await app.listen(port, host);
 
-  Logger.log(`🚀 Noverlink Backend running on: http://${host}:${port}/api`);
+  Logger.log(`🚀 Noverlink Backend running on: http://${host}:${port}`);
   Logger.log(`📝 Environment: ${isProduction ? 'production' : 'development'}`);
 }
 
