@@ -16,7 +16,7 @@ COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/interfaces/package.json ./packages/interfaces/package.json
 
 # Install all dependencies (including dev) - this sets up workspace symlinks
-RUN npm ci
+RUN npm ci --retry 3 || (sleep 5 && npm ci --retry 3)
 
 # Copy config files
 COPY tsconfig.base.json tsconfig.json nx.json jest.preset.js eslint.config.mjs ./

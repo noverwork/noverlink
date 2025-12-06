@@ -17,7 +17,7 @@ COPY packages/interfaces/package.json ./packages/interfaces/package.json
 COPY packages/backend-shared/package.json ./packages/backend-shared/package.json
 
 # Install dependencies - this sets up workspace symlinks
-RUN npm ci
+RUN npm ci --retry 3 || (sleep 5 && npm ci --retry 3)
 
 # Stage 2: Build
 FROM node:22.14-slim AS builder

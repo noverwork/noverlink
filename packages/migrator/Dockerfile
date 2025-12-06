@@ -16,7 +16,7 @@ COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/interfaces/package.json ./packages/interfaces/package.json
 
 # Install all dependencies (including dev) - this sets up workspace symlinks
-RUN npm ci
+RUN npm ci --retry 3 || (sleep 5 && npm ci --retry 3)
 
 # Copy config files
 COPY tsconfig.base.json tsconfig.json nx.json jest.preset.js eslint.config.mjs ./
@@ -40,7 +40,7 @@ WORKDIR /app
 
 # Copy package files and install production dependencies only
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev --ignore-scripts --retry 3 || (sleep 5 && npm ci --omit=dev --ignore-scripts --retry 3)
 
 COPY --from=builder /app/dist/apps/migrator ./dist/migrator
 COPY packages/migrator/docker-entrypoint.sh ./
