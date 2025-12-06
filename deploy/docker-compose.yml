@@ -38,12 +38,9 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      backend:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
-      relay:
-        condition: service_healthy
+      - backend
+      - frontend
+      - relay
     restart: unless-stopped
     networks:
       - noverlink
@@ -84,12 +81,6 @@ services:
       migrator:
         condition: service_completed_successfully
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
     networks:
       - noverlink
 
@@ -107,15 +98,8 @@ services:
     expose:
       - "4200"
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4200', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
     networks:
       - noverlink
 
@@ -138,12 +122,6 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     networks:
       - noverlink
 

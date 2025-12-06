@@ -91,13 +91,6 @@ async fn handle_http_request(
         .get(..headers_end + 4)
         .ok_or_else(|| anyhow::anyhow!("Headers end position out of bounds"))?;
 
-    // Check for health endpoint
-    if is_health_request(headers_slice) {
-        let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 15\r\n\r\n{\"status\":\"ok\"}";
-        stream.write_all(response).await?;
-        return Ok(());
-    }
-
     let host = parse_and_extract_host(headers_slice, &mut stream).await?;
 
     // Parse request info for logging
@@ -606,19 +599,6 @@ fn parse_response_status(response: &[u8]) -> u16 {
 /// Find the end of HTTP headers (\r\n\r\n)
 fn find_headers_end(buf: &[u8]) -> Option<usize> {
     buf.windows(4).position(|w| w == b"\r\n\r\n")
-}
-
-/// Check if request is for /health endpoint
-fn is_health_request(headers_buf: &[u8]) -> bool {
-    let Ok(headers_str) = std::str::from_utf8(headers_buf) else {
-        return false;
-    };
-
-    headers_str
-        .lines()
-        .next()
-        .map(|line| line.starts_with("GET /health"))
-        .unwrap_or(false)
 }
 
 /// Check if HTTP request is a WebSocket upgrade request
