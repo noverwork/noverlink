@@ -50,8 +50,8 @@ RUN npm ci --omit=dev --ignore-scripts --retry 3 || (sleep 5 && npm ci --omit=de
 
 # Copy built migrator and its dependencies
 COPY --from=builder /app/dist/apps/migrator ./dist/migrator
-COPY --from=builder /app/dist/shared ./dist/shared
-COPY --from=builder /app/dist/interfaces ./dist/interfaces
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/interfaces/dist ./packages/interfaces/dist
 
 COPY packages/migrator/docker-entrypoint.sh ./
 RUN chmod +x ./docker-entrypoint.sh
