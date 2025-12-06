@@ -55,5 +55,6 @@ target/
 # Environment variables
 .env
 .env.local
+deploy/.env
 vite.config.*.timestamp*
 vitest.config.*.timestamp*

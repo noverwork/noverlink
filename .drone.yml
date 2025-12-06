@@ -12,6 +12,8 @@ trigger:
 steps:
   - name: build-and-push
     image: plugins/docker
+    environment:
+      PLUGIN_CUSTOM_DNS: 10.43.0.10
     settings:
       registry: gitea.noverwork.com
       repo: gitea.noverwork.com/noverwork/noverlink-ci
@@ -24,6 +26,8 @@ steps:
         from_secret: registry_username
       password:
         from_secret: registry_password
+      build_args:
+        - BUILDKIT_INLINE_CACHE=1
 
 ---
 kind: pipeline
