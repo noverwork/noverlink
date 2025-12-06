@@ -14,7 +14,6 @@ import { RelayModule } from '../relay';
 import { TunnelsModule } from '../tunnels';
 import { SERVICE_NAME } from './app.constant';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -51,7 +50,6 @@ import { AppService } from './app.service';
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
