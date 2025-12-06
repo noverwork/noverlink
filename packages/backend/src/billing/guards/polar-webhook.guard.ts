@@ -2,8 +2,8 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  UnauthorizedException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
 import type { Request } from 'express';
