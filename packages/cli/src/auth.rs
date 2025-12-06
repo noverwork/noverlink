@@ -2,9 +2,9 @@
 //!
 //! Handles storing and loading CLI authentication tokens.
 
-use std::fs::{self, File};
 #[cfg(unix)]
 use std::fs::OpenOptions;
+use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
