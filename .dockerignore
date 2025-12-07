@@ -1,0 +1,54 @@
+# Dependencies (will be installed fresh in container)
+node_modules
+packages/*/node_modules
+
+# Build outputs
+dist
+packages/*/dist
+.next
+packages/*/.next
+out-tsc
+packages/*/out-tsc
+
+# Rust build artifacts
+target
+packages/*/target
+# Note: Cargo.lock is NOT excluded - needed for reproducible builds
+
+# Development files
+.env
+.env.*
+!.env.example
+packages/*/.env
+!packages/*/.env.example
+
+# IDE and editor
+.idea
+.vscode
+*.sublime-*
+.cursor
+
+# NX cache
+.nx
+.claude
+
+# Git
+.git
+.gitignore
+
+# Tests and coverage
+coverage
+test-output
+*.test.ts
+*.spec.ts
+
+# Documentation (not needed for build)
+docs
+*.md
+!README.md
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+tmp

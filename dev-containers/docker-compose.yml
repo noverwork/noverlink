@@ -1,0 +1,45 @@
+# Noverlink Development Docker Compose
+#
+# Development services: Caddy reverse proxy for local HTTPS.
+# Relay runs directly on host via `cargo run` for faster iteration.
+#
+# Usage:
+#   1. Start relay: cd packages/relay && cargo run
+#   2. Start Caddy: cd dev-containers && docker compose up
+#   3. Access tunnels: https://*.localhost (accept self-signed cert in browser)
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: noverlink-caddy-dev
+    ports:
+      - "80:80"     # HTTP
+      - "443:443"   # HTTPS
+    volumes:
+      # Mount Caddyfile
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Persist certificates and config
+      - caddy_data_dev:/data
+      - caddy_config_dev:/config
+    extra_hosts:
+      # Allow Caddy to reach host machine (where relay is running)
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17.6-alpine
+    container_name: noverlink-postgres-dev
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  caddy_data_dev:
+  caddy_config_dev:
+  postgres_data_dev:

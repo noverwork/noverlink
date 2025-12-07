@@ -1,0 +1,21 @@
+// Set up environment variables for testing
+process.env.NODE_ENV = 'development';
+process.env.LOG_LEVEL = 'debug';
+process.env.APP_BIND = '127.0.0.1';
+process.env.APP_PORT = '3000';
+process.env.DB_CLIENT_URL = 'postgres://test:test@localhost:5432/test';
+process.env.DB_DEBUG = 'false';
+process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-purposes-12345678';
+process.env.JWT_EXPIRES_IN = '15m';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-testing-purposes-12345678';
+process.env.JWT_REFRESH_EXPIRES_IN = '7d';
+process.env.GOOGLE_CLIENT_ID = 'test-google-client-id';
+process.env.GOOGLE_CLIENT_SECRET = 'test-google-client-secret';
+process.env.GOOGLE_CALLBACK_URL = 'http://localhost:3000/auth/google/callback';
+process.env.GITHUB_CLIENT_ID = 'test-github-client-id';
+process.env.GITHUB_CLIENT_SECRET = 'test-github-client-secret';
+process.env.GITHUB_CALLBACK_URL = 'http://localhost:3000/auth/github/callback';
+process.env.FRONTEND_URL = 'http://localhost:4200';
+process.env.TICKET_SECRET = 'test-ticket-secret-key-for-testing-purposes-12345678';
+process.env.RELAY_URL = 'wss://localhost:8443';
+process.env.RELAY_SECRET = 'test-relay-secret-key-for-testing-purposes-12345678';

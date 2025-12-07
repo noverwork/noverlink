@@ -1,0 +1,167 @@
+[workspace]
+resolver = "2"
+members = [
+    "packages/cli",
+    "packages/relay", "packages/rs-shared",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Noverlink Team"]
+
+[workspace.lints.rust]
+# Absolutely forbid unsafe code
+unsafe_code = "forbid"
+
+# Require documentation for public API
+missing_docs = "warn"
+
+# Must handle Result types
+unused_must_use = "deny"
+
+# Code quality - DENY unused code
+unused_variables = "deny"
+dead_code = "deny"
+unused_imports = "deny"
+
+[workspace.lints.clippy]
+# ===== OFFICIAL RECOMMENDED GROUPS =====
+
+# Clippy::all - Basic lints (enabled by default with cargo clippy)
+all = { level = "warn", priority = -2 }
+
+# Clippy::pedantic - Opinionated but valuable lints
+# Note: May have intentional false positives
+pedantic = { level = "warn", priority = -1 }
+
+# Clippy::nursery - Experimental but useful lints
+# Note: May change or be removed
+nursery = { level = "warn", priority = -1 }
+
+# Clippy::cargo - Cargo.toml best practices
+cargo = { level = "warn", priority = -1 }
+
+# ===== DENY LEVELS (Fails compilation) =====
+
+# Correctness: These are almost certainly bugs
+correctness = { level = "deny", priority = -1 }
+
+# Suspicious: Likely to be mistakes
+suspicious = { level = "deny", priority = -1 }
+
+# ===== WARN LEVELS =====
+
+# Complexity: Code is too complex
+complexity = { level = "warn", priority = -1 }
+
+# Performance: Inefficient patterns
+perf = { level = "warn", priority = -1 }
+
+# Style: Inconsistent style
+style = { level = "warn", priority = -1 }
+
+# ===== RESTRICTION LINTS (Selectively enabled) =====
+# Note: Do NOT enable clippy::restriction as a group
+# Only enable specific lints that make sense for your project
+
+# Error handling - DENY (force proper error handling)
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "warn"                  # Sometimes necessary
+todo = "deny"
+unimplemented = "deny"
+
+# Debug artifacts - DENY
+dbg_macro = "deny"
+print_stdout = "allow"          # CLI needs this
+print_stderr = "allow"          # Tracing uses this
+
+# Code organization
+exit = "warn"
+missing_assert_message = "warn"
+
+# Integer safety
+integer_division = "warn"
+as_conversions = "warn"
+cast_possible_truncation = "warn"
+cast_possible_wrap = "warn"
+cast_precision_loss = "warn"
+
+# String operations (prevent panics)
+string_slice = "warn"
+indexing_slicing = "warn"
+
+# Clone patterns
+clone_on_ref_ptr = "deny"
+redundant_clone = "deny"
+
+# Public API design
+must_use_candidate = "warn"
+
+# ===== ALLOW OVERRIDES (Reduce noise) =====
+
+# Naming patterns that are fine
+module_name_repetitions = "allow"
+similar_names = "allow"
+struct_field_names = "allow"
+
+# Format strings - both styles acceptable
+uninlined_format_args = "allow"
+
+# Pattern matching - sometimes match is clearer
+single_match_else = "allow"
+match_bool = "allow"
+
+# Function signatures
+needless_pass_by_value = "allow"
+must_use_unit = "allow"
+
+# Documentation - covered by missing_docs
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+
+# Rust idioms we want to allow
+implicit_return = "allow"
+question_mark_used = "allow"
+shadow_reuse = "allow"
+shadow_unrelated = "allow"
+let_underscore_untyped = "allow"
+
+# Nursery lints that are too aggressive
+cognitive_complexity = "allow"
+missing_const_for_fn = "allow"
+redundant_pub_crate = "allow"
+
+# Imports
+pub_use = "allow"
+wildcard_imports = "warn"
+
+# Restriction lints we don't want
+blanket_clippy_restriction_lints = "allow"
+implicit_hasher = "allow"
+missing_inline_in_public_items = "allow"
+exhaustive_structs = "allow"
+exhaustive_enums = "allow"
+mod_module_files = "allow"
+separated_literal_suffix = "allow"
+self_named_module_files = "allow"
+
+# Cargo metadata
+cargo_common_metadata = "allow"   # We have it in packages
+wildcard_dependencies = "allow"   # Cargo.lock pins versions
+multiple_crate_versions = "allow" # Sometimes unavoidable
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2

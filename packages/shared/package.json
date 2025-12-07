@@ -1,0 +1,33 @@
+{
+  "name": "@noverlink/shared",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@noverlink/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "nx": {
+    "name": "shared",
+    "targets": {
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@noverlink/interfaces": "0.0.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "tslib": "^2.3.0"
+  }
+}

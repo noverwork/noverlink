@@ -1,0 +1,64 @@
+{
+  "name": "@noverlink/relay",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "outputs": ["{workspaceRoot}/target"],
+        "options": {
+          "command": "cargo build --package relay --release",
+          "cwd": "{projectRoot}/../.."
+        },
+        "configurations": {
+          "development": {
+            "command": "cargo build --package relay"
+          }
+        }
+      },
+      "serve": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo run --package relay",
+          "cwd": "{projectRoot}/../.."
+        }
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo test --package relay",
+          "cwd": "{projectRoot}/../.."
+        }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo clippy --package relay --all-targets --all-features -- -D warnings",
+          "cwd": "{projectRoot}/../.."
+        }
+      },
+      "lint:fix": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo clippy --package relay --all-targets --all-features --fix --allow-dirty --allow-staged -- -D warnings",
+          "cwd": "{projectRoot}/../.."
+        }
+      },
+      "typecheck": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo check --package relay",
+          "cwd": "{projectRoot}/../.."
+        }
+      },
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cargo clean --package relay",
+          "cwd": "{projectRoot}/../.."
+        }
+      }
+    }
+  }
+}

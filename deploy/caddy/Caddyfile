@@ -1,0 +1,62 @@
+# Noverlink Caddy Configuration - Production with Cloudflare Origin CA
+#
+# For production deployment with Cloudflare proxy enabled.
+# Uses Cloudflare Origin CA certificate for wildcard domain support.
+#
+# The CLI trusts Cloudflare Origin CA directly, so all subdomains
+# (including ws.noverlink.com) can use the same Origin CA certificate.
+#
+# Setup requirements:
+#   1. Generate Cloudflare Origin CA certificate (see certs/README.md)
+#   2. Place origin.pem and origin.key in deploy/caddy/certs/
+#   3. Set Cloudflare SSL/TLS mode to "Full (strict)"
+#   4. DNS for BASE_DOMAIN (noverlink.com):
+#      - noverlink.com → server IP [Proxied ON]
+#      - api.noverlink.com → server IP [Proxied ON]
+#      - ws.noverlink.com → server IP [Proxied OFF - DNS only]
+#   5. DNS for PAID_DOMAIN (noverlink.app):
+#      - *.noverlink.app → server IP [Proxied ON]
+#   6. DNS for FREE_DOMAIN (noverlink-free.app):
+#      - *.noverlink-free.app → server IP [Proxied ON]
+
+# Frontend - main domain
+{$BASE_DOMAIN} {
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+
+    reverse_proxy frontend:4200 {
+        health_uri /
+        health_interval 10s
+        health_timeout 5s
+    }
+}
+
+# Backend API
+api.{$BASE_DOMAIN} {
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+
+    reverse_proxy backend:3000
+}
+
+# WebSocket endpoint for CLI connections
+# Uses Origin CA - the CLI has Cloudflare Origin CA built-in
+ws.{$BASE_DOMAIN} {
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+
+    reverse_proxy relay:8444
+}
+
+# Wildcard subdomain routing for paid plan tunnels (starter/pro)
+# Example: my-app.noverlink.app -> relay HTTP handler
+*.{$PAID_DOMAIN} {
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+
+    reverse_proxy relay:8080
+}
+
+# Wildcard subdomain routing for free plan tunnels (sandbox)
+# Example: funny-cat-123.noverlink-free.app -> relay HTTP handler
+*.{$FREE_DOMAIN} {
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+
+    reverse_proxy relay:8080
+}
