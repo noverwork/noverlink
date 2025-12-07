@@ -6,9 +6,25 @@ export interface ApiError {
   error?: string;
 }
 
+// Token management callbacks - set by auth-store to avoid circular deps
+let getRefreshToken: (() => string | null) | null = null;
+let onTokensRefreshed: ((accessToken: string, refreshToken: string) => void) | null = null;
+let onAuthFailed: (() => void) | null = null;
+
+export function setTokenCallbacks(callbacks: {
+  getRefreshToken: () => string | null;
+  onTokensRefreshed: (accessToken: string, refreshToken: string) => void;
+  onAuthFailed: () => void;
+}): void {
+  getRefreshToken = callbacks.getRefreshToken;
+  onTokensRefreshed = callbacks.onTokensRefreshed;
+  onAuthFailed = callbacks.onAuthFailed;
+}
+
 export class ApiClient {
   private baseUrl: string;
   private accessToken: string | null = null;
+  private refreshPromise: Promise<boolean> | null = null;
 
   constructor(baseUrl: string = env.apiUrl) {
     this.baseUrl = baseUrl;
@@ -22,9 +38,48 @@ export class ApiClient {
     return this.accessToken;
   }
 
+  private async refreshTokens(): Promise<boolean> {
+    // If already refreshing, wait for that to complete
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    this.refreshPromise = this.doRefresh();
+    const result = await this.refreshPromise;
+    this.refreshPromise = null;
+    return result;
+  }
+
+  private async doRefresh(): Promise<boolean> {
+    const refreshToken = getRefreshToken?.();
+    if (!refreshToken) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data = await response.json();
+      this.accessToken = data.accessToken;
+      onTokensRefreshed?.(data.accessToken, data.refreshToken);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    isRetry = false
   ): Promise<T> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -40,6 +95,17 @@ export class ApiClient {
       ...options,
       headers,
     });
+
+    // Handle 401 - try to refresh token once
+    if (response.status === 401 && !isRetry && !endpoint.includes('/auth/refresh')) {
+      const refreshed = await this.refreshTokens();
+      if (refreshed) {
+        // Retry the original request with new token
+        return this.request<T>(endpoint, options, true);
+      }
+      // Refresh failed - clear auth state
+      onAuthFailed?.();
+    }
 
     if (!response.ok) {
       const error: ApiError = await response.json().catch(() => ({

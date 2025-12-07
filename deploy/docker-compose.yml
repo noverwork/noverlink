@@ -53,6 +53,8 @@ services:
   backend:
     image: ghcr.io/noverwork/noverlink-backend:${IMAGE_TAG:-latest}
     container_name: noverlink-backend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     environment:
       NODE_ENV: production
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -89,6 +91,8 @@ services:
   frontend:
     image: ghcr.io/noverwork/noverlink-frontend:${IMAGE_TAG:-latest}
     container_name: noverlink-frontend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: https://api.${BASE_DOMAIN}
@@ -108,6 +112,8 @@ services:
   relay:
     image: ghcr.io/noverwork/noverlink-relay:${IMAGE_TAG:-latest}
     container_name: noverlink-relay
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     environment:
       WS_PORT: 8444
       HTTP_PORT: 8080
@@ -130,6 +136,8 @@ services:
   migrator:
     image: ghcr.io/noverwork/noverlink-migrator:${IMAGE_TAG:-latest}
     container_name: noverlink-migrator
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     environment:
       DB_CLIENT_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       FREE_DOMAIN: ${FREE_DOMAIN}
@@ -161,6 +169,26 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - noverlink
+
+  # =============================================================================
+  # Auto-Update Service
+  # =============================================================================
+  watchtower:
+    image: containrrr/watchtower
+    container_name: noverlink-watchtower
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_POLL_INTERVAL: 300  # Check every 5 minutes
+      WATCHTOWER_INCLUDE_STOPPED: "false"
+      WATCHTOWER_REVIVE_STOPPED: "false"
+      WATCHTOWER_ROLLING_RESTART: "true"
+      WATCHTOWER_LABEL_ENABLE: "true"  # Only update containers with label
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.docker/config.json:/config.json:ro  # For GHCR auth
+    restart: unless-stopped
     networks:
       - noverlink
 

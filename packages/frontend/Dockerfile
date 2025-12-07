@@ -55,8 +55,8 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Install sharp for image optimization
 RUN npm install --prefix /app sharp
 
-# Copy public assets
-COPY --from=builder /app/packages/frontend/public ./public
+# Copy public assets (must be at same relative path as in build)
+COPY --from=builder /app/packages/frontend/public ./packages/frontend/public
 
 # Copy standalone build (includes node_modules)
 COPY --from=builder --chown=nextjs:nodejs /app/packages/frontend/.next/standalone ./

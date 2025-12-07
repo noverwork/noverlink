@@ -541,7 +541,7 @@ fn rewrite_headers_for_localhost(request: &[u8], local_port: u16) -> Vec<u8> {
     let localhost_origin = format!("http://localhost:{}", local_port);
 
     let mut result = String::with_capacity(request_str.len());
-    let mut lines = request_str.lines().peekable();
+    let mut lines = request_str.lines();
 
     // First line is the request line (e.g., "GET /_next/webpack-hmr HTTP/1.1")
     if let Some(request_line) = lines.next() {
@@ -563,17 +563,15 @@ fn rewrite_headers_for_localhost(request: &[u8], local_port: u16) -> Vec<u8> {
             // Rewrite Host header
             result.push_str("Host: ");
             result.push_str(&localhost_host);
-            result.push_str("\r\n");
         } else if lower.starts_with("origin:") {
             // Rewrite Origin header
             result.push_str("Origin: ");
             result.push_str(&localhost_origin);
-            result.push_str("\r\n");
         } else {
             // Keep other headers as-is
             result.push_str(line);
-            result.push_str("\r\n");
         }
+        result.push_str("\r\n");
     }
 
     result.into_bytes()

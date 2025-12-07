@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import { apiClient, setTokenCallbacks } from './api';
 
 const ACCESS_TOKEN_KEY = 'noverlink_access_token';
 const REFRESH_TOKEN_KEY = 'noverlink_refresh_token';
@@ -41,5 +41,20 @@ export const authStore = {
     if (token) {
       apiClient.setAccessToken(token);
     }
+
+    // Register callbacks for auto-refresh
+    setTokenCallbacks({
+      getRefreshToken: () => this.getRefreshToken(),
+      onTokensRefreshed: (accessToken, refreshToken) => {
+        this.setTokens(accessToken, refreshToken);
+      },
+      onAuthFailed: () => {
+        this.clearTokens();
+        // Redirect to login if in browser
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+      },
+    });
   },
 };

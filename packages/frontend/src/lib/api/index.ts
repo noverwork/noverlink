@@ -7,7 +7,7 @@ export type {
 } from './auth';
 export { authApi } from './auth';
 export type { ApiError } from './client';
-export { ApiClient, apiClient } from './client';
+export { ApiClient, apiClient, setTokenCallbacks } from './client';
 export type {
   ListLogsParams,
   ListLogsResponse,

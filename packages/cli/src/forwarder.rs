@@ -159,7 +159,10 @@ fn rewrite_host_header(request: &[u8], local_port: u16) -> Vec<u8> {
         return request.to_vec();
     };
 
-    let Ok(headers_str) = std::str::from_utf8(&request[..headers_end + 4]) else {
+    let Some(headers_bytes) = request.get(..headers_end + 4) else {
+        return request.to_vec();
+    };
+    let Ok(headers_str) = std::str::from_utf8(headers_bytes) else {
         // Not valid UTF-8, return original
         return request.to_vec();
     };
@@ -187,12 +190,11 @@ fn rewrite_host_header(request: &[u8], local_port: u16) -> Vec<u8> {
             // Rewrite Host header
             result.push_str("Host: ");
             result.push_str(&localhost_host);
-            result.push_str("\r\n");
         } else {
             // Keep other headers as-is
             result.push_str(line);
-            result.push_str("\r\n");
         }
+        result.push_str("\r\n");
     }
 
     // End of headers
@@ -200,8 +202,8 @@ fn rewrite_host_header(request: &[u8], local_port: u16) -> Vec<u8> {
 
     // Append body if present
     let mut output = result.into_bytes();
-    if request.len() > headers_end + 4 {
-        output.extend_from_slice(&request[headers_end + 4..]);
+    if let Some(body) = request.get(headers_end + 4..) {
+        output.extend_from_slice(body);
     }
 
     output
@@ -304,10 +306,11 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::expect_used)]
     fn test_rewrite_host_header() {
         let request = b"GET / HTTP/1.1\r\nHost: abc123.example.com\r\nConnection: keep-alive\r\n\r\n";
         let rewritten = rewrite_host_header(request, 3000);
-        let rewritten_str = String::from_utf8(rewritten).unwrap();
+        let rewritten_str = String::from_utf8(rewritten).expect("valid utf8");
 
         assert!(rewritten_str.contains("Host: localhost:3000"));
         assert!(!rewritten_str.contains("abc123.example.com"));
@@ -315,10 +318,11 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::expect_used)]
     fn test_rewrite_host_header_with_body() {
         let request = b"POST /api HTTP/1.1\r\nHost: tunnel.app\r\nContent-Length: 5\r\n\r\nHello";
         let rewritten = rewrite_host_header(request, 8080);
-        let rewritten_str = String::from_utf8(rewritten).unwrap();
+        let rewritten_str = String::from_utf8(rewritten).expect("valid utf8");
 
         assert!(rewritten_str.contains("Host: localhost:8080"));
         assert!(rewritten_str.contains("Content-Length: 5"));
@@ -326,10 +330,11 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::expect_used)]
     fn test_rewrite_host_header_case_insensitive() {
         let request = b"GET / HTTP/1.1\r\nHOST: TUNNEL.APP\r\n\r\n";
         let rewritten = rewrite_host_header(request, 3000);
-        let rewritten_str = String::from_utf8(rewritten).unwrap();
+        let rewritten_str = String::from_utf8(rewritten).expect("valid utf8");
 
         assert!(rewritten_str.contains("Host: localhost:3000"));
         assert!(!rewritten_str.contains("TUNNEL.APP"));
