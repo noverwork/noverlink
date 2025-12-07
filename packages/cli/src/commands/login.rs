@@ -11,13 +11,6 @@ use crate::auth;
 
 /// Run the login command using device code flow
 pub async fn run_login() -> Result<()> {
-    // Check if already logged in
-    if auth::is_logged_in() {
-        println!("You are already logged in.");
-        println!("Run 'noverlink logout' first to login with a different account.");
-        return Ok(());
-    }
-
     println!("🔐 Logging in to Noverlink...");
     println!();
 

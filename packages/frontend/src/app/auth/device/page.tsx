@@ -14,7 +14,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -75,8 +75,11 @@ function DeviceAuthContent() {
 
   const userCode = watch('userCode');
 
-  // Check if user is logged in
-  const isAuthenticated = authStore.isAuthenticated();
+  // Check if user is logged in (only on client to avoid hydration mismatch)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    setIsAuthenticated(authStore.isAuthenticated());
+  }, []);
 
   const onSubmit = async (data: DeviceCodeFormData) => {
     if (!isAuthenticated) {
