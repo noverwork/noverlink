@@ -43,9 +43,17 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Install sharp dependencies for Next.js Image Optimization
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libvips-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
+
+# Install sharp for image optimization
+RUN npm install --prefix /app sharp
 
 # Copy public assets
 COPY --from=builder /app/packages/frontend/public ./public
