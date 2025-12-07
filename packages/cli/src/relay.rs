@@ -366,7 +366,10 @@ async fn handle_websocket_connection(
         }
     };
 
-    // 2. Connect to localhost as raw TCP (we'll upgrade it ourselves)
+    // 2. Rewrite Host and Origin headers for localhost
+    let rewritten_request = rewrite_headers_for_localhost(&request_bytes, local_port);
+
+    // 3. Connect to localhost as raw TCP (we'll upgrade it ourselves)
     let local_addr = format!("127.0.0.1:{}", local_port);
     let mut local_stream = TcpStream::connect(&local_addr)
         .await
@@ -374,9 +377,9 @@ async fn handle_websocket_connection(
 
     debug!("Connected to localhost: {}", local_addr);
 
-    // 3. Send the initial HTTP upgrade request
+    // 4. Send the rewritten HTTP upgrade request
     local_stream
-        .write_all(&request_bytes)
+        .write_all(&rewritten_request)
         .await
         .context("Failed to send upgrade request to localhost")?;
 
@@ -520,6 +523,60 @@ async fn handle_websocket_connection(
     info!("WebSocket connection closed: {}", connection_id);
 
     Ok(())
+}
+
+/// Rewrite Host and Origin headers in HTTP request for localhost forwarding
+///
+/// This is necessary because:
+/// - Browser sends `Host: abc123.example.com` (tunnel domain)
+/// - localhost services (like Next.js HMR) expect `Host: localhost:port`
+/// - Without rewriting, localhost returns 400 Bad Request
+fn rewrite_headers_for_localhost(request: &[u8], local_port: u16) -> Vec<u8> {
+    let Ok(request_str) = std::str::from_utf8(request) else {
+        // If not valid UTF-8, return original request
+        return request.to_vec();
+    };
+
+    let localhost_host = format!("localhost:{}", local_port);
+    let localhost_origin = format!("http://localhost:{}", local_port);
+
+    let mut result = String::with_capacity(request_str.len());
+    let mut lines = request_str.lines().peekable();
+
+    // First line is the request line (e.g., "GET /_next/webpack-hmr HTTP/1.1")
+    if let Some(request_line) = lines.next() {
+        result.push_str(request_line);
+        result.push_str("\r\n");
+    }
+
+    // Process headers
+    for line in lines {
+        if line.is_empty() {
+            // End of headers
+            result.push_str("\r\n");
+            continue;
+        }
+
+        let lower = line.to_lowercase();
+
+        if lower.starts_with("host:") {
+            // Rewrite Host header
+            result.push_str("Host: ");
+            result.push_str(&localhost_host);
+            result.push_str("\r\n");
+        } else if lower.starts_with("origin:") {
+            // Rewrite Origin header
+            result.push_str("Origin: ");
+            result.push_str(&localhost_origin);
+            result.push_str("\r\n");
+        } else {
+            // Keep other headers as-is
+            result.push_str(line);
+            result.push_str("\r\n");
+        }
+    }
+
+    result.into_bytes()
 }
 
 /// Build TLS connector that trusts both standard CAs and Cloudflare Origin CA

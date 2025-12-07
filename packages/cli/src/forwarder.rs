@@ -14,6 +14,9 @@ pub async fn forward_to_localhost(request: &[u8], local_port: u16) -> Result<Vec
         local_port
     );
 
+    // Rewrite Host header for localhost
+    let rewritten_request = rewrite_host_header(request, local_port);
+
     // Connect to localhost with timeout
     let mut stream = timeout(
         Duration::from_secs(5),
@@ -22,9 +25,9 @@ pub async fn forward_to_localhost(request: &[u8], local_port: u16) -> Result<Vec
     .await
     .context("Timeout connecting to localhost")??;
 
-    // Send request
+    // Send rewritten request
     stream
-        .write_all(request)
+        .write_all(&rewritten_request)
         .await
         .context("Failed to write request to localhost")?;
 
@@ -143,6 +146,67 @@ fn find_headers_end(buffer: &[u8]) -> Option<usize> {
     buffer.windows(4).position(|w| w == b"\r\n\r\n")
 }
 
+/// Rewrite Host header in HTTP request for localhost forwarding
+///
+/// This is necessary because:
+/// - Browser sends `Host: abc123.example.com` (tunnel domain)
+/// - localhost services expect `Host: localhost:port`
+/// - Without rewriting, some apps may reject the request or behave incorrectly
+fn rewrite_host_header(request: &[u8], local_port: u16) -> Vec<u8> {
+    // Find the end of headers
+    let Some(headers_end) = find_headers_end(request) else {
+        // No complete headers, return original
+        return request.to_vec();
+    };
+
+    let Ok(headers_str) = std::str::from_utf8(&request[..headers_end + 4]) else {
+        // Not valid UTF-8, return original
+        return request.to_vec();
+    };
+
+    let localhost_host = format!("localhost:{}", local_port);
+
+    let mut result = String::with_capacity(request.len());
+    let mut lines = headers_str.lines();
+
+    // First line is the request line (e.g., "GET / HTTP/1.1")
+    if let Some(request_line) = lines.next() {
+        result.push_str(request_line);
+        result.push_str("\r\n");
+    }
+
+    // Process headers
+    for line in lines {
+        if line.is_empty() {
+            continue;
+        }
+
+        let lower = line.to_lowercase();
+
+        if lower.starts_with("host:") {
+            // Rewrite Host header
+            result.push_str("Host: ");
+            result.push_str(&localhost_host);
+            result.push_str("\r\n");
+        } else {
+            // Keep other headers as-is
+            result.push_str(line);
+            result.push_str("\r\n");
+        }
+    }
+
+    // End of headers
+    result.push_str("\r\n");
+
+    // Append body if present
+    let mut output = result.into_bytes();
+    if request.len() > headers_end + 4 {
+        output.extend_from_slice(&request[headers_end + 4..]);
+    }
+
+    output
+}
+
 /// Create a 502 Bad Gateway error response
 pub fn create_502_response(error: &anyhow::Error) -> Vec<u8> {
     let body = format!("Failed to connect to localhost: {}", error);
@@ -237,5 +301,37 @@ mod tests {
     fn test_multiple_chunks() {
         let multi_chunk = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n5\r\nWorld\r\n0\r\n\r\n";
         assert!(is_complete_http_response(multi_chunk));
+    }
+
+    #[test]
+    fn test_rewrite_host_header() {
+        let request = b"GET / HTTP/1.1\r\nHost: abc123.example.com\r\nConnection: keep-alive\r\n\r\n";
+        let rewritten = rewrite_host_header(request, 3000);
+        let rewritten_str = String::from_utf8(rewritten).unwrap();
+
+        assert!(rewritten_str.contains("Host: localhost:3000"));
+        assert!(!rewritten_str.contains("abc123.example.com"));
+        assert!(rewritten_str.contains("Connection: keep-alive"));
+    }
+
+    #[test]
+    fn test_rewrite_host_header_with_body() {
+        let request = b"POST /api HTTP/1.1\r\nHost: tunnel.app\r\nContent-Length: 5\r\n\r\nHello";
+        let rewritten = rewrite_host_header(request, 8080);
+        let rewritten_str = String::from_utf8(rewritten).unwrap();
+
+        assert!(rewritten_str.contains("Host: localhost:8080"));
+        assert!(rewritten_str.contains("Content-Length: 5"));
+        assert!(rewritten_str.ends_with("\r\n\r\nHello"));
+    }
+
+    #[test]
+    fn test_rewrite_host_header_case_insensitive() {
+        let request = b"GET / HTTP/1.1\r\nHOST: TUNNEL.APP\r\n\r\n";
+        let rewritten = rewrite_host_header(request, 3000);
+        let rewritten_str = String::from_utf8(rewritten).unwrap();
+
+        assert!(rewritten_str.contains("Host: localhost:3000"));
+        assert!(!rewritten_str.contains("TUNNEL.APP"));
     }
 }
