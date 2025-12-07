@@ -409,11 +409,22 @@ async fn handle_websocket_connection(
 
     // Verify it's a 101 response
     if !response_buf.starts_with(b"HTTP/1.1 101") {
-        error!(
-            "Expected 101 response, got: {:?}",
-            String::from_utf8_lossy(&response_buf[..20.min(response_buf.len())])
-        );
-        bail!("WebSocket upgrade failed");
+        let response_preview = String::from_utf8_lossy(&response_buf[..50.min(response_buf.len())]);
+        error!("Expected 101 response, got: {:?}", response_preview);
+
+        // Send error response back to relay so it can forward to the browser
+        let error_response = base64::engine::general_purpose::STANDARD.encode(&response_buf);
+        let error_msg = WebSocketMessage::WebSocketError {
+            connection_id: connection_id.clone(),
+            error_response,
+        };
+
+        ws_msg_tx
+            .send(error_msg)
+            .await
+            .context("Failed to send WebSocketError message")?;
+
+        bail!("WebSocket upgrade failed: {}", response_preview);
     }
 
     info!("WebSocket upgrade successful: {}", connection_id);

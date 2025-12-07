@@ -139,6 +139,17 @@ pub enum WebSocketMessage {
         /// Connection ID
         connection_id: String,
     },
+
+    /// CLI → Relay: WebSocket upgrade failed
+    ///
+    /// Sent when localhost returns a non-101 response to the WebSocket upgrade request.
+    /// The relay should forward this error response to the client.
+    WebSocketError {
+        /// Connection ID matching the `WebSocketUpgrade` message
+        connection_id: String,
+        /// Base64-encoded error response from localhost (e.g., 400 Bad Request)
+        error_response: String,
+    },
 }
 
 #[cfg(test)]

@@ -306,6 +306,27 @@ pub async fn handle_cli_connection(
                                     registry.remove_websocket(&connection_id);
                                 }
 
+                                WebSocketMessage::WebSocketError { connection_id, error_response } => {
+                                    match base64_decode(&error_response) {
+                                        Ok(response_data) => {
+                                            bytes_out.fetch_add(u64::try_from(response_data.len()).unwrap_or(u64::MAX), Ordering::Relaxed);
+
+                                            // Send the error response as if it were a successful upgrade response
+                                            // This will forward the 400/etc response to the browser
+                                            if registry.send_websocket_upgrade_response(&connection_id, response_data).await {
+                                                info!("WebSocket error response sent for {}", connection_id);
+                                            } else {
+                                                warn!("Failed to send WebSocket error response for {}", connection_id);
+                                            }
+                                        }
+                                        Err(e) => {
+                                            error!("Failed to decode WebSocket error response: {}", e);
+                                        }
+                                    }
+                                    // Cleanup the pending WebSocket
+                                    registry.remove_websocket(&connection_id);
+                                }
+
                                 _ => {
                                     warn!("Unexpected message from CLI: {:?}", ws_msg);
                                 }
