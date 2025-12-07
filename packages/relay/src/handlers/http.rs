@@ -266,6 +266,7 @@ async fn read_http_headers(stream: &mut TcpStream) -> Result<(Vec<u8>, usize)> {
             .ok_or_else(|| anyhow::anyhow!("Buffer slicing error"))?;
 
         if let Some(pos) = find_headers_end(header_slice) {
+            buf.truncate(total_read);
             return Ok((buf, pos));
         }
     }
