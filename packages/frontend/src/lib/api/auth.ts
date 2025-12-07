@@ -12,7 +12,7 @@ export interface UserProfile {
   name: string;
   email: string;
   emailVerified: boolean;
-  plan: 'free' | 'hobbyist' | 'pro' | 'enterprise';
+  plan: 'free' | 'starter' | 'pro' | 'enterprise';
   maxTunnels: number;
   maxBandwidthMb: number;
   isActive: boolean;

@@ -74,7 +74,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
-            NEXT_PUBLIC_POLAR_HOBBYIST_PRODUCT_ID=${{ vars.NEXT_PUBLIC_POLAR_HOBBYIST_PRODUCT_ID }}
+            NEXT_PUBLIC_POLAR_STARTER_PRODUCT_ID=${{ vars.NEXT_PUBLIC_POLAR_STARTER_PRODUCT_ID }}
             NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID=${{ vars.NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
