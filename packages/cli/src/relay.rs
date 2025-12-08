@@ -48,6 +48,8 @@ pub struct RelayConnection {
     request_rx: mpsc::Receiver<IncomingRequest>,
     response_tx: mpsc::Sender<OutgoingResponse>,
     tunnel_url: String,
+    /// Shutdown signal sender - drop this to trigger graceful shutdown
+    shutdown_tx: Option<mpsc::Sender<()>>,
 }
 
 impl RelayConnection {
@@ -114,6 +116,9 @@ impl RelayConnection {
 
         // Channel for sending WebSocket messages to relay
         let (ws_msg_tx, mut ws_msg_rx) = mpsc::channel::<WebSocketMessage>(100);
+
+        // Shutdown signal channel
+        let (shutdown_tx, mut shutdown_rx) = mpsc::channel::<()>(1);
 
         // WebSocket connections registry
         let ws_connections: WebSocketConnections = Arc::new(DashMap::new());
@@ -240,6 +245,14 @@ impl RelayConnection {
         tokio::spawn(async move {
             loop {
                 tokio::select! {
+                    // Handle shutdown signal - send Close frame and exit
+                    _ = shutdown_rx.recv() => {
+                        info!("Sending WebSocket close frame to relay");
+                        if let Err(e) = ws_sink.send(Message::Close(None)).await {
+                            warn!("Failed to send close frame: {}", e);
+                        }
+                        break;
+                    }
                     Some(response) = response_rx.recv() => {
                         // Encode response as base64
                         let payload = base64::engine::general_purpose::STANDARD.encode(&response.payload);
@@ -288,12 +301,26 @@ impl RelayConnection {
             request_rx,
             response_tx,
             tunnel_url,
+            shutdown_tx: Some(shutdown_tx),
         })
     }
 
     /// Get tunnel URL
     pub fn tunnel_url(&self) -> &str {
         &self.tunnel_url
+    }
+
+    /// Gracefully close the connection to relay
+    ///
+    /// Sends a WebSocket Close frame to notify the relay that we're disconnecting.
+    /// This allows the relay to properly close the session in the backend.
+    pub async fn close(&mut self) {
+        if let Some(tx) = self.shutdown_tx.take() {
+            // Send shutdown signal
+            let _ = tx.send(()).await;
+            // Give the writer task time to send the close frame
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        }
     }
 
     /// Receive next request from relay

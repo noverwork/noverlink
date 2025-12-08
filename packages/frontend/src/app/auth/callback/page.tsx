@@ -28,7 +28,7 @@ function CallbackHandler() {
   }, [searchParams, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
       <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
       <p className="mt-4 text-slate-400">Completing sign in...</p>
     </div>
@@ -39,7 +39,7 @@ export default function OAuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
           <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
           <p className="mt-4 text-slate-400">Loading...</p>
         </div>

@@ -42,6 +42,9 @@ pub async fn run_http(port: u16, subdomain: Option<String>) -> Result<()> {
     // Handle requests
     let result = handle_requests(&mut relay, port).await;
 
+    // Gracefully close connection to relay (sends WebSocket Close frame)
+    relay.close().await;
+
     // Cleanup
     println!();
     println!("👋 Tunnel closed");
