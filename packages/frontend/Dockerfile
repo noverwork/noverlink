@@ -52,15 +52,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Install sharp for image optimization
-RUN npm install --prefix /app sharp
-
-# Copy public assets (must be at same relative path as in build)
-COPY --from=builder /app/packages/frontend/public ./packages/frontend/public
-
 # Copy standalone build (includes node_modules)
 COPY --from=builder --chown=nextjs:nodejs /app/packages/frontend/.next/standalone ./
+
+# Copy public and static assets to where standalone server.js expects them
+# Per Next.js docs: copy to standalone/public and standalone/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/packages/frontend/public ./packages/frontend/public
 COPY --from=builder --chown=nextjs:nodejs /app/packages/frontend/.next/static ./packages/frontend/.next/static
+
+# Install sharp for image optimization in the standalone node_modules
+RUN cd /app && npm install sharp && chown -R nextjs:nodejs /app/node_modules
 
 USER nextjs
 
