@@ -27,6 +27,16 @@ export interface TunnelLog {
   timestamp: string;
 }
 
+export interface TunnelLogDetail extends TunnelLog {
+  requestHeaders: Record<string, string>;
+  requestBody: string | null;
+  responseHeaders: Record<string, string> | null;
+  responseBody: string | null;
+  bodyTruncated: boolean;
+  originalRequestSize: number | null;
+  originalResponseSize: number | null;
+}
+
 export interface TunnelStats {
   activeSessions: number;
   totalRequests: number;
@@ -92,5 +102,11 @@ export const tunnelsApi = {
 
   getStats(): Promise<TunnelStats> {
     return apiClient.get<TunnelStats>('/tunnels/stats');
+  },
+
+  getLogDetail(sessionId: string, logId: string): Promise<TunnelLogDetail> {
+    return apiClient.get<TunnelLogDetail>(
+      `/tunnels/sessions/${sessionId}/logs/${logId}`
+    );
   },
 };

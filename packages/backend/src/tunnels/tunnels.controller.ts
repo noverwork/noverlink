@@ -102,6 +102,40 @@ export class TunnelsController {
   }
 
   /**
+   * Get a single HTTP request log with full details (headers + body)
+   * Note: This route must be defined BEFORE the list route to avoid conflicts
+   */
+  @Get('sessions/:sessionId/logs/:logId')
+  async getLogDetail(
+    @CurrentUser() user: Loaded<User, never>,
+    @Param('sessionId') sessionId: string,
+    @Param('logId') logId: string
+  ) {
+    const log = await this.tunnelsService.getLogDetail(
+      user.id,
+      sessionId,
+      logId
+    );
+
+    return {
+      id: log.id,
+      method: log.method,
+      path: log.path,
+      queryString: log.queryString,
+      status: log.responseStatus,
+      durationMs: log.durationMs,
+      timestamp: log.timestamp.toISOString(),
+      requestHeaders: log.requestHeaders,
+      requestBody: log.requestBody?.toString('utf-8') ?? null,
+      responseHeaders: log.responseHeaders ?? null,
+      responseBody: log.responseBody?.toString('utf-8') ?? null,
+      bodyTruncated: log.bodyTruncated,
+      originalRequestSize: log.originalRequestSize ?? null,
+      originalResponseSize: log.originalResponseSize ?? null,
+    };
+  }
+
+  /**
    * Get HTTP request logs for a session
    */
   @Get('sessions/:id/logs')

@@ -14,6 +14,7 @@ export type {
   ListSessionsParams,
   ListSessionsResponse,
   TunnelLog,
+  TunnelLogDetail,
   TunnelSession,
   TunnelStats,
 } from './tunnels';

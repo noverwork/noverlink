@@ -8,6 +8,7 @@ import type {
   ListLogsResponse,
   ListSessionsParams,
   ListSessionsResponse,
+  TunnelLogDetail,
   TunnelSession,
   TunnelStats,
 } from '../api';
@@ -50,5 +51,14 @@ export function useStats() {
     queryFn: tunnelsApi.getStats,
     enabled: authStore.isAuthenticated(),
     refetchInterval: 10000, // Poll every 10 seconds
+  });
+}
+
+export function useLogDetail(sessionId: string, logId: string | null) {
+  return useQuery<TunnelLogDetail, ApiError>({
+    queryKey: [...SESSIONS_QUERY_KEY, sessionId, 'logs', logId],
+    queryFn: () => tunnelsApi.getLogDetail(sessionId, logId as string),
+    enabled: authStore.isAuthenticated() && !!sessionId && !!logId,
+    staleTime: 60000, // Log details don't change, cache for 1 minute
   });
 }

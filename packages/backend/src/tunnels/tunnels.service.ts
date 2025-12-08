@@ -447,4 +447,34 @@ export class TunnelsService {
   async getSessionRequestCount(sessionId: string): Promise<number> {
     return this.em.count(HttpRequest, { session: sessionId });
   }
+
+  /**
+   * Get a single HTTP request log with full details (headers + body)
+   */
+  async getLogDetail(
+    userId: string,
+    sessionId: string,
+    logId: string
+  ): Promise<HttpRequest> {
+    // Verify session ownership
+    const session = await this.em.findOne(TunnelSession, {
+      id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      throw new NotFoundException(`Session ${sessionId} not found`);
+    }
+
+    const log = await this.em.findOne(HttpRequest, {
+      id: logId,
+      session: sessionId,
+    });
+
+    if (!log) {
+      throw new NotFoundException(`Log ${logId} not found`);
+    }
+
+    return log;
+  }
 }

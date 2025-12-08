@@ -10,6 +10,7 @@ export {
 export {
   SESSIONS_QUERY_KEY,
   STATS_QUERY_KEY,
+  useLogDetail,
   useSession,
   useSessionLogs,
   useSessions,
