@@ -231,11 +231,19 @@ impl RelayConnection {
                         info!("WebSocket close for {}", connection_id);
                         ws_connections_clone.remove(&connection_id);
                     }
+                    WebSocketMessage::Ping => {
+                        // Respond to heartbeat ping with pong
+                        debug!("Heartbeat ping received, sending pong");
+                        if ws_msg_tx.send(WebSocketMessage::Pong).await.is_err() {
+                            error!("Failed to send pong response");
+                            break;
+                        }
+                    }
                     WebSocketMessage::Error { message } => {
                         error!("Relay error: {}", message);
                     }
                     _ => {
-                        // Ignore Ping and other messages
+                        // Ignore other messages (Pong, Ack, etc.)
                     }
                 }
             }

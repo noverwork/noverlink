@@ -2,7 +2,7 @@
 
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use anyhow::Result;
 use base64::Engine;
@@ -12,6 +12,11 @@ use tokio::sync::mpsc;
 use tokio::time::interval;
 use tokio_tungstenite::accept_async;
 use tracing::{debug, error, info, warn};
+
+/// Heartbeat interval - send Ping every 30 seconds
+const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(30);
+/// Connection timeout - close if no message received for 90 seconds
+const CONNECTION_TIMEOUT: Duration = Duration::from_secs(90);
 
 use noverlink_shared::WebSocketMessage;
 
@@ -169,9 +174,37 @@ pub async fn handle_cli_connection(
     let mut stats_interval = interval(Duration::from_secs(60));
     stats_interval.tick().await; // Skip first immediate tick
 
+    // Heartbeat interval
+    let mut heartbeat_interval = interval(HEARTBEAT_INTERVAL);
+    heartbeat_interval.tick().await; // Skip first immediate tick
+
+    // Track last message time for timeout detection
+    let mut last_message_time = Instant::now();
+
     // Main message loop
     loop {
         tokio::select! {
+            // Heartbeat - send Ping to CLI
+            _ = heartbeat_interval.tick() => {
+                // Check for timeout first
+                if last_message_time.elapsed() > CONNECTION_TIMEOUT {
+                    warn!(
+                        "CLI connection timeout: {} (session: {}, user: {}, no response for {:?})",
+                        final_domain, session_id, ticket_payload.user_id, CONNECTION_TIMEOUT
+                    );
+                    break;
+                }
+
+                // Send Ping
+                let ping_msg = WebSocketMessage::Ping;
+                let json = serde_json::to_string(&ping_msg)?;
+                if let Err(e) = ws_sink.send(tokio_tungstenite::tungstenite::Message::Text(json)).await {
+                    error!("Failed to send heartbeat ping to {}: {}", final_domain, e);
+                    break;
+                }
+                debug!("Heartbeat ping sent to {} (session: {})", final_domain, session_id);
+            }
+
             // Periodic stats update
             _ = stats_interval.tick() => {
                 let current_bytes_in = bytes_in.load(Ordering::Relaxed);
@@ -249,9 +282,17 @@ pub async fn handle_cli_connection(
             msg = ws_stream.next() => {
                 match msg {
                     Some(Ok(msg)) => {
+                        // Update last message time on any message
+                        last_message_time = Instant::now();
+
                         let text = msg.to_string();
                         if let Ok(ws_msg) = serde_json::from_str::<WebSocketMessage>(&text) {
                             match ws_msg {
+                                WebSocketMessage::Pong => {
+                                    debug!("Heartbeat pong received from CLI");
+                                    // Just update last_message_time (already done above)
+                                }
+
                                 WebSocketMessage::Response { request_id, payload } => {
                                     match base64_decode(&payload) {
                                         Ok(response_data) => {
@@ -334,11 +375,13 @@ pub async fn handle_cli_connection(
                         }
                     }
                     Some(Err(e)) => {
-                        error!("WebSocket error: {}", e);
+                        error!("WebSocket error for {} (session: {}, user: {}): {}",
+                            final_domain, session_id, ticket_payload.user_id, e);
                         break;
                     }
                     None => {
-                        info!("WebSocket connection closed");
+                        info!("WebSocket connection closed: {} (session: {}, user: {})",
+                            final_domain, session_id, ticket_payload.user_id);
                         break;
                     }
                 }
