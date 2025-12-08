@@ -16,11 +16,21 @@ use tracing::{error, info, warn};
 use crate::registry::{TunnelMessage, TunnelRegistry};
 use crate::session_client::{base64_encode, truncate_body, HttpRequestLog, RequestLogger};
 
-/// 404 error page template
+/// 404 error page template (tunnel not found)
 #[derive(Template)]
 #[template(path = "404.html")]
 struct NotFoundTemplate<'a> {
     host: &'a str,
+}
+
+/// 503 error page template (local server not running)
+#[derive(Template)]
+#[template(path = "503.html")]
+struct ServiceUnavailableTemplate<'a> {
+    title: &'a str,
+    message: &'a str,
+    port: &'a str,
+    error_message: &'a str,
 }
 
 const MAX_BODY_SIZE: usize = 65536; // 64KB max body for logging
@@ -534,6 +544,26 @@ async fn forward_to_tunnel(
             let status = parse_response_status(&response_data);
             let response_headers = parse_response_headers(&response_data);
 
+            // Check for X-Noverlink-Error header - CLI signals it needs a custom error page
+            if let Some(noverlink_error) = extract_noverlink_error(&response_data) {
+                // Serve custom 503 error page from template
+                let final_response =
+                    render_503_error_page(&noverlink_error).unwrap_or(response_data);
+                stream.write_all(&final_response).await?;
+                stream.flush().await?;
+                info!(
+                    "HTTP request for {} completed with Noverlink error page (type: {})",
+                    host, noverlink_error.error_type
+                );
+
+                return Ok(ForwardResult {
+                    status: 503,
+                    response_headers,
+                    response_body: None,
+                    original_response_size: None,
+                });
+            }
+
             // Extract response body for logging (truncated)
             let headers_end = response_data
                 .windows(4)
@@ -634,6 +664,94 @@ fn is_websocket_upgrade(headers_buf: &[u8]) -> bool {
     }
 
     has_upgrade && has_connection_upgrade && has_ws_key
+}
+
+/// Extracted Noverlink error info from CLI response headers
+struct NoverlinkError {
+    error_type: String,
+    port: String,
+    message: String,
+}
+
+/// Extract X-Noverlink-Error headers from response
+fn extract_noverlink_error(response: &[u8]) -> Option<NoverlinkError> {
+    let headers_end = response.windows(4).position(|w| w == b"\r\n\r\n")?;
+    let headers_str = std::str::from_utf8(response.get(..headers_end)?).ok()?;
+
+    let mut error_type = None;
+    let mut port = None;
+    let mut message = None;
+
+    for line in headers_str.lines() {
+        let lower = line.to_lowercase();
+
+        if lower.starts_with("x-noverlink-error:") {
+            error_type = line.split(':').nth(1).map(|s| s.trim().to_string());
+        } else if lower.starts_with("x-noverlink-port:") {
+            port = line.split(':').nth(1).map(|s| s.trim().to_string());
+        } else if lower.starts_with("x-noverlink-message:") {
+            // Message might contain colons, so rejoin after first split
+            let parts: Vec<&str> = line.splitn(2, ':').collect();
+            if parts.len() >= 2 {
+                message = Some(parts[1].trim().to_string());
+            }
+        }
+    }
+
+    // Only return if we have the error type (required header)
+    error_type.map(|error_type| NoverlinkError {
+        error_type,
+        port: port.unwrap_or_else(|| "unknown".to_string()),
+        message: message.unwrap_or_else(|| "Unknown error".to_string()),
+    })
+}
+
+/// Render 503 error page from template
+fn render_503_error_page(error: &NoverlinkError) -> Result<Vec<u8>> {
+    let (title, message) = match error.error_type.as_str() {
+        "connection-refused" => (
+            "Local Server Not Running",
+            format!(
+                "Your tunnel is active, but no server is listening on port {}.",
+                error.port
+            ),
+        ),
+        "timeout" => (
+            "Local Server Timeout",
+            format!(
+                "Your server on port {} is taking too long to respond.",
+                error.port
+            ),
+        ),
+        _ => (
+            "Connection Error",
+            format!("Could not connect to localhost:{}.", error.port),
+        ),
+    };
+
+    let template = ServiceUnavailableTemplate {
+        title,
+        message: &message,
+        port: &error.port,
+        error_message: &error.message,
+    };
+
+    let body = template.render()?;
+
+    let response = format!(
+        "HTTP/1.1 503 Service Unavailable\r\n\
+         Content-Type: text/html; charset=utf-8\r\n\
+         Content-Length: {}\r\n\
+         Cache-Control: no-cache, no-store, must-revalidate\r\n\
+         Retry-After: 5\r\n\
+         Connection: close\r\n\
+         \r\n\
+         {}",
+        body.len(),
+        body
+    );
+
+    Ok(response.into_bytes())
 }
 
 #[cfg(test)]

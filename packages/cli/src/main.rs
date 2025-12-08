@@ -6,6 +6,7 @@ mod api;
 mod auth;
 mod cli;
 mod commands;
+mod display;
 mod forwarder;
 mod relay;
 
@@ -21,11 +22,11 @@ async fn main() -> Result<()> {
     // If this fails, it means a provider is already installed (which is fine)
     let _ = rustls::crypto::ring::default_provider().install_default();
 
-    // Initialize logging
+    // Initialize logging (default to warn to avoid interfering with TUI display)
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("warn")),
         )
         .init();
 

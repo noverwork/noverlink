@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connection Unavailable - Noverlink</title>
+    <title>{{ title }} - Noverlink</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -56,8 +56,8 @@
             letter-spacing: -0.025em;
         }
 
-        /* Tunnel visualization */
-        .tunnel-viz {
+        /* Status visualization */
+        .status-viz {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -81,26 +81,26 @@
             height: 24px;
         }
 
+        .node-tunnel {
+            background: rgba(45, 212, 191, 0.1);
+            border: 1px solid rgba(45, 212, 191, 0.25);
+        }
+
+        .node-tunnel svg {
+            color: #2dd4bf;
+        }
+
         .node-local {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.25);
         }
 
         .node-local svg {
-            color: #94a3b8;
+            color: #fbbf24;
         }
 
-        .node-public {
-            background: rgba(251, 113, 133, 0.1);
-            border: 1px solid rgba(251, 113, 133, 0.25);
-        }
-
-        .node-public svg {
-            color: #fb7185;
-        }
-
-        /* Tunnel line */
-        .tunnel-line {
+        /* Connection line */
+        .connection-line {
             width: 80px;
             height: 2px;
             position: relative;
@@ -109,23 +109,23 @@
             justify-content: center;
         }
 
-        .tunnel-line::before,
-        .tunnel-line::after {
+        .connection-line::before,
+        .connection-line::after {
             content: '';
             position: absolute;
             height: 2px;
         }
 
-        .tunnel-line::before {
+        .connection-line::before {
             left: 0;
             width: 35%;
-            background: linear-gradient(90deg, #334155, #475569);
+            background: linear-gradient(90deg, rgba(45, 212, 191, 0.5), rgba(45, 212, 191, 0.15));
         }
 
-        .tunnel-line::after {
+        .connection-line::after {
             right: 0;
             width: 35%;
-            background: linear-gradient(270deg, rgba(251, 113, 133, 0.5), rgba(251, 113, 133, 0.15));
+            background: linear-gradient(270deg, rgba(251, 191, 36, 0.5), rgba(251, 191, 36, 0.15));
         }
 
         .break-icon {
@@ -136,14 +136,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #fb7185;
+            border: 2px solid #fbbf24;
             z-index: 1;
         }
 
         .break-icon svg {
             width: 10px;
             height: 10px;
-            color: #fb7185;
+            color: #fbbf24;
         }
 
         /* Labels */
@@ -159,8 +159,8 @@
             white-space: nowrap;
         }
 
-        .node-local .node-label { color: #64748b; }
-        .node-public .node-label { color: #fb7185; }
+        .node-tunnel .node-label { color: #2dd4bf; }
+        .node-local .node-label { color: #fbbf24; }
 
         /* Content */
         h1 {
@@ -177,15 +177,48 @@
             font-size: 0.875rem;
         }
 
-        .domain {
+        .port-info {
             font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
             font-size: 0.8125rem;
-            color: #64748b;
+            color: #2dd4bf;
             background: #0f172a;
             padding: 0.5rem 0.875rem;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Code example */
+        .code-block {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: left;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 0.8125rem;
+            margin-bottom: 1rem;
+        }
+
+        .code-comment {
+            color: #64748b;
+        }
+
+        .code-command {
+            color: #2dd4bf;
+        }
+
+        /* Error detail */
+        .error-detail {
+            font-size: 0.75rem;
+            color: #64748b;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            word-break: break-all;
+            margin-bottom: 1rem;
         }
 
         /* Footer */
@@ -197,18 +230,11 @@
 
         .footer-text {
             font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .refresh-hint {
             color: #94a3b8;
-        }
-
-        .footer a {
-            color: #2dd4bf;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 150ms ease;
-        }
-
-        .footer a:hover {
-            color: #5eead4;
         }
     </style>
 </head>
@@ -220,16 +246,16 @@
                 <span class="logo-text">Noverlink</span>
             </div>
 
-            <div class="tunnel-viz">
-                <div class="node node-local">
+            <div class="status-viz">
+                <div class="node node-tunnel">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <rect x="2" y="3" width="20" height="14" rx="2"/>
-                        <path d="M8 21h8M12 17v4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                     </svg>
-                    <span class="node-label">You</span>
+                    <span class="node-label">Tunnel</span>
                 </div>
 
-                <div class="tunnel-line">
+                <div class="connection-line">
                     <div class="break-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <path d="M18 6L6 18M6 6l12 12"/>
@@ -237,26 +263,31 @@
                     </div>
                 </div>
 
-                <div class="node node-public">
+                <div class="node node-local">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <path d="M8 21h8M12 17v4"/>
                     </svg>
-                    <span class="node-label">Offline</span>
+                    <span class="node-label">localhost:{{ port }}</span>
                 </div>
             </div>
 
-            <h1>This site isn't connected</h1>
-            <p class="message">
-                The connection to this address is currently inactive.<br>
-                It may come back online shortly.
-            </p>
+            <h1>{{ title }}</h1>
+            <p class="message">{{ message }}</p>
 
-            <div class="domain">{{ host }}</div>
+            <div class="port-info">localhost:{{ port }}</div>
+
+            <div class="code-block">
+                <span class="code-comment"># Start your server on port {{ port }}</span><br>
+                <span class="code-command">npm run dev</span> <span class="code-comment"># or</span><br>
+                <span class="code-command">python -m http.server {{ port }}</span>
+            </div>
+
+            <div class="error-detail">{{ error_message }}</div>
 
             <div class="footer">
-                <p class="footer-text">
-                    Site owner? <a href="https://noverlink.com/docs/quickstart">Reconnect your tunnel</a>
+                <p class="footer-text refresh-hint">
+                    This page will work once your server is running. Just refresh!
                 </p>
             </div>
         </div>

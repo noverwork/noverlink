@@ -209,18 +209,35 @@ fn rewrite_host_header(request: &[u8], local_port: u16) -> Vec<u8> {
     output
 }
 
-/// Create a 502 Bad Gateway error response
-pub fn create_502_response(error: &anyhow::Error) -> Vec<u8> {
-    let body = format!("Failed to connect to localhost: {}", error);
+/// Create an error response with special headers for relay to intercept
+///
+/// The relay will detect `X-Noverlink-Error` header and serve a nice HTML error page.
+/// This keeps error page styling centralized in the relay.
+pub fn create_502_response(error: &anyhow::Error, local_port: u16) -> Vec<u8> {
+    let error_msg = error.to_string();
+
+    // Determine error type for relay to use appropriate template
+    let error_type = if error_msg.contains("Connection refused") {
+        "connection-refused"
+    } else if error_msg.contains("Timeout") {
+        "timeout"
+    } else {
+        "unknown"
+    };
+
+    // Minimal response - relay will replace body with HTML template
     let response = format!(
-        "HTTP/1.1 502 Bad Gateway\r\n\
+        "HTTP/1.1 503 Service Unavailable\r\n\
+         X-Noverlink-Error: {}\r\n\
+         X-Noverlink-Port: {}\r\n\
+         X-Noverlink-Message: {}\r\n\
          Content-Type: text/plain\r\n\
-         Content-Length: {}\r\n\
+         Content-Length: 0\r\n\
          Connection: close\r\n\
-         \r\n\
-         {}",
-        body.len(),
-        body
+         \r\n",
+        error_type,
+        local_port,
+        error_msg.replace('\n', " ").replace('\r', "")
     );
 
     response.into_bytes()
@@ -276,15 +293,29 @@ mod tests {
     #[test]
     fn test_create_502_response() {
         let error = anyhow::anyhow!("Connection refused");
-        let response = create_502_response(&error);
+        let response = create_502_response(&error, 3000);
 
         let response_str =
             String::from_utf8(response).unwrap_or_else(|_| String::from("Invalid UTF-8"));
 
-        assert!(response_str.starts_with("HTTP/1.1 502 Bad Gateway"));
-        assert!(response_str.contains("Content-Type: text/plain"));
+        // Sends minimal response with special headers for relay to intercept
+        assert!(response_str.starts_with("HTTP/1.1 503 Service Unavailable"));
+        assert!(response_str.contains("X-Noverlink-Error: connection-refused"));
+        assert!(response_str.contains("X-Noverlink-Port: 3000"));
+        assert!(response_str.contains("X-Noverlink-Message: Connection refused"));
         assert!(response_str.contains("Connection: close"));
-        assert!(response_str.contains("Connection refused"));
+    }
+
+    #[test]
+    fn test_create_502_response_timeout() {
+        let error = anyhow::anyhow!("Timeout connecting to localhost");
+        let response = create_502_response(&error, 8080);
+
+        let response_str =
+            String::from_utf8(response).unwrap_or_else(|_| String::from("Invalid UTF-8"));
+
+        assert!(response_str.contains("X-Noverlink-Error: timeout"));
+        assert!(response_str.contains("X-Noverlink-Port: 8080"));
     }
 
     #[test]
