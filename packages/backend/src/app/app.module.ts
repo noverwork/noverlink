@@ -2,6 +2,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ENTITIES } from '@noverlink/backend-shared';
 import { PinoLoggerModule } from '@noverlink/backend-shared';
 import { PinoLogger } from 'nestjs-pino';
@@ -18,6 +19,7 @@ import { AppController } from './app.controller';
 @Module({
   imports: [
     AppConfigModule,
+    ScheduleModule.forRoot(),
     PinoLoggerModule.forRootAsync({
       inject: [AppConfigService],
       useFactory: (appConfigService: AppConfigService) => ({

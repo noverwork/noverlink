@@ -34,7 +34,7 @@ const config = defineConfig({
     allOrNothing: true,
     dropTables: true,
     safe: false,
-    snapshot: false,
+    snapshot: true,
     emit: 'ts',
   },
   seeder: {

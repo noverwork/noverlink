@@ -1,5 +1,6 @@
 import { EntityManager, ref } from '@mikro-orm/postgresql';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Interval } from '@nestjs/schedule';
 import {
   Domain,
   HttpRequest,
@@ -16,6 +17,12 @@ import {
   HttpRequestBatchDto,
   UpdateStatsDto,
 } from './dto';
+
+/** Sessions not seen for this duration are considered stale (3 minutes) */
+const STALE_SESSION_THRESHOLD_MS = 3 * 60 * 1000;
+
+/** How often to run the cleanup task (1 minute) */
+const CLEANUP_INTERVAL_MS = 60 * 1000;
 
 @Injectable()
 export class RelayService {
@@ -69,6 +76,7 @@ export class RelayService {
 
     session.bytesIn = BigInt(dto.bytes_in);
     session.bytesOut = BigInt(dto.bytes_out);
+    session.lastSeenAt = new Date();
 
     await this.em.flush();
 
@@ -190,5 +198,47 @@ export class RelayService {
         (1000 * 60);
       quota.tunnelMinutes += minutes;
     }
+  }
+
+  /**
+   * Cleanup stale sessions that haven't received stats updates.
+   * This handles cases where Relay crashes without notifying Backend.
+   * Runs every minute.
+   */
+  @Interval(CLEANUP_INTERVAL_MS)
+  async cleanupStaleSessions(): Promise<void> {
+    const threshold = new Date(Date.now() - STALE_SESSION_THRESHOLD_MS);
+
+    // Find active sessions that haven't been seen recently
+    const staleSessions = await this.em.find(TunnelSession, {
+      status: SessionStatus.ACTIVE,
+      lastSeenAt: { $lt: threshold },
+    });
+
+    if (staleSessions.length === 0) {
+      return;
+    }
+
+    this.logger.warn(
+      `Found ${staleSessions.length} stale session(s), marking as closed`
+    );
+
+    for (const session of staleSessions) {
+      session.status = SessionStatus.CLOSED;
+      session.disconnectedAt = new Date();
+
+      // Update usage quota with final stats
+      await this.updateUsageQuota(
+        session,
+        Number(session.bytesIn),
+        Number(session.bytesOut)
+      );
+
+      this.logger.log(
+        `Closed stale session: ${session.id} (last seen: ${session.lastSeenAt.toISOString()})`
+      );
+    }
+
+    await this.em.flush();
   }
 }

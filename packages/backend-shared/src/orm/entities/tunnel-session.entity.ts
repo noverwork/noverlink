@@ -53,6 +53,11 @@ export class TunnelSession extends PgBaseEntity {
   @Property({ type: 'Date' })
   connectedAt: Date & Opt = new Date();
 
+  /** Last time Relay reported this session is alive (updated every 60s by stats) */
+  @Property({ type: 'Date' })
+  @Index()
+  lastSeenAt: Date & Opt = new Date();
+
   @Property({ type: 'Date', nullable: true })
   disconnectedAt?: Date;
 

@@ -89,6 +89,7 @@
     "@nestjs/jwt": "^11.0.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/schedule": "^6.1.0",
     "@noverlink/shared": "^0.0.1",
     "@polar-sh/sdk": "^0.41.5",
     "argon2": "^0.44.0",
