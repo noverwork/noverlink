@@ -25,6 +25,7 @@ import {
   RegisterDto,
   UpdateProfileDto,
 } from './dto';
+import { CliAuthGuard } from './guards/cli-auth.guard';
 import type { OAuthProfile } from './strategies/google.strategy';
 
 @Controller('auth')
@@ -151,6 +152,21 @@ export class AuthController {
     @CurrentUser() user: Loaded<User, 'plan'>
   ) {
     return this.authService.updateProfile(user.id, dto);
+  }
+
+  // ==================== CLI Profile ====================
+
+  @Public()
+  @UseGuards(CliAuthGuard)
+  @Get('cli/me')
+  getCliProfile(@CurrentUser() user: Loaded<User, 'plan'>) {
+    const plan = user.plan.$;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      plan: plan.id,
+    };
   }
 
   private redirectWithTokens(res: Response, authResponse: AuthResponse): void {

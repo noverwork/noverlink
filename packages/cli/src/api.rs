@@ -36,7 +36,7 @@ pub struct TicketResponse {
     pub expires_in: u32,
 }
 
-/// Response from GET /auth/me
+/// Response from GET /auth/cli/me
 #[derive(Debug, Deserialize)]
 pub struct MeResponse {
     #[allow(dead_code)]
@@ -171,7 +171,7 @@ impl ApiClient {
 
     /// Get current user profile
     pub async fn get_me(&self, auth_token: &str) -> Result<MeResponse> {
-        let url = format!("{}/auth/me", self.base_url);
+        let url = format!("{}/auth/cli/me", self.base_url);
 
         let response = self
             .client
