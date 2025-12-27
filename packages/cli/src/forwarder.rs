@@ -339,7 +339,8 @@ mod tests {
     #[test]
     #[allow(clippy::expect_used)]
     fn test_rewrite_host_header() {
-        let request = b"GET / HTTP/1.1\r\nHost: abc123.example.com\r\nConnection: keep-alive\r\n\r\n";
+        let request =
+            b"GET / HTTP/1.1\r\nHost: abc123.example.com\r\nConnection: keep-alive\r\n\r\n";
         let rewritten = rewrite_host_header(request, 3000);
         let rewritten_str = String::from_utf8(rewritten).expect("valid utf8");
 

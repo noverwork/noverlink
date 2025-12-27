@@ -260,10 +260,8 @@ fn truncate_string(s: &str, max_len: usize) -> String {
     }
 
     // Get the truncated portion safely
-    s.get(..end).map_or_else(
-        || s.to_string(),
-        |truncated| format!("{}...", truncated),
-    )
+    s.get(..end)
+        .map_or_else(|| s.to_string(), |truncated| format!("{}...", truncated))
 }
 
 /// Parse HTTP method and path from raw request bytes
