@@ -1,5 +1,7 @@
 {
-  "namespaces": ["public"],
+  "namespaces": [
+    "public"
+  ],
   "name": "public",
   "tables": [
     {
@@ -119,7 +121,9 @@
       "indexes": [
         {
           "keyName": "plan_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -237,7 +241,9 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["email"],
+          "columnNames": [
+            "email"
+          ],
           "composite": false,
           "keyName": "user_email_index",
           "constraint": false,
@@ -245,7 +251,9 @@
           "unique": false
         },
         {
-          "columnNames": ["email"],
+          "columnNames": [
+            "email"
+          ],
           "composite": false,
           "keyName": "user_email_unique",
           "constraint": true,
@@ -253,7 +261,9 @@
           "unique": true
         },
         {
-          "columnNames": ["plan_id"],
+          "columnNames": [
+            "plan_id"
+          ],
           "composite": false,
           "keyName": "user_plan_id_index",
           "constraint": false,
@@ -261,7 +271,9 @@
           "unique": false
         },
         {
-          "columnNames": ["auth_token"],
+          "columnNames": [
+            "auth_token"
+          ],
           "composite": false,
           "keyName": "user_auth_token_index",
           "constraint": false,
@@ -269,7 +281,9 @@
           "unique": false
         },
         {
-          "columnNames": ["auth_token"],
+          "columnNames": [
+            "auth_token"
+          ],
           "composite": false,
           "keyName": "user_auth_token_unique",
           "constraint": true,
@@ -278,7 +292,9 @@
         },
         {
           "keyName": "user_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -289,9 +305,13 @@
       "foreignKeys": {
         "user_plan_id_foreign": {
           "constraintName": "user_plan_id_foreign",
-          "columnNames": ["plan_id"],
+          "columnNames": [
+            "plan_id"
+          ],
           "localTableName": "public.user",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.plan",
           "updateRule": "cascade"
         }
@@ -394,7 +414,11 @@
       "indexes": [
         {
           "keyName": "usage_quota_user_id_year_month_index",
-          "columnNames": ["user_id", "year", "month"],
+          "columnNames": [
+            "user_id",
+            "year",
+            "month"
+          ],
           "composite": true,
           "constraint": false,
           "primary": false,
@@ -402,7 +426,9 @@
         },
         {
           "keyName": "usage_quota_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -413,9 +439,13 @@
       "foreignKeys": {
         "usage_quota_user_id_foreign": {
           "constraintName": "usage_quota_user_id_foreign",
-          "columnNames": ["user_id"],
+          "columnNames": [
+            "user_id"
+          ],
           "localTableName": "public.usage_quota",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -536,7 +566,9 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["polar_subscription_id"],
+          "columnNames": [
+            "polar_subscription_id"
+          ],
           "composite": false,
           "keyName": "subscription_polar_subscription_id_index",
           "constraint": false,
@@ -544,7 +576,9 @@
           "unique": false
         },
         {
-          "columnNames": ["polar_subscription_id"],
+          "columnNames": [
+            "polar_subscription_id"
+          ],
           "composite": false,
           "keyName": "subscription_polar_subscription_id_unique",
           "constraint": true,
@@ -552,7 +586,9 @@
           "unique": true
         },
         {
-          "columnNames": ["polar_customer_id"],
+          "columnNames": [
+            "polar_customer_id"
+          ],
           "composite": false,
           "keyName": "subscription_polar_customer_id_index",
           "constraint": false,
@@ -560,7 +596,9 @@
           "unique": false
         },
         {
-          "columnNames": ["user_id"],
+          "columnNames": [
+            "user_id"
+          ],
           "composite": false,
           "keyName": "subscription_user_id_index",
           "constraint": false,
@@ -569,7 +607,9 @@
         },
         {
           "keyName": "subscription_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -580,9 +620,13 @@
       "foreignKeys": {
         "subscription_user_id_foreign": {
           "constraintName": "subscription_user_id_foreign",
-          "columnNames": ["user_id"],
+          "columnNames": [
+            "user_id"
+          ],
           "localTableName": "public.subscription",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -628,7 +672,10 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "enumItems": ["google", "github"],
+          "enumItems": [
+            "google",
+            "github"
+          ],
           "mappedType": "enum"
         },
         "provider_user_id": {
@@ -656,7 +703,9 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["provider"],
+          "columnNames": [
+            "provider"
+          ],
           "composite": false,
           "keyName": "oauth_connection_provider_index",
           "constraint": false,
@@ -664,7 +713,9 @@
           "unique": false
         },
         {
-          "columnNames": ["provider_user_id"],
+          "columnNames": [
+            "provider_user_id"
+          ],
           "composite": false,
           "keyName": "oauth_connection_provider_user_id_index",
           "constraint": false,
@@ -673,7 +724,10 @@
         },
         {
           "keyName": "oauth_connection_provider_provider_user_id_unique",
-          "columnNames": ["provider", "provider_user_id"],
+          "columnNames": [
+            "provider",
+            "provider_user_id"
+          ],
           "composite": true,
           "constraint": true,
           "primary": false,
@@ -681,7 +735,9 @@
         },
         {
           "keyName": "oauth_connection_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -692,9 +748,13 @@
       "foreignKeys": {
         "oauth_connection_user_id_foreign": {
           "constraintName": "oauth_connection_user_id_foreign",
-          "columnNames": ["user_id"],
+          "columnNames": [
+            "user_id"
+          ],
           "localTableName": "public.oauth_connection",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -778,7 +838,9 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["user_id"],
+          "columnNames": [
+            "user_id"
+          ],
           "composite": false,
           "keyName": "domain_user_id_index",
           "constraint": false,
@@ -786,7 +848,9 @@
           "unique": false
         },
         {
-          "columnNames": ["hostname"],
+          "columnNames": [
+            "hostname"
+          ],
           "composite": false,
           "keyName": "domain_hostname_index",
           "constraint": false,
@@ -794,7 +858,9 @@
           "unique": false
         },
         {
-          "columnNames": ["hostname"],
+          "columnNames": [
+            "hostname"
+          ],
           "composite": false,
           "keyName": "domain_hostname_unique",
           "constraint": true,
@@ -803,7 +869,9 @@
         },
         {
           "keyName": "domain_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -814,9 +882,13 @@
       "foreignKeys": {
         "domain_user_id_foreign": {
           "constraintName": "domain_user_id_foreign",
-          "columnNames": ["user_id"],
+          "columnNames": [
+            "user_id"
+          ],
           "localTableName": "public.domain",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -892,7 +964,10 @@
           "primary": false,
           "nullable": false,
           "default": "'http'",
-          "enumItems": ["http", "tcp"],
+          "enumItems": [
+            "http",
+            "tcp"
+          ],
           "mappedType": "enum"
         },
         "status": {
@@ -903,7 +978,10 @@
           "primary": false,
           "nullable": false,
           "default": "'active'",
-          "enumItems": ["active", "closed"],
+          "enumItems": [
+            "active",
+            "closed"
+          ],
           "mappedType": "enum"
         },
         "connected_at": {
@@ -924,6 +1002,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
+          "default": "'now()'",
           "mappedType": "datetime"
         },
         "disconnected_at": {
@@ -991,7 +1070,9 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["user_id"],
+          "columnNames": [
+            "user_id"
+          ],
           "composite": false,
           "keyName": "tunnel_session_user_id_index",
           "constraint": false,
@@ -999,7 +1080,9 @@
           "unique": false
         },
         {
-          "columnNames": ["domain_id"],
+          "columnNames": [
+            "domain_id"
+          ],
           "composite": false,
           "keyName": "tunnel_session_domain_id_index",
           "constraint": false,
@@ -1007,7 +1090,9 @@
           "unique": false
         },
         {
-          "columnNames": ["status"],
+          "columnNames": [
+            "status"
+          ],
           "composite": false,
           "keyName": "tunnel_session_status_index",
           "constraint": false,
@@ -1015,7 +1100,9 @@
           "unique": false
         },
         {
-          "columnNames": ["last_seen_at"],
+          "columnNames": [
+            "last_seen_at"
+          ],
           "composite": false,
           "keyName": "tunnel_session_last_seen_at_index",
           "constraint": false,
@@ -1024,7 +1111,11 @@
         },
         {
           "keyName": "tunnel_session_user_id_status_connected_at_index",
-          "columnNames": ["user_id", "status", "connected_at"],
+          "columnNames": [
+            "user_id",
+            "status",
+            "connected_at"
+          ],
           "composite": true,
           "constraint": false,
           "primary": false,
@@ -1032,7 +1123,9 @@
         },
         {
           "keyName": "tunnel_session_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1043,17 +1136,25 @@
       "foreignKeys": {
         "tunnel_session_user_id_foreign": {
           "constraintName": "tunnel_session_user_id_foreign",
-          "columnNames": ["user_id"],
+          "columnNames": [
+            "user_id"
+          ],
           "localTableName": "public.tunnel_session",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         },
         "tunnel_session_domain_id_foreign": {
           "constraintName": "tunnel_session_domain_id_foreign",
-          "columnNames": ["domain_id"],
+          "columnNames": [
+            "domain_id"
+          ],
           "localTableName": "public.tunnel_session",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.domain",
           "updateRule": "cascade"
         }
@@ -1229,7 +1330,9 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["session_id"],
+          "columnNames": [
+            "session_id"
+          ],
           "composite": false,
           "keyName": "http_request_session_id_index",
           "constraint": false,
@@ -1237,7 +1340,9 @@
           "unique": false
         },
         {
-          "columnNames": ["timestamp"],
+          "columnNames": [
+            "timestamp"
+          ],
           "composite": false,
           "keyName": "http_request_timestamp_index",
           "constraint": false,
@@ -1246,7 +1351,10 @@
         },
         {
           "keyName": "http_request_session_id_timestamp_index",
-          "columnNames": ["session_id", "timestamp"],
+          "columnNames": [
+            "session_id",
+            "timestamp"
+          ],
           "composite": true,
           "constraint": false,
           "primary": false,
@@ -1254,7 +1362,9 @@
         },
         {
           "keyName": "http_request_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1265,9 +1375,13 @@
       "foreignKeys": {
         "http_request_session_id_foreign": {
           "constraintName": "http_request_session_id_foreign",
-          "columnNames": ["session_id"],
+          "columnNames": [
+            "session_id"
+          ],
           "localTableName": "public.http_request",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.tunnel_session",
           "updateRule": "cascade"
         }
