@@ -6,6 +6,7 @@ mod api;
 mod auth;
 mod cli;
 mod commands;
+mod constants;
 mod display;
 mod forwarder;
 mod relay;

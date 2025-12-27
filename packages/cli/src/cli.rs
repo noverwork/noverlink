@@ -1,7 +1,6 @@
 use clap::{Parser, Subcommand};
 
-/// Version injected at build time (from `NOVERLINK_VERSION` env or `Cargo.toml`)
-const VERSION: &str = env!("NOVERLINK_VERSION");
+use crate::constants::VERSION;
 
 #[derive(Parser)]
 #[command(name = "noverlink")]

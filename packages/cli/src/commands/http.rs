@@ -6,11 +6,10 @@ use tracing::{debug, error};
 
 use crate::api::ApiClient;
 use crate::auth;
+use crate::constants::VERSION;
 use crate::display::{self, Display};
 use crate::forwarder;
 use crate::relay::RelayConnection;
-
-const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub async fn run_http(port: u16, subdomain: Option<String>) -> Result<()> {
     // Load auth token
