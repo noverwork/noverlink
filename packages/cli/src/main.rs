@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
         Commands::Logout => run_logout(),
 
         Commands::Whoami => {
-            run_whoami();
+            run_whoami().await;
             Ok(())
         }
 

@@ -108,17 +108,37 @@ pub fn run_logout() -> Result<()> {
 }
 
 /// Show current login status
-pub fn run_whoami() {
-    if auth::is_logged_in() {
-        let email = auth::get_email().unwrap_or_else(|| "unknown".to_string());
-        let plan = auth::get_plan().unwrap_or_else(|| "unknown".to_string());
-
-        println!("✅ You are logged in.");
-        println!("   Email: {}", email);
-        println!("   Plan:  {}", plan);
-        println!("   API:   {}", auth::api_url());
-    } else {
+pub async fn run_whoami() {
+    if !auth::is_logged_in() {
         println!("❌ You are not logged in.");
         println!("   Run 'noverlink login' to authenticate.");
+        return;
     }
+
+    let mut email = auth::get_email();
+    let mut plan = auth::get_plan();
+
+    // If cache is missing, fetch from API
+    if email.is_none() || plan.is_none() {
+        if let Ok(token) = auth::load_token() {
+            let api = ApiClient::from_config();
+            if let Ok(me) = api.get_me(&token).await {
+                // Update cache
+                let _ = auth::save_profile(&me.email, me.name.as_deref(), &me.plan);
+                email = Some(me.email);
+                plan = Some(me.plan);
+            }
+        }
+    }
+
+    println!("✅ You are logged in.");
+    println!(
+        "   Email: {}",
+        email.unwrap_or_else(|| "unknown".to_string())
+    );
+    println!(
+        "   Plan:  {}",
+        plan.unwrap_or_else(|| "unknown".to_string())
+    );
+    println!("   API:   {}", auth::api_url());
 }
