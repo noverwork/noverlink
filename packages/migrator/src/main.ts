@@ -6,7 +6,7 @@ import { Environment } from '@noverlink/shared';
 
 import { MIGRATION_ROOT } from './constant';
 import MikroOrmConfig from './mikro-orm.config';
-import { PlanSeeder } from './seeders';
+import { DevUserSeeder, PlanSeeder } from './seeders';
 
 // Logger for CLI output - console is appropriate here
 const log = {
@@ -58,6 +58,7 @@ export const seed = async () => {
   const orm = await MikroORM.init<PostgreSqlDriver>({ ...MikroOrmConfig });
   const seeder = orm.getSeeder();
   await seeder.seed(PlanSeeder);
+  await seeder.seed(DevUserSeeder);
   await orm.close();
 };
 
