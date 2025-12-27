@@ -15,6 +15,7 @@ export class DevUserSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     // Only run in development
     if (process.env.NODE_ENV === Environment.Production) {
+      // eslint-disable-next-line no-console
       console.log('Skipping DevUserSeeder in production environment');
       return;
     }
@@ -29,6 +30,7 @@ export class DevUserSeeder extends Seeder {
     const existing = await em.findOne(User, { email: DEV_USER.email });
 
     if (existing) {
+      // eslint-disable-next-line no-console
       console.log(`Dev user already exists: ${DEV_USER.email}`);
       // Update auth token in case it changed
       existing.authToken = DEV_USER.authToken;
@@ -44,11 +46,13 @@ export class DevUserSeeder extends Seeder {
         isActive: true,
       });
       em.persist(user);
+      // eslint-disable-next-line no-console
       console.log(`Dev user created: ${DEV_USER.email}`);
     }
 
     await em.flush();
 
+    /* eslint-disable no-console */
     console.log('');
     console.log('=== Dev User Credentials ===');
     console.log(`Email:      ${DEV_USER.email}`);
@@ -57,5 +61,6 @@ export class DevUserSeeder extends Seeder {
     console.log('To use with CLI, add to ~/.noverlink/config.toml:');
     console.log(`auth_token = "${DEV_USER.authToken}"`);
     console.log('');
+    /* eslint-enable no-console */
   }
 }
