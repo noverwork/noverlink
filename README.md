@@ -119,17 +119,50 @@ cd packages/cli
 NOVERLINK_RELAY_URL=ws://localhost:8444 cargo run -- http 3000
 ```
 
+## CLI Installation
+
+### macOS / Linux (Homebrew)
+
+```bash
+# Install
+brew install noverwork/noverlink/noverlink
+
+# Upgrade
+brew upgrade noverlink
+
+# If upgrade doesn't work, force reinstall
+brew uninstall noverlink
+brew untap noverwork/noverlink
+brew tap noverwork/noverlink
+brew install noverlink
+```
+
+### Manual Download
+
+Download the latest release from [GitHub Releases](https://github.com/noverwork/noverlink/releases/latest).
+
+| Platform | File |
+|----------|------|
+| macOS (Apple Silicon) | `noverlink-darwin-arm64.tar.gz` |
+| macOS (Intel) | `noverlink-darwin-x64.tar.gz` |
+| Linux (x64) | `noverlink-linux-x64.tar.gz` |
+| Linux (ARM64) | `noverlink-linux-arm64.tar.gz` |
+| Windows | `noverlink-windows-x64.zip` |
+
 ## CLI Usage
 
 ```bash
+# Login first
+noverlink login
+
+# Check who you are
+noverlink whoami
+
 # Basic tunnel
 noverlink http 3000
 
 # Custom subdomain
-noverlink http 3000 --domain myapp
-
-# With auth token
-noverlink http 3000 --token YOUR_AUTH_TOKEN
+noverlink http 3000 --subdomain myapp
 ```
 
 ## Environment Variables

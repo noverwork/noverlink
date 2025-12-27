@@ -43,8 +43,18 @@ pub async fn run_login() -> Result<()> {
                 // Save token
                 auth::save_token(&auth_token)?;
 
-                println!();
-                println!("✅ Successfully logged in!");
+                // Fetch and save user profile
+                match api.get_me(&auth_token).await {
+                    Ok(me) => {
+                        auth::save_profile(&me.email, me.name.as_deref(), &me.plan)?;
+                        println!();
+                        println!("✅ Successfully logged in as {}!", me.email);
+                    }
+                    Err(_) => {
+                        println!();
+                        println!("✅ Successfully logged in!");
+                    }
+                }
                 println!();
                 println!("You can now use 'noverlink http <port>' to create tunnels.");
 
@@ -100,8 +110,13 @@ pub fn run_logout() -> Result<()> {
 /// Show current login status
 pub fn run_whoami() {
     if auth::is_logged_in() {
+        let email = auth::get_email().unwrap_or_else(|| "unknown".to_string());
+        let plan = auth::get_plan().unwrap_or_else(|| "unknown".to_string());
+
         println!("✅ You are logged in.");
-        println!("   API: {}", auth::api_url());
+        println!("   Email: {}", email);
+        println!("   Plan:  {}", plan);
+        println!("   API:   {}", auth::api_url());
     } else {
         println!("❌ You are not logged in.");
         println!("   Run 'noverlink login' to authenticate.");

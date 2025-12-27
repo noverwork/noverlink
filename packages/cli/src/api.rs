@@ -36,6 +36,16 @@ pub struct TicketResponse {
     pub expires_in: u32,
 }
 
+/// Response from GET /auth/me
+#[derive(Debug, Deserialize)]
+pub struct MeResponse {
+    #[allow(dead_code)]
+    pub id: String,
+    pub name: Option<String>,
+    pub email: String,
+    pub plan: String,
+}
+
 /// Request for POST /tunnels/ticket
 #[derive(Debug, Serialize)]
 struct CreateTicketRequest {
@@ -157,6 +167,34 @@ impl ApiClient {
             .json::<TicketResponse>()
             .await
             .context("Failed to parse ticket response")
+    }
+
+    /// Get current user profile
+    pub async fn get_me(&self, auth_token: &str) -> Result<MeResponse> {
+        let url = format!("{}/auth/me", self.base_url);
+
+        let response = self
+            .client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", auth_token))
+            .send()
+            .await
+            .context("Failed to connect to backend")?;
+
+        if response.status().as_u16() == 401 {
+            bail!("Authentication expired. Please run 'noverlink login' again.");
+        }
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            bail!("Failed to get profile: {} - {}", status, body);
+        }
+
+        response
+            .json::<MeResponse>()
+            .await
+            .context("Failed to parse profile response")
     }
 }
 

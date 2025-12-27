@@ -28,9 +28,15 @@ pub async fn run_http(port: u16, subdomain: Option<String>) -> Result<()> {
 
     let tunnel_url = relay.tunnel_url().to_string();
 
+    // Get account info for display
+    let account_info = auth::get_email().map(|email| {
+        let plan = auth::get_plan().unwrap_or_else(|| "free".to_string());
+        format!("{} ({})", email, plan)
+    });
+
     // Create display and show status panel
     let mut display = Display::new(tunnel_url.clone(), port);
-    display.print_status_panel(VERSION, None);
+    display.print_status_panel(VERSION, account_info.as_deref());
 
     // Handle requests
     let result = handle_requests(&mut relay, port, &mut display).await;

@@ -25,6 +25,18 @@ pub struct Config {
     /// Authentication token for backend API
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auth_token: Option<String>,
+
+    /// User email (cached from /auth/me)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+
+    /// User name (cached from /auth/me)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+
+    /// User plan (cached from /auth/me)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub plan: Option<String>,
 }
 
 impl Config {
@@ -125,6 +137,31 @@ pub fn save_token(token: &str) -> Result<()> {
     config.save()
 }
 
+/// Save user profile to config
+pub fn save_profile(email: &str, name: Option<&str>, plan: &str) -> Result<()> {
+    let mut config = Config::load().unwrap_or_default();
+    config.email = Some(email.to_string());
+    config.name = name.map(String::from);
+    config.plan = Some(plan.to_string());
+    config.save()
+}
+
+/// Get cached user email
+pub fn get_email() -> Option<String> {
+    Config::load().ok().and_then(|c| c.email)
+}
+
+/// Get cached user name
+#[allow(dead_code)]
+pub fn get_name() -> Option<String> {
+    Config::load().ok().and_then(|c| c.name)
+}
+
+/// Get cached user plan
+pub fn get_plan() -> Option<String> {
+    Config::load().ok().and_then(|c| c.plan)
+}
+
 /// Clear authentication token
 pub fn clear_token() -> Result<()> {
     let mut config = Config::load().unwrap_or_default();
@@ -160,12 +197,17 @@ mod tests {
     fn test_config_serialization() {
         let config = Config {
             auth_token: Some("nv_test123".to_string()),
+            email: Some("test@example.com".to_string()),
+            name: Some("Test User".to_string()),
+            plan: Some("free".to_string()),
         };
 
         let toml_str = toml::to_string(&config).unwrap();
         assert!(toml_str.contains("auth_token"));
+        assert!(toml_str.contains("email"));
 
         let parsed: Config = toml::from_str(&toml_str).unwrap();
         assert_eq!(parsed.auth_token, config.auth_token);
+        assert_eq!(parsed.email, config.email);
     }
 }

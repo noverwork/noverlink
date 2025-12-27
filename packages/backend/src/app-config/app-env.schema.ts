@@ -5,11 +5,13 @@ import {
   IsEnum,
   IsIP,
   IsNumber,
+  IsOptional,
   IsString,
   IsUrl,
   Max,
   Min,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 import { EnvField } from './env.constant';
@@ -53,25 +55,33 @@ export class AppEnvSchema {
   @IsString()
   [EnvField.JwtRefreshExpiresIn]!: string;
 
-  // OAuth - Google
+  // OAuth - Google (optional for local dev)
+  @IsOptional()
   @IsString()
-  [EnvField.GoogleClientId]!: string;
+  [EnvField.GoogleClientId]?: string;
 
+  @IsOptional()
   @IsString()
-  [EnvField.GoogleClientSecret]!: string;
+  [EnvField.GoogleClientSecret]?: string;
 
+  @IsOptional()
+  @ValidateIf((o) => o[EnvField.GoogleCallbackUrl]?.length > 0)
   @IsUrl({ require_tld: false })
-  [EnvField.GoogleCallbackUrl]!: string;
+  [EnvField.GoogleCallbackUrl]?: string;
 
-  // OAuth - GitHub
+  // OAuth - GitHub (optional for local dev)
+  @IsOptional()
   @IsString()
-  [EnvField.GithubClientId]!: string;
+  [EnvField.GithubClientId]?: string;
 
+  @IsOptional()
   @IsString()
-  [EnvField.GithubClientSecret]!: string;
+  [EnvField.GithubClientSecret]?: string;
 
+  @IsOptional()
+  @ValidateIf((o) => o[EnvField.GithubCallbackUrl]?.length > 0)
   @IsUrl({ require_tld: false })
-  [EnvField.GithubCallbackUrl]!: string;
+  [EnvField.GithubCallbackUrl]?: string;
 
   // Frontend URL for OAuth redirects
   @IsUrl({ require_tld: false })
@@ -89,8 +99,10 @@ export class AppEnvSchema {
   @MinLength(16)
   [EnvField.RelaySecret]!: string;
 
-  // Polar.sh
+  // Polar.sh (optional for local dev)
+  @IsOptional()
+  @ValidateIf((o) => o[EnvField.PolarWebhookSecret]?.length > 0)
   @IsString()
   @MinLength(16)
-  [EnvField.PolarWebhookSecret]!: string;
+  [EnvField.PolarWebhookSecret]?: string;
 }
