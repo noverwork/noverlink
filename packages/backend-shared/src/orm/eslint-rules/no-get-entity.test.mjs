@@ -50,6 +50,21 @@ ruleTester.run('no-get-entity', rule, {
       `,
       errors: [{ messageId: 'noGetEntity' }],
     },
+    {
+      name: 'Direct unwrap() call',
+      code: `
+        const book = await em.findOne(Book, 1);
+        const author = book.author.unwrap();
+      `,
+      errors: [{ messageId: 'noUnwrap' }],
+    },
+    {
+      name: 'unwrap() in chained call',
+      code: `
+        console.log(book.author.unwrap()?.name);
+      `,
+      errors: [{ messageId: 'noUnwrap' }],
+    },
   ],
 });
 

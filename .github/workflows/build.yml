@@ -3,6 +3,8 @@ name: Build Docker Images
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 concurrency:
@@ -41,6 +43,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}-backend:${{ github.sha }}
             ${{ env.IMAGE_PREFIX }}-backend:latest
+            ${{ github.ref_type == 'tag' && format('{0}-backend:{1}', env.IMAGE_PREFIX, github.ref_name) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -71,6 +74,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}-frontend:${{ github.sha }}
             ${{ env.IMAGE_PREFIX }}-frontend:latest
+            ${{ github.ref_type == 'tag' && format('{0}-frontend:{1}', env.IMAGE_PREFIX, github.ref_name) || '' }}
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
@@ -106,6 +110,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}-migrator:${{ github.sha }}
             ${{ env.IMAGE_PREFIX }}-migrator:latest
+            ${{ github.ref_type == 'tag' && format('{0}-migrator:{1}', env.IMAGE_PREFIX, github.ref_name) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -136,5 +141,6 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}-relay:${{ github.sha }}
             ${{ env.IMAGE_PREFIX }}-relay:latest
+            ${{ github.ref_type == 'tag' && format('{0}-relay:{1}', env.IMAGE_PREFIX, github.ref_name) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -112,7 +112,10 @@ ruleTester.run('require-ref-for-relations', rule, {
           organizer!: User;
         }
       `,
-      errors: [{ messageId: 'missingRefOption' }, { messageId: 'missingRefType' }],
+      errors: [
+        { messageId: 'missingRefOption' },
+        { messageId: 'missingRefType' },
+      ],
     },
     {
       name: '@OneToOne without ref: true option',

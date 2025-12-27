@@ -133,7 +133,10 @@ export default {
       if (param.type === 'Identifier') {
         return param.name;
       }
-      if (param.type === 'AssignmentPattern' && param.left.type === 'Identifier') {
+      if (
+        param.type === 'AssignmentPattern' &&
+        param.left.type === 'Identifier'
+      ) {
         return param.left.name;
       }
       return '<unknown>';
