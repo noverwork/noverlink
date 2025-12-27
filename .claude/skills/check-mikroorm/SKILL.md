@@ -73,6 +73,51 @@ session.domain = ref(domain);
 // eslint-disable-next-line mikro-orm/no-get-entity  // FORBIDDEN
 ```
 
+## Scheduled Tasks and Request Context
+
+When using MikroORM with NestJS scheduled tasks (`@Interval`, `@Cron`, etc.), you MUST use `@EnsureRequestContext()` to create a proper request context. However, **DO NOT stack decorators on the same method**.
+
+```typescript
+// WRONG - Stacking decorators causes issues
+@Interval(60000)
+@EnsureRequestContext()
+async cleanupTask(): Promise<void> {
+  await this.em.find(...);
+}
+
+// CORRECT - Separate the scheduler from the context-aware method
+@Interval(60000)
+async cleanupTask(): Promise<void> {
+  await this.doCleanup();
+}
+
+@EnsureRequestContext()
+async doCleanup(): Promise<void> {
+  await this.em.find(...);
+}
+```
+
+**Requirements for `@EnsureRequestContext()`:**
+1. Inject `MikroORM` instance in constructor
+2. Apply decorator to the method that uses EntityManager
+
+```typescript
+import { EnsureRequestContext, MikroORM } from '@mikro-orm/core';
+
+@Injectable()
+export class MyService {
+  constructor(
+    private readonly orm: MikroORM,
+    private readonly em: EntityManager
+  ) {}
+
+  @EnsureRequestContext()
+  async methodNeedingContext(): Promise<void> {
+    // Safe to use this.em here
+  }
+}
+```
+
 ## Migrations
 
 ### Creating a Migration
@@ -134,6 +179,7 @@ npm run migrator:seed           # Run seeders only
 2. Detect `repo.persist()` or `repo.flush()` calls
 3. Find `.getEntity()` method calls
 4. Check for disabled mikro-orm eslint rules
+5. Detect `@Interval`/`@Cron` stacked with `@EnsureRequestContext` on same method
 
 ## Output Format
 
@@ -143,8 +189,10 @@ npm run migrator:seed           # Run seeders only
 Violations:
 - [file:line] EntityManager imported from @mikro-orm/core
 - [file:line] Using .getEntity() instead of .$
+- [file:line] @Interval/@Cron stacked with @EnsureRequestContext
 
 Suggested Fixes:
 - Import EntityManager from @mikro-orm/postgresql
 - Use .$ for populated references
+- Separate scheduler decorator from @EnsureRequestContext method
 ```

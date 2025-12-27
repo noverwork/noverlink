@@ -1,3 +1,4 @@
+import { EnsureRequestContext, MikroORM } from '@mikro-orm/core';
 import { EntityManager, ref } from '@mikro-orm/postgresql';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
@@ -28,7 +29,11 @@ const CLEANUP_INTERVAL_MS = 60 * 1000;
 export class RelayService {
   private readonly logger = new Logger(RelayService.name);
 
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    // Used by @EnsureRequestContext() decorator via reflection
+    readonly orm: MikroORM,
+    private readonly em: EntityManager
+  ) {}
 
   async createSession(
     relayId: string,
@@ -201,11 +206,19 @@ export class RelayService {
   }
 
   /**
-   * Cleanup stale sessions that haven't received stats updates.
-   * This handles cases where Relay crashes without notifying Backend.
+   * Scheduled task to cleanup stale sessions.
    * Runs every minute.
    */
   @Interval(CLEANUP_INTERVAL_MS)
+  async cleanupStaleSessionsTask(): Promise<void> {
+    await this.cleanupStaleSessions();
+  }
+
+  /**
+   * Cleanup stale sessions that haven't received stats updates.
+   * This handles cases where Relay crashes without notifying Backend.
+   */
+  @EnsureRequestContext()
   async cleanupStaleSessions(): Promise<void> {
     const threshold = new Date(Date.now() - STALE_SESSION_THRESHOLD_MS);
 

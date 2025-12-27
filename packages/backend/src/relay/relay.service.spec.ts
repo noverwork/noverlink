@@ -1,3 +1,4 @@
+import { MikroORM } from '@mikro-orm/core';
 import { EntityManager, ref } from '@mikro-orm/postgresql';
 import { Logger, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -49,8 +50,14 @@ describe('RelayService', () => {
       flush: jest.fn(),
     };
 
+    const mockOrm = {};
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RelayService, { provide: EntityManager, useValue: mockEm }],
+      providers: [
+        RelayService,
+        { provide: MikroORM, useValue: mockOrm },
+        { provide: EntityManager, useValue: mockEm },
+      ],
     }).compile();
 
     service = module.get<RelayService>(RelayService);
