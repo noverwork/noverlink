@@ -271,55 +271,55 @@ jobs:
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 
       - name: Update Homebrew Formula
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+          SHA_DARWIN_ARM64: ${{ needs.release.outputs.sha256_darwin_arm64 }}
+          SHA_DARWIN_X64: ${{ needs.release.outputs.sha256_darwin_x64 }}
+          SHA_LINUX_ARM64: ${{ needs.release.outputs.sha256_linux_arm64 }}
+          SHA_LINUX_X64: ${{ needs.release.outputs.sha256_linux_x64 }}
         run: |
-          VERSION="${{ needs.release.outputs.version }}"
-          SHA_DARWIN_ARM64="${{ needs.release.outputs.sha256_darwin_arm64 }}"
-          SHA_DARWIN_X64="${{ needs.release.outputs.sha256_darwin_x64 }}"
-          SHA_LINUX_ARM64="${{ needs.release.outputs.sha256_linux_arm64 }}"
-          SHA_LINUX_X64="${{ needs.release.outputs.sha256_linux_x64 }}"
-
           mkdir -p Formula
-          cat > Formula/noverlink.rb << EOF
-class Noverlink < Formula
-  desc "Local-to-global tunneling CLI - expose your localhost to the web"
-  homepage "https://github.com/noverwork/noverlink"
-  version "$VERSION"
-  license "AGPL-3.0-or-later"
+          envsubst << 'FORMULA_EOF' > Formula/noverlink.rb
+          class Noverlink < Formula
+            desc "Local-to-global tunneling CLI - expose your localhost to the web"
+            homepage "https://github.com/noverwork/noverlink"
+            version "$VERSION"
+            license "AGPL-3.0-or-later"
 
-  on_macos do
-    on_arm do
-      url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-darwin-arm64.tar.gz"
-      sha256 "$SHA_DARWIN_ARM64"
-    end
+            on_macos do
+              on_arm do
+                url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-darwin-arm64.tar.gz"
+                sha256 "$SHA_DARWIN_ARM64"
+              end
 
-    on_intel do
-      url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-darwin-x64.tar.gz"
-      sha256 "$SHA_DARWIN_X64"
-    end
-  end
+              on_intel do
+                url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-darwin-x64.tar.gz"
+                sha256 "$SHA_DARWIN_X64"
+              end
+            end
 
-  on_linux do
-    on_arm do
-      url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-linux-arm64.tar.gz"
-      sha256 "$SHA_LINUX_ARM64"
-    end
+            on_linux do
+              on_arm do
+                url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-linux-arm64.tar.gz"
+                sha256 "$SHA_LINUX_ARM64"
+              end
 
-    on_intel do
-      url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-linux-x64.tar.gz"
-      sha256 "$SHA_LINUX_X64"
-    end
-  end
+              on_intel do
+                url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-linux-x64.tar.gz"
+                sha256 "$SHA_LINUX_X64"
+              end
+            end
 
-  def install
-    bin.install "noverlink"
-  end
+            def install
+              bin.install "noverlink"
+            end
 
-  test do
-    assert_match "noverlink", shell_output("#{bin}/noverlink --version")
-  end
-end
-EOF
-
+            test do
+              assert_match "noverlink", shell_output("#{bin}/noverlink --version")
+            end
+          end
+          FORMULA_EOF
+          sed -i 's/^          //' Formula/noverlink.rb
           cat Formula/noverlink.rb
 
       - name: Commit and push
