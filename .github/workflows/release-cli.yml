@@ -17,7 +17,6 @@ env:
   CARGO_TERM_COLOR: always
   RUST_VERSION: '1.83'
   NOVERLINK_API_URL: ${{ vars.NOVERLINK_API_URL }}
-  NOVERLINK_VERSION: ${{ github.sha }}
 
 jobs:
   build-linux-x64:
@@ -30,6 +29,14 @@ jobs:
         with:
           toolchain: ${{ env.RUST_VERSION }}
           targets: x86_64-unknown-linux-gnu
+
+      - name: Set version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+          fi
 
       - name: Build
         run: cargo build --release --package noverlink-cli --target x86_64-unknown-linux-gnu
@@ -62,6 +69,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
+      - name: Set version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+          fi
+
       - name: Build
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
@@ -90,6 +105,14 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
           targets: x86_64-apple-darwin
 
+      - name: Set version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+          fi
+
       - name: Build
         run: cargo build --release --package noverlink-cli --target x86_64-apple-darwin
 
@@ -115,6 +138,14 @@ jobs:
         with:
           toolchain: ${{ env.RUST_VERSION }}
           targets: aarch64-apple-darwin
+
+      - name: Set version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+          fi
 
       - name: Build
         run: cargo build --release --package noverlink-cli --target aarch64-apple-darwin
@@ -142,6 +173,15 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
           targets: x86_64-pc-windows-msvc
 
+      - name: Set version
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+          fi
+
       - name: Build
         run: cargo build --release --package noverlink-cli --target x86_64-pc-windows-msvc
 
@@ -167,7 +207,7 @@ jobs:
       - build-darwin-x64
       - build-darwin-arm64
       - build-windows-x64
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     outputs:
@@ -177,9 +217,9 @@ jobs:
       sha256_linux_x64: ${{ steps.checksums.outputs.sha256_linux_x64 }}
       version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Generate version
+      - name: Get version from tag
         id: version
-        run: echo "version=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        run: echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -199,29 +239,30 @@ jobs:
           echo "sha256_linux_arm64=$(sha256sum noverlink-linux-arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
           echo "sha256_linux_x64=$(sha256sum noverlink-linux-x64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
-      - name: Delete existing latest release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release delete latest --repo ${{ github.repository }} --yes || true
-          git push origin :refs/tags/latest || true
-
-      - name: Create latest release
+      - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: Latest Build (${{ steps.version.outputs.version }})
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           body: |
-            Automated build from commit ${{ github.sha }}
+            Release ${{ github.ref_name }}
 
-            Version: `${{ steps.version.outputs.version }}`
+            ## Installation
+
+            ### Homebrew (macOS/Linux)
+            ```bash
+            brew install noverwork/noverlink/noverlink
+            ```
+
+            ### Manual Download
+            Download the appropriate binary for your platform from the assets below.
           files: artifacts/*
-          prerelease: true
+          prerelease: false
 
   update-homebrew:
     runs-on: ubuntu-latest
     needs: release
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout homebrew-noverlink
         uses: actions/checkout@v4
@@ -239,45 +280,45 @@ jobs:
 
           mkdir -p Formula
           cat > Formula/noverlink.rb << EOF
-          class Noverlink < Formula
-            desc "Local-to-global tunneling CLI - expose your localhost to the web"
-            homepage "https://github.com/noverwork/noverlink"
-            version "$VERSION"
-            license "AGPL-3.0-or-later"
+class Noverlink < Formula
+  desc "Local-to-global tunneling CLI - expose your localhost to the web"
+  homepage "https://github.com/noverwork/noverlink"
+  version "$VERSION"
+  license "AGPL-3.0-or-later"
 
-            on_macos do
-              on_arm do
-                url "https://github.com/noverwork/noverlink/releases/download/latest/noverlink-darwin-arm64.tar.gz"
-                sha256 "$SHA_DARWIN_ARM64"
-              end
+  on_macos do
+    on_arm do
+      url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-darwin-arm64.tar.gz"
+      sha256 "$SHA_DARWIN_ARM64"
+    end
 
-              on_intel do
-                url "https://github.com/noverwork/noverlink/releases/download/latest/noverlink-darwin-x64.tar.gz"
-                sha256 "$SHA_DARWIN_X64"
-              end
-            end
+    on_intel do
+      url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-darwin-x64.tar.gz"
+      sha256 "$SHA_DARWIN_X64"
+    end
+  end
 
-            on_linux do
-              on_arm do
-                url "https://github.com/noverwork/noverlink/releases/download/latest/noverlink-linux-arm64.tar.gz"
-                sha256 "$SHA_LINUX_ARM64"
-              end
+  on_linux do
+    on_arm do
+      url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-linux-arm64.tar.gz"
+      sha256 "$SHA_LINUX_ARM64"
+    end
 
-              on_intel do
-                url "https://github.com/noverwork/noverlink/releases/download/latest/noverlink-linux-x64.tar.gz"
-                sha256 "$SHA_LINUX_X64"
-              end
-            end
+    on_intel do
+      url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-linux-x64.tar.gz"
+      sha256 "$SHA_LINUX_X64"
+    end
+  end
 
-            def install
-              bin.install "noverlink"
-            end
+  def install
+    bin.install "noverlink"
+  end
 
-            test do
-              assert_match "noverlink", shell_output("#{bin}/noverlink --version")
-            end
-          end
-          EOF
+  test do
+    assert_match "noverlink", shell_output("#{bin}/noverlink --version")
+  end
+end
+EOF
 
           cat Formula/noverlink.rb
 
