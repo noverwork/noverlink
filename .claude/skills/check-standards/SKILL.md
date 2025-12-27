@@ -23,6 +23,7 @@ Run each specialized checker and aggregate results:
 | NestJS | `check-nestjs` | decorators, injection, controllers |
 | Libraries | `check-libraries` | dayjs, nanoid, AppConfigService |
 | Logging | `check-logging` | pino style, flat structure, log levels |
+| Rust | `check-rust` | error handling, async patterns, tracing |
 
 ### Steps
 
@@ -52,6 +53,9 @@ Run each specialized checker and aggregate results:
 === Logging ===
 [Results from check-logging or "Pass"]
 
+=== Rust ===
+[Results from check-rust or "Pass"]
+
 === Summary ===
 【Fatal Issues】 [Count and brief description]
 【Fix Priority】 [Ordered list of what to fix first]
@@ -77,3 +81,4 @@ See individual skill files for detailed rules:
 - `.claude/skills/check-nestjs/SKILL.md`
 - `.claude/skills/check-libraries/SKILL.md`
 - `.claude/skills/check-logging/SKILL.md`
+- `.claude/skills/check-rust/SKILL.md`
