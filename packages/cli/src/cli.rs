@@ -1,8 +1,11 @@
 use clap::{Parser, Subcommand};
 
+/// Version injected at build time (from `NOVERLINK_VERSION` env or `Cargo.toml`)
+const VERSION: &str = env!("NOVERLINK_VERSION");
+
 #[derive(Parser)]
 #[command(name = "noverlink")]
-#[command(version, about = "Fast local-to-global tunneling", long_about = None)]
+#[command(version = VERSION, about = "Fast local-to-global tunneling", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     tags:
-      - "v*"
+      - 'v*'
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -15,8 +15,9 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION: "1.83"
+  RUST_VERSION: '1.83'
   NOVERLINK_API_URL: ${{ vars.NOVERLINK_API_URL }}
+  NOVERLINK_VERSION: ${{ github.sha }}
 
 jobs:
   build-linux-x64:
@@ -178,7 +179,7 @@ jobs:
     steps:
       - name: Generate version
         id: version
-        run: echo "version=0.0.0-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
