@@ -858,11 +858,12 @@
           "unique": false
         },
         {
+          "keyName": "domain_hostname_base_domain_unique",
           "columnNames": [
-            "hostname"
+            "hostname",
+            "base_domain"
           ],
-          "composite": false,
-          "keyName": "domain_hostname_unique",
+          "composite": true,
           "constraint": true,
           "primary": false,
           "unique": true

@@ -15,6 +15,7 @@ import { TunnelSession } from './tunnel-session.entity';
 import { User } from './user.entity';
 
 @Entity()
+@Unique({ properties: ['hostname', 'baseDomain'] })
 export class Domain extends PgBaseEntity {
   @ManyToOne(() => User, { ref: true })
   @Index()
@@ -22,7 +23,6 @@ export class Domain extends PgBaseEntity {
 
   /** Subdomain (e.g., "myapp" for myapp.noverlink.app) OR custom domain (e.g., "tunnel.mycompany.com") */
   @Property({ type: 'string' })
-  @Unique()
   @Index()
   hostname!: string;
 

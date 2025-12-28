@@ -225,7 +225,10 @@ describe('TunnelsService', () => {
   describe('domain entity management', () => {
     it('should create new domain entity if not exists', async () => {
       em.findOne.mockResolvedValue(null);
-      em.create.mockImplementation((_, data) => data);
+      em.create.mockImplementation((_, data) => ({
+        ...data,
+        user: { id: data.user },
+      }));
       em.persistAndFlush.mockResolvedValue(undefined);
 
       await service.createTicket(mockUser as never, 'new-subdomain');
@@ -233,8 +236,8 @@ describe('TunnelsService', () => {
       expect(em.create).toHaveBeenCalledWith(
         Domain,
         expect.objectContaining({
-          user: 'user-123',
           hostname: 'new-subdomain',
+          baseDomain: 'noverlink-free.app',
           isReserved: false,
         })
       );

@@ -52,6 +52,11 @@ npx nx test @noverlink/backend
 npx nx lint @noverlink/frontend
 ```
 
+### Migrations
+- **ALWAYS** use `npm run migrator:create <name>` to generate migrations
+- **NEVER** manually create migration files - the command syncs the schema snapshot
+- After generation, register the migration in `packages/migrator/src/migrations/index.ts`
+
 ## Architecture
 
 ### Package Structure

@@ -1,6 +1,11 @@
 import * as crypto from 'node:crypto';
 
-import { type FilterQuery, type Loaded, ref } from '@mikro-orm/core';
+import {
+  type FilterQuery,
+  type Loaded,
+  ref,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
@@ -236,6 +241,9 @@ export class TunnelsService {
    * - If doesn't exist → create new (non-reserved)
    * - If exists but belongs to different user (non-reserved) → reassign to current user
    * - If exists and belongs to current user → do nothing
+   *
+   * Uses try-catch to handle race conditions where concurrent requests
+   * try to create the same domain simultaneously.
    */
   private async ensureDomainEntity(
     user: Loaded<User, never>,
@@ -248,16 +256,37 @@ export class TunnelsService {
     });
 
     if (!domain) {
-      // Create new domain
-      domain = this.em.create(Domain, {
-        user: user.id,
-        hostname: subdomain,
-        baseDomain,
-        isReserved: false,
-      });
-      await this.em.persistAndFlush(domain);
-    } else if (domain.user.id !== user.id && !domain.isReserved) {
-      // Reassign non-reserved domain to current user
+      // Try to create new domain, handling race condition
+      try {
+        domain = this.em.create(Domain, {
+          user: user.id,
+          hostname: subdomain,
+          baseDomain,
+          isReserved: false,
+        });
+        await this.em.persistAndFlush(domain);
+      } catch (error) {
+        if (error instanceof UniqueConstraintViolationException) {
+          // Another request created this domain concurrently, fetch it
+          this.em.clear(); // Clear the failed entity from unit of work
+          domain = await this.em.findOne(Domain, {
+            hostname: subdomain,
+            baseDomain,
+          });
+          if (!domain) {
+            // This shouldn't happen, but handle it gracefully
+            throw new BadRequestException(
+              `Failed to allocate subdomain '${subdomain}'`
+            );
+          }
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    // Reassign non-reserved domain to current user if needed
+    if (domain.user.id !== user.id && !domain.isReserved) {
       domain.user = ref(this.em.getReference(User, user.id));
       await this.em.persistAndFlush(domain);
     }
