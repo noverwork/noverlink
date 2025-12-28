@@ -51,6 +51,12 @@
   "references": [
     {
       "path": "../ui-shared"
+    },
+    {
+      "path": "../shared"
+    },
+    {
+      "path": "../interfaces"
     }
   ]
 }

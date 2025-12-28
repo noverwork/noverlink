@@ -27,10 +27,13 @@
   ],
   "references": [
     {
-      "path": "../backend-shared/tsconfig.lib.json"
+      "path": "../shared/tsconfig.lib.json"
     },
     {
-      "path": "../shared/tsconfig.lib.json"
+      "path": "../interfaces/tsconfig.lib.json"
+    },
+    {
+      "path": "../backend-shared/tsconfig.lib.json"
     }
   ]
 }
