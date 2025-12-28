@@ -6,6 +6,8 @@ import {
   Domain,
   HttpRequest,
   Plan,
+  RelayServer,
+  RelayStatus,
   SessionStatus,
   TunnelSession,
   UsageQuota,
@@ -43,14 +45,21 @@ describe('RelayService', () => {
     jest.spyOn(Logger.prototype, 'log').mockImplementation();
     jest.spyOn(Logger.prototype, 'debug').mockImplementation();
 
-    const mockEm = {
+    const mockEm: Record<string, jest.Mock> = {
       findOne: jest.fn(),
+      find: jest.fn(),
       create: jest.fn(),
       persist: jest.fn(),
       flush: jest.fn(),
+      fork: jest.fn(),
     };
 
-    const mockOrm = {};
+    // Mock fork to return the same em for @EnsureRequestContext() decorator
+    mockEm.fork.mockReturnValue(mockEm);
+
+    const mockOrm = {
+      em: mockEm,
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -442,4 +451,141 @@ describe('RelayService', () => {
       expect(persistedRequest?.requestHeaders).toEqual({});
     });
   });
+
+  describe('registerRelay', () => {
+    it('should register a new relay', async () => {
+      em.findOne.mockResolvedValue(null);
+
+      let persistedRelay: RelayServer | null = null;
+      em.persist.mockImplementation((entity) => {
+        persistedRelay = entity as RelayServer;
+        return em;
+      });
+
+      const result = await service.registerRelay('relay-1', {
+        ws_port: 8444,
+        http_port: 9444,
+        base_domain: 'noverlink.app',
+        ip_address: '10.0.0.1',
+        version: '1.0.0',
+      });
+
+      expect(result).toEqual({
+        relay_id: 'relay-1',
+        status: RelayStatus.ONLINE,
+      });
+      expect(persistedRelay).toBeTruthy();
+      expect(persistedRelay?.relayId).toBe('relay-1');
+      expect(persistedRelay?.wsPort).toBe(8444);
+      expect(persistedRelay?.httpPort).toBe(9444);
+      expect(persistedRelay?.baseDomain).toBe('noverlink.app');
+      expect(persistedRelay?.status).toBe(RelayStatus.ONLINE);
+      expect(em.persist).toHaveBeenCalled();
+      expect(em.flush).toHaveBeenCalled();
+    });
+
+    it('should update existing relay on re-registration', async () => {
+      const existingRelay = {
+        relayId: 'relay-1',
+        wsPort: 8000,
+        httpPort: 9000,
+        baseDomain: 'old.domain',
+        status: RelayStatus.OFFLINE,
+        lastHeartbeatAt: new Date('2025-01-01'),
+      } as unknown as RelayServer;
+
+      em.findOne.mockResolvedValue(existingRelay);
+
+      const result = await service.registerRelay('relay-1', {
+        ws_port: 8444,
+        http_port: 9444,
+        base_domain: 'noverlink.app',
+        version: '2.0.0',
+      });
+
+      expect(result.status).toBe(RelayStatus.ONLINE);
+      expect(existingRelay.wsPort).toBe(8444);
+      expect(existingRelay.httpPort).toBe(9444);
+      expect(existingRelay.baseDomain).toBe('noverlink.app');
+      expect(existingRelay.status).toBe(RelayStatus.ONLINE);
+      expect(em.persist).not.toHaveBeenCalled(); // Existing entity, no need to persist
+      expect(em.flush).toHaveBeenCalled();
+    });
+  });
+
+  describe('heartbeat', () => {
+    it('should update relay heartbeat and session count', async () => {
+      const existingRelay = {
+        relayId: 'relay-1',
+        status: RelayStatus.ONLINE,
+        lastHeartbeatAt: new Date('2025-01-01'),
+        activeSessions: 0,
+      } as unknown as RelayServer;
+
+      em.findOne.mockResolvedValue(existingRelay);
+
+      const result = await service.heartbeat('relay-1', {
+        active_sessions: 5,
+      });
+
+      expect(result).toEqual({ status: RelayStatus.ONLINE });
+      expect(existingRelay.activeSessions).toBe(5);
+      expect(existingRelay.lastHeartbeatAt.getTime()).toBeGreaterThan(
+        new Date('2025-01-01').getTime()
+      );
+      expect(em.flush).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if relay not found', async () => {
+      em.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.heartbeat('unknown-relay', { active_sessions: 0 })
+      ).rejects.toThrow(new NotFoundException('Relay unknown-relay not found'));
+    });
+
+    it('should set relay status to online on heartbeat', async () => {
+      const existingRelay = {
+        relayId: 'relay-1',
+        status: RelayStatus.OFFLINE,
+        lastHeartbeatAt: new Date('2025-01-01'),
+        activeSessions: 0,
+      } as unknown as RelayServer;
+
+      em.findOne.mockResolvedValue(existingRelay);
+
+      await service.heartbeat('relay-1', { active_sessions: 2 });
+
+      expect(existingRelay.status).toBe(RelayStatus.ONLINE);
+    });
+  });
+
+  describe('setRelayOffline', () => {
+    it('should set relay status to offline', async () => {
+      const existingRelay = {
+        relayId: 'relay-1',
+        status: RelayStatus.ONLINE,
+        activeSessions: 5,
+      } as unknown as RelayServer;
+
+      em.findOne.mockResolvedValue(existingRelay);
+
+      await service.setRelayOffline('relay-1');
+
+      expect(existingRelay.status).toBe(RelayStatus.OFFLINE);
+      expect(existingRelay.activeSessions).toBe(0);
+      expect(em.flush).toHaveBeenCalled();
+    });
+
+    it('should do nothing if relay not found', async () => {
+      em.findOne.mockResolvedValue(null);
+
+      await service.setRelayOffline('unknown-relay');
+
+      expect(em.flush).not.toHaveBeenCalled();
+    });
+  });
+
+  // Note: cleanupStaleRelays is tested via integration tests as it uses
+  // @EnsureRequestContext() decorator which requires a full MikroORM instance
 });

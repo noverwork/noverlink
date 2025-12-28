@@ -143,6 +143,11 @@ impl TunnelRegistry {
             .map(|entry| Arc::clone(entry.value()))
     }
 
+    /// Get the number of active tunnels (sessions)
+    pub fn active_session_count(&self) -> usize {
+        self.tunnels.len()
+    }
+
     /// Remove tunnel by domain
     pub fn remove(&self, domain: &str) {
         if self.tunnels.remove(domain).is_some() {
@@ -443,6 +448,34 @@ mod tests {
             let tunnel = registry.get(&domain).unwrap();
             assert_eq!(tunnel.session_id, format!("session-{}", i));
         }
+    }
+
+    #[test]
+    fn test_active_session_count() {
+        let registry = TunnelRegistry::new("noverlink.io".to_string());
+
+        assert_eq!(registry.active_session_count(), 0);
+
+        for i in 0..3 {
+            let (tx, _rx) = mpsc::channel(10);
+            registry.register(
+                format!("tunnel-{}", i),
+                "noverlink.app".to_string(),
+                format!("user-{}", i),
+                format!("session-{}", i),
+                tx,
+                3000 + u16::try_from(i).unwrap(),
+            );
+        }
+
+        assert_eq!(registry.active_session_count(), 3);
+
+        registry.remove("tunnel-1");
+        assert_eq!(registry.active_session_count(), 2);
+
+        registry.remove("tunnel-0");
+        registry.remove("tunnel-2");
+        assert_eq!(registry.active_session_count(), 0);
     }
 
     #[test]

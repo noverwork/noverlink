@@ -2,6 +2,7 @@ import {
   Domain,
   HttpRequest,
   OAuthConnection,
+  RelayServer,
   Subscription,
   TunnelSession,
   UsageQuota,
@@ -18,4 +19,5 @@ export const ENTITIES = [
   UsageQuota,
   OAuthConnection,
   Subscription,
+  RelayServer,
 ];

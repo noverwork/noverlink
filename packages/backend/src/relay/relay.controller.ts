@@ -13,7 +13,11 @@ import {
   CloseSessionDto,
   CreateSessionDto,
   CreateSessionResponse,
+  HeartbeatDto,
+  HeartbeatResponse,
   HttpRequestBatchDto,
+  RegisterRelayDto,
+  RegisterRelayResponse,
   UpdateStatsDto,
 } from './dto';
 import { RelayAuthGuard } from './guards';
@@ -24,6 +28,26 @@ import { RelayService } from './relay.service';
 @UseGuards(RelayAuthGuard)
 export class RelayController {
   constructor(private readonly relayService: RelayService) {}
+
+  // ─── Relay Server Management ────────────────────────────────────
+
+  @Post('register')
+  async register(
+    @Headers('x-relay-id') relayId: string,
+    @Body() dto: RegisterRelayDto
+  ): Promise<RegisterRelayResponse> {
+    return this.relayService.registerRelay(relayId, dto);
+  }
+
+  @Post('heartbeat')
+  async heartbeat(
+    @Headers('x-relay-id') relayId: string,
+    @Body() dto: HeartbeatDto
+  ): Promise<HeartbeatResponse> {
+    return this.relayService.heartbeat(relayId, dto);
+  }
+
+  // ─── Session Management ─────────────────────────────────────────
 
   @Post('sessions')
   async createSession(

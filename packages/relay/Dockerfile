@@ -4,6 +4,10 @@
 # Stage 1: Build
 FROM rust:1.83-bookworm AS builder
 
+# Version to inject at build time (e.g., git tag or commit SHA)
+ARG RELAY_VERSION
+ENV RELAY_VERSION=${RELAY_VERSION}
+
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     pkg-config \

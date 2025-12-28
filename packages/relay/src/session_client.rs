@@ -1,6 +1,8 @@
 //! Backend session client for managing tunnel sessions and logging requests
 //!
 //! Handles:
+//! - Registering relay with backend on startup
+//! - Sending periodic heartbeats
 //! - Creating sessions when CLI connects
 //! - Closing sessions when CLI disconnects
 //! - Batching and sending HTTP request logs
@@ -12,6 +14,38 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 use tokio::time::interval;
 use tracing::{debug, error, info, warn};
+
+/// Version injected at build time (`RELAY_VERSION` env, defaults to "dev")
+const VERSION: &str = env!("RELAY_VERSION");
+
+// ─── Relay Registration Types ──────────────────────────────────────────────
+
+#[derive(Debug, Serialize)]
+struct RegisterRelayRequest {
+    ws_port: u16,
+    http_port: u16,
+    base_domain: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ip_address: Option<String>,
+    version: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RegisterRelayResponse {
+    pub relay_id: String,
+    pub status: String,
+}
+
+#[derive(Debug, Serialize)]
+struct HeartbeatRequest {
+    active_sessions: usize,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct HeartbeatResponse {
+    #[allow(dead_code)] // Used for deserialization, may be used for status checks in future
+    pub status: String,
+}
 
 // ─── API Types ─────────────────────────────────────────────────────────────
 
@@ -87,6 +121,105 @@ impl SessionClient {
             relay_id: relay_id.to_string(),
         }
     }
+
+    // ─── Relay Registration ────────────────────────────────────────────────
+
+    /// Register this relay with the backend
+    pub async fn register(
+        &self,
+        ws_port: u16,
+        http_port: u16,
+        base_domain: &str,
+    ) -> Result<RegisterRelayResponse, String> {
+        let url = format!("{}/relay/register", self.backend_url);
+
+        let request = RegisterRelayRequest {
+            ws_port,
+            http_port,
+            base_domain: base_domain.to_string(),
+            ip_address: None, // TODO: detect public IP if needed
+            version: VERSION.to_string(),
+        };
+
+        match self
+            .client
+            .post(&url)
+            .header("X-Relay-Secret", &self.relay_secret)
+            .header("X-Relay-Id", &self.relay_id)
+            .json(&request)
+            .timeout(Duration::from_secs(10))
+            .send()
+            .await
+        {
+            Ok(response) => {
+                if response.status().is_success() {
+                    match response.json::<RegisterRelayResponse>().await {
+                        Ok(res) => {
+                            info!(
+                                "Relay registered: {} (status: {})",
+                                res.relay_id, res.status
+                            );
+                            Ok(res)
+                        }
+                        Err(e) => Err(format!("Failed to parse register response: {}", e)),
+                    }
+                } else {
+                    let status = response.status();
+                    let text = response.text().await.unwrap_or_default();
+                    Err(format!("Failed to register relay: {} - {}", status, text))
+                }
+            }
+            Err(e) => Err(format!("Failed to connect to backend for registration: {}", e)),
+        }
+    }
+
+    /// Send heartbeat to backend
+    pub async fn heartbeat(&self, active_sessions: usize) -> Result<HeartbeatResponse, String> {
+        let url = format!("{}/relay/heartbeat", self.backend_url);
+
+        let request = HeartbeatRequest { active_sessions };
+
+        match self
+            .client
+            .post(&url)
+            .header("X-Relay-Secret", &self.relay_secret)
+            .header("X-Relay-Id", &self.relay_id)
+            .json(&request)
+            .timeout(Duration::from_secs(5))
+            .send()
+            .await
+        {
+            Ok(response) => {
+                if response.status().is_success() {
+                    match response.json::<HeartbeatResponse>().await {
+                        Ok(res) => {
+                            debug!("Heartbeat sent: {} active sessions", active_sessions);
+                            Ok(res)
+                        }
+                        Err(e) => Err(format!("Failed to parse heartbeat response: {}", e)),
+                    }
+                } else {
+                    let status = response.status();
+                    let text = response.text().await.unwrap_or_default();
+                    Err(format!("Heartbeat failed: {} - {}", status, text))
+                }
+            }
+            Err(e) => Err(format!("Failed to connect to backend for heartbeat: {}", e)),
+        }
+    }
+
+    /// Notify backend that relay is going offline
+    pub async fn notify_shutdown(&self) {
+        // Send a heartbeat with 0 sessions to indicate we're shutting down
+        // The backend will mark us as offline after the heartbeat timeout
+        if let Err(e) = self.heartbeat(0).await {
+            warn!("Failed to send shutdown notification: {}", e);
+        } else {
+            info!("Shutdown notification sent to backend");
+        }
+    }
+
+    // ─── Session Management ────────────────────────────────────────────────
 
     /// Create a new session in the backend
     pub async fn create_session(

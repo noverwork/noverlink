@@ -1,4 +1,4 @@
 //! Compile-time constants
 
-/// Version injected at build time (from `NOVERLINK_VERSION` env or `Cargo.toml`)
+/// Version injected at build time (`NOVERLINK_VERSION` env, defaults to "dev")
 pub const VERSION: &str = env!("NOVERLINK_VERSION");

@@ -5,6 +5,8 @@ import { Interval } from '@nestjs/schedule';
 import {
   Domain,
   HttpRequest,
+  RelayServer,
+  RelayStatus,
   SessionStatus,
   TunnelSession,
   UsageQuota,
@@ -15,12 +17,19 @@ import {
   CloseSessionDto,
   CreateSessionDto,
   CreateSessionResponse,
+  HeartbeatDto,
+  HeartbeatResponse,
   HttpRequestBatchDto,
+  RegisterRelayDto,
+  RegisterRelayResponse,
   UpdateStatsDto,
 } from './dto';
 
 /** Sessions not seen for this duration are considered stale (3 minutes) */
 const STALE_SESSION_THRESHOLD_MS = 3 * 60 * 1000;
+
+/** Relays not seen for this duration are considered offline (2 minutes) */
+const STALE_RELAY_THRESHOLD_MS = 2 * 60 * 1000;
 
 /** How often to run the cleanup task (1 minute) */
 const CLEANUP_INTERVAL_MS = 60 * 1000;
@@ -34,6 +43,86 @@ export class RelayService {
     readonly orm: MikroORM,
     private readonly em: EntityManager
   ) {}
+
+  // ─── Relay Server Management ────────────────────────────────────
+
+  async registerRelay(
+    relayId: string,
+    dto: RegisterRelayDto
+  ): Promise<RegisterRelayResponse> {
+    let relay = await this.em.findOne(RelayServer, { relayId });
+
+    if (relay) {
+      // Update existing relay
+      relay.wsPort = dto.ws_port;
+      relay.httpPort = dto.http_port;
+      relay.baseDomain = dto.base_domain;
+      relay.ipAddress = dto.ip_address;
+      relay.version = dto.version;
+      relay.status = RelayStatus.ONLINE;
+      relay.lastHeartbeatAt = new Date();
+
+      this.logger.log(`Relay re-registered: ${relayId}`);
+    } else {
+      // Create new relay
+      relay = new RelayServer();
+      relay.relayId = relayId;
+      relay.wsPort = dto.ws_port;
+      relay.httpPort = dto.http_port;
+      relay.baseDomain = dto.base_domain;
+      relay.ipAddress = dto.ip_address;
+      relay.version = dto.version;
+      relay.status = RelayStatus.ONLINE;
+      relay.lastHeartbeatAt = new Date();
+      relay.activeSessions = 0;
+
+      this.em.persist(relay);
+      this.logger.log(`Relay registered: ${relayId}`);
+    }
+
+    await this.em.flush();
+
+    return {
+      relay_id: relay.relayId,
+      status: relay.status,
+    };
+  }
+
+  async heartbeat(
+    relayId: string,
+    dto: HeartbeatDto
+  ): Promise<HeartbeatResponse> {
+    const relay = await this.em.findOne(RelayServer, { relayId });
+
+    if (!relay) {
+      throw new NotFoundException(`Relay ${relayId} not found`);
+    }
+
+    relay.lastHeartbeatAt = new Date();
+    relay.activeSessions = dto.active_sessions;
+    relay.status = RelayStatus.ONLINE;
+
+    await this.em.flush();
+
+    this.logger.debug(
+      `Heartbeat from ${relayId}: ${dto.active_sessions} active sessions`
+    );
+
+    return { status: relay.status };
+  }
+
+  async setRelayOffline(relayId: string): Promise<void> {
+    const relay = await this.em.findOne(RelayServer, { relayId });
+
+    if (relay) {
+      relay.status = RelayStatus.OFFLINE;
+      relay.activeSessions = 0;
+      await this.em.flush();
+      this.logger.log(`Relay marked offline: ${relayId}`);
+    }
+  }
+
+  // ─── Session Management ─────────────────────────────────────────
 
   async createSession(
     relayId: string,
@@ -206,12 +295,13 @@ export class RelayService {
   }
 
   /**
-   * Scheduled task to cleanup stale sessions.
+   * Scheduled task to cleanup stale sessions and relays.
    * Runs every minute.
    */
   @Interval(CLEANUP_INTERVAL_MS)
-  async cleanupStaleSessionsTask(): Promise<void> {
+  async cleanupStaleResourcesTask(): Promise<void> {
     await this.cleanupStaleSessions();
+    await this.cleanupStaleRelays();
   }
 
   /**
@@ -249,6 +339,42 @@ export class RelayService {
 
       this.logger.log(
         `Closed stale session: ${session.id} (last seen: ${session.lastSeenAt.toISOString()})`
+      );
+    }
+
+    await this.em.flush();
+  }
+
+  // ─── Stale Relay Cleanup ────────────────────────────────────────
+
+  /**
+   * Cleanup stale relays that haven't sent heartbeats.
+   * This handles cases where Relay crashes without graceful shutdown.
+   */
+  @EnsureRequestContext()
+  async cleanupStaleRelays(): Promise<void> {
+    const threshold = new Date(Date.now() - STALE_RELAY_THRESHOLD_MS);
+
+    // Find online relays that haven't sent heartbeat recently
+    const staleRelays = await this.em.find(RelayServer, {
+      status: RelayStatus.ONLINE,
+      lastHeartbeatAt: { $lt: threshold },
+    });
+
+    if (staleRelays.length === 0) {
+      return;
+    }
+
+    this.logger.warn(
+      `Found ${staleRelays.length} stale relay(s), marking as offline`
+    );
+
+    for (const relay of staleRelays) {
+      relay.status = RelayStatus.OFFLINE;
+      relay.activeSessions = 0;
+
+      this.logger.log(
+        `Marked relay offline: ${relay.relayId} (last heartbeat: ${relay.lastHeartbeatAt.toISOString()})`
       );
     }
 

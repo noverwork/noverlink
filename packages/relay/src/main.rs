@@ -10,19 +10,25 @@ mod session_client;
 mod ticket;
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::Result;
 use noverlink_shared::RelayConfig;
 use tokio::net::TcpListener;
 use tokio::signal;
-use tracing::{error, info};
+use tokio::time::interval;
+use tracing::{error, info, warn};
 
 use handlers::{handle_cli_connection, start_http_server};
 use registry::TunnelRegistry;
 use session_client::{RequestLogger, SessionClient};
 use ticket::TicketVerifier;
 
+/// Heartbeat interval in seconds
+const HEARTBEAT_INTERVAL_SECS: u64 = 30;
+
 #[tokio::main]
+#[allow(clippy::too_many_lines)] // Main orchestrates startup - acceptable complexity
 async fn main() -> Result<()> {
     // Load configuration from .env
     let config = RelayConfig::load().map_err(|e| anyhow::anyhow!("{}", e))?;
@@ -54,6 +60,22 @@ async fn main() -> Result<()> {
         "Session client initialized, backend: {}",
         config.backend_url
     );
+
+    // Register relay with backend
+    match session_client
+        .register(config.ws_port, config.http_port, &config.base_domain)
+        .await
+    {
+        Ok(response) => {
+            info!(
+                "Relay registered with backend: {} (status: {})",
+                response.relay_id, response.status
+            );
+        }
+        Err(e) => {
+            warn!("Failed to register with backend (will retry via heartbeat): {}", e);
+        }
+    }
 
     // Request logger - batches and sends HTTP request logs to backend
     let request_logger = Arc::new(RequestLogger::new((*session_client).clone()));
@@ -122,6 +144,23 @@ async fn main() -> Result<()> {
         }
     });
 
+    // Start heartbeat task
+    let registry_heartbeat = Arc::clone(&registry);
+    let session_client_heartbeat = Arc::clone(&session_client);
+    let heartbeat_handle = tokio::spawn(async move {
+        let mut heartbeat_interval = interval(Duration::from_secs(HEARTBEAT_INTERVAL_SECS));
+
+        loop {
+            heartbeat_interval.tick().await;
+
+            let active_sessions = registry_heartbeat.active_session_count();
+
+            if let Err(e) = session_client_heartbeat.heartbeat(active_sessions).await {
+                warn!("Heartbeat failed: {}", e);
+            }
+        }
+    });
+
     // Wait for shutdown signal
     match signal::ctrl_c().await {
         Ok(()) => {
@@ -132,8 +171,12 @@ async fn main() -> Result<()> {
         }
     }
 
+    // Notify backend of shutdown
+    session_client.notify_shutdown().await;
+
     ws_handle.abort();
     http_handle.abort();
+    heartbeat_handle.abort();
     info!("Relay stopped");
 
     Ok(())

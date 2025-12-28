@@ -1,10 +1,10 @@
-//! Build script for noverlink-cli
+//! Build script for relay
 //!
 //! Injects version information at compile time.
-//! Uses `NOVERLINK_VERSION` env var if set, otherwise defaults to "dev".
+//! Uses `RELAY_VERSION` env var if set, otherwise defaults to "dev".
 
 fn main() {
-    let version = std::env::var("NOVERLINK_VERSION").map_or_else(
+    let version = std::env::var("RELAY_VERSION").map_or_else(
         |_| "dev".to_string(),
         |v| {
             // Truncate to 7 chars if it looks like a full SHA (40 hex chars)
@@ -16,6 +16,6 @@ fn main() {
         },
     );
 
-    println!("cargo:rustc-env=NOVERLINK_VERSION={version}");
-    println!("cargo:rerun-if-env-changed=NOVERLINK_VERSION");
+    println!("cargo:rustc-env=RELAY_VERSION={version}");
+    println!("cargo:rerun-if-env-changed=RELAY_VERSION");
 }

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { RelayStatus } from '@noverlink/backend-shared';
 
 import { AppConfigService } from '../app-config';
 import { RelayAuthGuard } from './guards';
@@ -11,6 +12,8 @@ describe('RelayController', () => {
 
   beforeEach(async () => {
     const mockRelayService = {
+      registerRelay: jest.fn(),
+      heartbeat: jest.fn(),
       createSession: jest.fn(),
       closeSession: jest.fn(),
       addRequests: jest.fn(),
@@ -155,6 +158,69 @@ describe('RelayController', () => {
       await expect(
         controller.addRequests('unknown', { requests: [] })
       ).rejects.toThrow('Session not found');
+    });
+  });
+
+  describe('register', () => {
+    it('should register relay with relay id from header', async () => {
+      relayService.registerRelay.mockResolvedValue({
+        relay_id: 'relay-1',
+        status: RelayStatus.ONLINE,
+      });
+
+      const dto = {
+        ws_port: 8444,
+        http_port: 9444,
+        base_domain: 'noverlink.app',
+        ip_address: '10.0.0.1',
+        version: '1.0.0',
+      };
+
+      const result = await controller.register('relay-1', dto);
+
+      expect(result).toEqual({
+        relay_id: 'relay-1',
+        status: RelayStatus.ONLINE,
+      });
+      expect(relayService.registerRelay).toHaveBeenCalledWith('relay-1', dto);
+    });
+
+    it('should handle re-registration', async () => {
+      relayService.registerRelay.mockResolvedValue({
+        relay_id: 'relay-1',
+        status: RelayStatus.ONLINE,
+      });
+
+      const dto = {
+        ws_port: 8444,
+        http_port: 9444,
+        base_domain: 'noverlink.app',
+      };
+
+      await controller.register('relay-1', dto);
+
+      expect(relayService.registerRelay).toHaveBeenCalledWith('relay-1', dto);
+    });
+  });
+
+  describe('heartbeat', () => {
+    it('should send heartbeat with relay id from header', async () => {
+      relayService.heartbeat.mockResolvedValue({ status: RelayStatus.ONLINE });
+
+      const dto = { active_sessions: 5 };
+
+      const result = await controller.heartbeat('relay-1', dto);
+
+      expect(result).toEqual({ status: RelayStatus.ONLINE });
+      expect(relayService.heartbeat).toHaveBeenCalledWith('relay-1', dto);
+    });
+
+    it('should propagate service errors', async () => {
+      relayService.heartbeat.mockRejectedValue(new Error('Relay not found'));
+
+      await expect(
+        controller.heartbeat('unknown', { active_sessions: 0 })
+      ).rejects.toThrow('Relay not found');
     });
   });
 });
