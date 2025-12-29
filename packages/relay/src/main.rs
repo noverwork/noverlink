@@ -73,7 +73,10 @@ async fn main() -> Result<()> {
             );
         }
         Err(e) => {
-            warn!("Failed to register with backend (will retry via heartbeat): {}", e);
+            warn!(
+                "Failed to register with backend (will retry via heartbeat): {}",
+                e
+            );
         }
     }
 

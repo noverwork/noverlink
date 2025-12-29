@@ -169,7 +169,10 @@ impl SessionClient {
                     Err(format!("Failed to register relay: {} - {}", status, text))
                 }
             }
-            Err(e) => Err(format!("Failed to connect to backend for registration: {}", e)),
+            Err(e) => Err(format!(
+                "Failed to connect to backend for registration: {}",
+                e
+            )),
         }
     }
 
