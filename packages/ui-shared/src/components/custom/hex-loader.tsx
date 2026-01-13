@@ -18,7 +18,7 @@ const tunnelLoaderVariants = cva('relative inline-flex items-center justify-cent
   },
 });
 
-const dotSizeVariants = cva('rounded-full bg-teal-400 animate-pulse', {
+const dotSizeVariants = cva('bg-[#00ff00] animate-pulse shadow-[0_0_6px_rgba(0,255,0,0.5)]', {
   variants: {
     size: {
       sm: 'w-2 h-2',
@@ -67,7 +67,7 @@ export interface SpinnerLoaderProps
     VariantProps<typeof tunnelLoaderVariants> {}
 
 const spinnerSizeVariants = cva(
-  'border-2 border-slate-700 border-t-teal-400 rounded-full animate-spin',
+  'border-2 border-white/10 border-t-[#00ff00] animate-spin',
   {
     variants: {
       size: {
@@ -155,10 +155,10 @@ const LoadingOverlay = React.forwardRef<HTMLDivElement, LoadingOverlayProps>(
     return (
       <div ref={ref} className={cn('relative', className)} {...props}>
         {children}
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm z-50">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a]/90 backdrop-blur-sm z-50">
           <LoaderComponent size="lg" />
           {text && (
-            <span className="mt-4 text-sm font-medium text-slate-300 tracking-wide">
+            <span className="mt-4 text-xs font-mono uppercase tracking-wider text-white/60">
               {text}
             </span>
           )}

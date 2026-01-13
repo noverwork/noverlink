@@ -83,18 +83,45 @@ export function BillingsPage() {
     <DashboardLayout>
       {/* Page Header */}
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-white tracking-tight">
+        <h2
+          className="text-3xl text-white uppercase"
+          style={{
+            fontFamily: "'Times New Roman', Georgia, serif",
+            fontWeight: 900,
+            transform: 'scaleY(0.7) scaleX(0.85)',
+            transformOrigin: 'left',
+            letterSpacing: '0.05em',
+          }}
+        >
           Billing & Subscription
         </h2>
-        <p className="text-slate-400 mt-1">
+        <p
+          className="text-white/50 mt-2 text-xs"
+          style={{
+            fontFamily: "'Helvetica Neue', Arial, sans-serif",
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+          }}
+        >
           Choose a plan that works for you. No hidden fees.
         </p>
       </div>
 
       {/* Current Usage */}
-      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 mb-8">
+      <div className="p-6 bg-[#111] border border-white/10 mb-8">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-medium text-white">Current Usage</h3>
+          <h3
+            className="text-xl text-white uppercase"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+              transform: 'scaleY(0.75) scaleX(0.9)',
+              transformOrigin: 'left',
+              letterSpacing: '0.03em',
+            }}
+          >
+            Current Usage
+          </h3>
           <PulseBadge variant="connected" appearance="pill">
             Sandbox
           </PulseBadge>
@@ -104,7 +131,16 @@ export function BillingsPage() {
           {/* Tunnels */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Tunnels Used</span>
+              <span
+                className="text-[0.65rem] text-white/50"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Tunnels Used
+              </span>
               <span className="text-sm font-mono text-white">
                 {usage.tunnels.used} / {usage.tunnels.max}
               </span>
@@ -119,7 +155,16 @@ export function BillingsPage() {
           {/* Bandwidth */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Bandwidth Used</span>
+              <span
+                className="text-[0.65rem] text-white/50"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Bandwidth Used
+              </span>
               <span className="text-sm font-mono text-white">
                 {usage.bandwidth.used} MB / {usage.bandwidth.max / 1024} GB
               </span>
@@ -133,8 +178,17 @@ export function BillingsPage() {
 
           {/* Billing Period */}
           <div className="space-y-3">
-            <span className="text-sm text-slate-400">Billing Period</span>
-            <div className="text-xl font-medium text-white">
+            <span
+              className="text-[0.65rem] text-white/50"
+              style={{
+                fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Billing Period
+            </span>
+            <div className="text-xl font-mono text-white">
               {usage.billingPeriod || '—'}
             </div>
           </div>
@@ -149,13 +203,30 @@ export function BillingsPage() {
       </div>
 
       {/* Payment History */}
-      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 mt-8">
-        <h3 className="text-lg font-medium text-white mb-4">Payment History</h3>
+      <div className="p-6 bg-[#111] border border-white/10 mt-8">
+        <h3
+          className="text-xl text-white mb-4 uppercase"
+          style={{
+            fontFamily: "'Times New Roman', Georgia, serif",
+            fontWeight: 900,
+            transform: 'scaleY(0.75) scaleX(0.9)',
+            transformOrigin: 'left',
+            letterSpacing: '0.03em',
+          }}
+        >
+          Payment History
+        </h3>
         <div className="text-center py-8">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-            <ReceiptIcon className="w-6 h-6 text-slate-500" />
+          <div className="w-12 h-12 mx-auto mb-4 bg-white/5 border border-white/10 flex items-center justify-center">
+            <ReceiptIcon className="w-6 h-6 text-white/40" />
           </div>
-          <p className="text-sm text-slate-400">
+          <p
+            className="text-xs text-white/50"
+            style={{
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              letterSpacing: '0.1em',
+            }}
+          >
             No payment history yet. Upgrade to a paid plan to see invoices here.
           </p>
         </div>
@@ -166,21 +237,21 @@ export function BillingsPage() {
 
 function PlanCard({ plan }: { plan: Plan }) {
   const getBorderClass = () => {
-    if (plan.popular) return 'border-teal-500/50';
-    if (plan.current) return 'border-teal-500/30';
-    return 'border-slate-800';
+    if (plan.popular) return 'border-[#00ff00]/50';
+    if (plan.current) return 'border-[#00ff00]/30';
+    return 'border-white/10';
   };
 
   const getBgClass = () => {
     if (plan.popular)
-      return 'bg-gradient-to-b from-teal-500/10 to-slate-900/50';
-    return 'bg-slate-900/50';
+      return 'bg-gradient-to-b from-[#00ff00]/10 to-[#111]';
+    return 'bg-[#111]';
   };
 
   return (
     <div
       className={cn(
-        'relative rounded-xl border-2 p-6 flex flex-col h-full',
+        'relative border-2 p-6 flex flex-col h-full',
         getBorderClass(),
         getBgClass()
       )}
@@ -196,13 +267,40 @@ function PlanCard({ plan }: { plan: Plan }) {
 
       {/* Plan Header */}
       <div className="mb-6 pt-2">
-        <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
+        <h3
+          className="text-xl text-white mb-2 uppercase"
+          style={{
+            fontFamily: "'Times New Roman', Georgia, serif",
+            fontWeight: 900,
+            transform: 'scaleY(0.75) scaleX(0.9)',
+            transformOrigin: 'left',
+            letterSpacing: '0.03em',
+          }}
+        >
+          {plan.name}
+        </h3>
         <div className="flex items-baseline">
-          <span className="text-4xl font-bold text-white">{plan.price}</span>
-          <span className="text-slate-400 ml-1">{plan.period}</span>
+          <span
+            className="text-4xl text-white"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+            }}
+          >
+            {plan.price}
+          </span>
+          <span
+            className="text-white/50 ml-1 text-xs"
+            style={{
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              letterSpacing: '0.1em',
+            }}
+          >
+            {plan.period}
+          </span>
         </div>
         {plan.yearlyPrice && (
-          <div className="text-sm text-slate-500 mt-1">
+          <div className="text-sm text-white/40 mt-1">
             or {plan.yearlyPrice}/year (save ~30%)
           </div>
         )}
@@ -216,11 +314,11 @@ function PlanCard({ plan }: { plan: Plan }) {
               className={cn(
                 'h-5 w-5 mr-2 shrink-0',
                 plan.current || plan.popular
-                  ? 'text-teal-400'
-                  : 'text-slate-500'
+                  ? 'text-[#00ff00]'
+                  : 'text-white/40'
               )}
             />
-            <span className="text-slate-300">{feature}</span>
+            <span className="text-white/60">{feature}</span>
           </li>
         ))}
       </ul>

@@ -8,9 +8,10 @@ import { cn } from '../../lib/utils';
 const inputVariants = cva(
   [
     'relative w-full',
-    'bg-slate-900',
-    'border transition-colors',
-    'text-white placeholder:text-slate-500',
+    'bg-[#0a0a0a]',
+    'border transition-all duration-200',
+    'text-white placeholder:text-white/30',
+    'font-mono',
     'focus:outline-none',
     'disabled:cursor-not-allowed disabled:opacity-50',
   ],
@@ -18,13 +19,13 @@ const inputVariants = cva(
     variants: {
       variant: {
         default: [
-          'border-white/[0.08]',
-          'hover:border-white/[0.15]',
-          'focus:border-teal-500/50',
+          'border-white/10',
+          'hover:border-white/20',
+          'focus:border-white/40',
         ],
         error: [
-          'border-rose-400/50',
-          'focus:border-rose-400',
+          'border-[#ff0000]/50',
+          'focus:border-[#ff0000]',
         ],
       },
       size: {
@@ -35,8 +36,8 @@ const inputVariants = cva(
       rounded: {
         none: 'rounded-none',
         sm: 'rounded-sm',
-        default: 'rounded-lg',
-        lg: 'rounded-xl',
+        default: 'rounded-none',
+        lg: 'rounded-none',
         full: 'rounded-full',
       },
       mono: {
@@ -48,7 +49,7 @@ const inputVariants = cva(
       variant: 'default',
       size: 'default',
       rounded: 'default',
-      mono: false,
+      mono: true,
     },
   }
 );
@@ -84,7 +85,7 @@ const TunnelInput = React.forwardRef<HTMLInputElement, TunnelInputProps>(
       <div className="w-full">
         <div className="relative flex items-center">
           {hasIcon && iconPosition === 'left' && (
-            <div className="absolute left-3 text-slate-400 pointer-events-none z-10">
+            <div className="absolute left-3 text-white/40 pointer-events-none z-10">
               {icon}
             </div>
           )}
@@ -100,13 +101,13 @@ const TunnelInput = React.forwardRef<HTMLInputElement, TunnelInputProps>(
             {...props}
           />
           {hasIcon && iconPosition === 'right' && (
-            <div className="absolute right-3 text-slate-400 z-10">
+            <div className="absolute right-3 text-white/40 z-10">
               {icon}
             </div>
           )}
         </div>
         {error && (
-          <p className="mt-1.5 text-xs text-rose-400">{error}</p>
+          <p className="mt-1.5 text-xs text-[#ff0000]">{error}</p>
         )}
       </div>
     );
@@ -138,7 +139,7 @@ const TunnelTextarea = React.forwardRef<HTMLTextAreaElement, TunnelTextareaProps
           {...props}
         />
         {error && (
-          <p className="mt-1.5 text-xs text-rose-400">{error}</p>
+          <p className="mt-1.5 text-xs text-[#ff0000]">{error}</p>
         )}
       </div>
     );
@@ -157,14 +158,14 @@ const TunnelInputGroup = React.forwardRef<HTMLDivElement, TunnelInputGroupProps>
     return (
       <div ref={ref} className={cn('space-y-2', className)} {...props}>
         {label && (
-          <label className="block text-sm font-medium text-white">
+          <label className="block text-xs font-mono uppercase tracking-wider text-white/80">
             {label}
-            {required && <span className="text-rose-400 ml-1">*</span>}
+            {required && <span className="text-[#ff0000] ml-1">*</span>}
           </label>
         )}
         {children}
         {description && (
-          <p className="text-xs text-slate-400">{description}</p>
+          <p className="text-xs text-white/40">{description}</p>
         )}
       </div>
     );
@@ -178,4 +179,4 @@ export const NeonTextarea = TunnelTextarea;
 export const NeonInputGroup = TunnelInputGroup;
 export const neonInputVariants = inputVariants;
 
-export { inputVariants,TunnelInput, TunnelInputGroup, TunnelTextarea };
+export { inputVariants, TunnelInput, TunnelInputGroup, TunnelTextarea };

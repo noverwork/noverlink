@@ -72,8 +72,8 @@ const TunnelLine = React.forwardRef<HTMLDivElement, TunnelLineProps>(
           className={cn(
             tunnelLineVariants({ status, direction }),
             isConnected
-              ? 'bg-gradient-to-r from-slate-700 via-teal-500 to-slate-700'
-              : 'bg-slate-700'
+              ? 'bg-gradient-to-r from-white/10 via-[#00ff00]/50 to-white/10'
+              : 'bg-white/20'
           )}
         />
 
@@ -81,8 +81,8 @@ const TunnelLine = React.forwardRef<HTMLDivElement, TunnelLineProps>(
         {animated && isConnected && (
           <div
             className={cn(
-              'absolute w-2 h-2 rounded-full bg-teal-400',
-              'shadow-lg shadow-teal-400/50'
+              'absolute w-2 h-2 rounded-full bg-[#00ff00]',
+              'shadow-[0_0_10px_rgba(0,255,0,0.8)]'
             )}
             style={{
               animation: `${getFlowAnimation(isHorizontal, flowDirection)} 2s linear infinite`,
@@ -94,7 +94,7 @@ const TunnelLine = React.forwardRef<HTMLDivElement, TunnelLineProps>(
         {status === 'connecting' && (
           <div
             className={cn(
-              'absolute w-3 h-3 rounded-full bg-teal-400/50',
+              'absolute w-3 h-3 rounded-full bg-[#ffb800]/50',
               'animate-ping'
             )}
           />
@@ -104,11 +104,11 @@ const TunnelLine = React.forwardRef<HTMLDivElement, TunnelLineProps>(
         {label && (
           <div
             className={cn(
-              'absolute px-3 py-1 rounded-full',
-              'bg-slate-900 border',
-              isConnected ? 'border-teal-500/30' : 'border-slate-700',
-              'text-xs font-medium',
-              isConnected ? 'text-teal-400' : 'text-slate-500'
+              'absolute px-3 py-1',
+              'bg-[#0a0a0a] border',
+              isConnected ? 'border-[#00ff00]/30' : 'border-white/20',
+              'text-xs font-mono uppercase tracking-wider',
+              isConnected ? 'text-[#00ff00]' : 'text-white/50'
             )}
           >
             {label}
@@ -139,9 +139,9 @@ const TunnelConnection = React.forwardRef<HTMLDivElement, TunnelConnectionProps>
   (
     {
       className,
-      localLabel = 'Local',
+      localLabel = 'LOCAL',
       localSublabel,
-      publicLabel = 'Public',
+      publicLabel = 'PUBLIC',
       publicSublabel,
       status = 'connected',
       tunnelName,
@@ -152,6 +152,8 @@ const TunnelConnection = React.forwardRef<HTMLDivElement, TunnelConnectionProps>
     },
     ref
   ) => {
+    const isConnected = status === 'connected';
+
     return (
       <div
         ref={ref}
@@ -163,14 +165,14 @@ const TunnelConnection = React.forwardRef<HTMLDivElement, TunnelConnectionProps>
           <div className="flex flex-col items-center gap-2">
             <div
               className={cn(
-                'w-16 h-16 flex items-center justify-center rounded-2xl',
-                'bg-slate-800 border border-slate-700',
+                'w-16 h-16 flex items-center justify-center',
+                'bg-[#0a0a0a] border border-white/20',
                 status === 'disconnected' && 'opacity-50',
                 status === 'connecting' && 'animate-pulse'
               )}
             >
               <svg
-                className="w-7 h-7 text-slate-400"
+                className="w-7 h-7 text-white/60"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -180,9 +182,9 @@ const TunnelConnection = React.forwardRef<HTMLDivElement, TunnelConnectionProps>
               </svg>
             </div>
             <div className="text-center">
-              <div className="text-sm font-medium text-white">{localLabel}</div>
+              <div className="text-xs font-mono uppercase tracking-wider text-white">{localLabel}</div>
               {localSublabel && (
-                <div className="text-xs font-mono text-slate-400">{localSublabel}</div>
+                <div className="text-xs font-mono text-white/50">{localSublabel}</div>
               )}
             </div>
           </div>
@@ -202,15 +204,20 @@ const TunnelConnection = React.forwardRef<HTMLDivElement, TunnelConnectionProps>
           <div className="flex flex-col items-center gap-2">
             <div
               className={cn(
-                'w-16 h-16 flex items-center justify-center rounded-2xl',
-                'bg-gradient-to-br from-teal-500/20 to-cyan-500/20',
-                'border border-teal-500/30',
+                'w-16 h-16 flex items-center justify-center',
+                'bg-[#0a0a0a]',
+                isConnected
+                  ? 'border border-[#00ff00]/50 shadow-[0_0_15px_rgba(0,255,0,0.15)]'
+                  : 'border border-white/20',
                 status === 'disconnected' && 'opacity-50',
                 status === 'connecting' && 'animate-pulse'
               )}
             >
               <svg
-                className="w-7 h-7 text-teal-400"
+                className={cn(
+                  'w-7 h-7',
+                  isConnected ? 'text-[#00ff00]' : 'text-white/40'
+                )}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -220,9 +227,12 @@ const TunnelConnection = React.forwardRef<HTMLDivElement, TunnelConnectionProps>
               </svg>
             </div>
             <div className="text-center">
-              <div className="text-sm font-medium text-white">{publicLabel}</div>
+              <div className="text-xs font-mono uppercase tracking-wider text-white">{publicLabel}</div>
               {publicSublabel && (
-                <div className="text-xs font-mono text-slate-400">{publicSublabel}</div>
+                <div className={cn(
+                  'text-xs font-mono',
+                  isConnected ? 'text-[#00ff00]/80' : 'text-white/50'
+                )}>{publicSublabel}</div>
               )}
             </div>
           </div>

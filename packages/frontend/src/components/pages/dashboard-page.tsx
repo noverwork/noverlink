@@ -53,16 +53,32 @@ export function DashboardPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-semibold text-white tracking-tight">
+          <h2
+            className="text-3xl text-white uppercase"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+              transform: 'scaleY(0.7) scaleX(0.85)',
+              transformOrigin: 'left',
+              letterSpacing: '0.05em',
+            }}
+          >
             Dashboard
           </h2>
-          <p className="text-slate-400 mt-1">
+          <p
+            className="text-white/50 mt-2 text-xs"
+            style={{
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+            }}
+          >
             Real-time tunnel connections from your CLI
           </p>
         </div>
         {hasActiveTunnels && (
           <PulseBadge variant="connected" appearance="pill">
-            {activeTunnels.length} Active
+            {activeTunnels.length} ACTIVE
           </PulseBadge>
         )}
       </div>
@@ -71,22 +87,22 @@ export function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <MetricCard
           value={stats.activeSessions}
-          label="Active Tunnels"
+          label="ACTIVE TUNNELS"
           sublabel="right now"
         />
         <MetricCard
           value={stats.totalRequests.toLocaleString()}
-          label="Requests"
+          label="REQUESTS"
           sublabel="this month"
         />
         <MetricCard
           value={`${stats.bandwidthMb.toFixed(1)} MB`}
-          label="Bandwidth"
+          label="BANDWIDTH"
           sublabel="this month"
         />
         <MetricCard
           value={stats.tunnelMinutes.toLocaleString()}
-          label="Tunnel Minutes"
+          label="TUNNEL MINUTES"
           sublabel="this month"
         />
       </div>
@@ -95,14 +111,23 @@ export function DashboardPage() {
       {hasActiveTunnels ? (
         <div className="space-y-6">
           {/* Primary tunnel visualization */}
-          <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+          <div className="p-6 bg-[#0a0a0a]/80 border border-white/10">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-medium text-white">
+              <h3
+                className="text-xl text-white uppercase"
+                style={{
+                  fontFamily: "'Times New Roman', Georgia, serif",
+                  fontWeight: 900,
+                  transform: 'scaleY(0.75) scaleX(0.9)',
+                  transformOrigin: 'left',
+                  letterSpacing: '0.03em',
+                }}
+              >
                 Active Connections
               </h3>
               <Link href="/tunnels">
                 <GlowButton variant="ghost" size="sm">
-                  View All
+                  VIEW ALL
                 </GlowButton>
               </Link>
             </div>
@@ -142,16 +167,23 @@ export function DashboardPage() {
           </div>
 
           {/* Quick Start reminder */}
-          <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-800">
+          <div className="p-4 bg-white/5 border border-white/10">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-                <TerminalIcon className="w-5 h-5 text-teal-400" />
+              <div className="w-10 h-10 bg-[#00ff00]/10 border border-[#00ff00]/20 flex items-center justify-center">
+                <TerminalIcon className="w-5 h-5 text-[#00ff00]" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-white">
+                <div
+                  className="text-xs text-white"
+                  style={{
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Start another tunnel
                 </div>
-                <code className="text-xs text-slate-400 font-mono">
+                <code className="text-xs text-white/40 font-mono">
                   noverlink http 8080
                 </code>
               </div>
@@ -160,7 +192,7 @@ export function DashboardPage() {
         </div>
       ) : (
         /* No active tunnels - show CLI instructions */
-        <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
+        <div className="p-8 bg-[#0a0a0a]/80 border border-white/10">
           <div className="text-center max-w-lg mx-auto">
             {/* Disconnected visualization */}
             <div className="mb-8 opacity-50">
@@ -174,20 +206,44 @@ export function DashboardPage() {
               />
             </div>
 
-            <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-              <TerminalIcon className="w-6 h-6 text-slate-500" />
+            <div className="w-12 h-12 mx-auto mb-4 bg-white/5 border border-white/20 flex items-center justify-center">
+              <TerminalIcon className="w-6 h-6 text-white/40" />
             </div>
-            <h3 className="text-lg font-medium text-white mb-2">
+            <h3
+              className="text-xl text-white mb-2 uppercase"
+              style={{
+                fontFamily: "'Times New Roman', Georgia, serif",
+                fontWeight: 900,
+                transform: 'scaleY(0.75) scaleX(0.9)',
+                letterSpacing: '0.03em',
+              }}
+            >
               No active tunnels
             </h3>
-            <p className="text-slate-400 mb-6 text-sm">
+            <p
+              className="text-white/50 mb-6 text-xs"
+              style={{
+                fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+              }}
+            >
               Start a tunnel from your terminal to see it here
             </p>
 
             {/* CLI Instructions */}
-            <div className="bg-slate-950 rounded-lg p-4 text-left mb-6">
-              <div className="text-xs text-slate-500 mb-2">Terminal</div>
-              <code className="text-sm text-teal-400 font-mono">
+            <div className="bg-black p-4 text-left mb-6 border border-white/10">
+              <div
+                className="text-[0.65rem] text-white/40 mb-2"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Terminal
+              </div>
+              <code className="text-sm text-[#00ff00] font-mono">
                 $ noverlink http 3000
               </code>
             </div>
@@ -198,7 +254,7 @@ export function DashboardPage() {
               rel="noopener noreferrer"
             >
               <GlowButton variant="ghost" size="sm">
-                View Docs
+                VIEW DOCS
               </GlowButton>
             </a>
           </div>
@@ -207,29 +263,36 @@ export function DashboardPage() {
 
       {/* Recent Activity */}
       {hasActiveTunnels && recentLogs.length > 0 && (
-        <div className="mt-8 p-6 rounded-xl bg-slate-900/50 border border-slate-800">
-          <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">
+        <div className="mt-8 p-6 bg-[#0a0a0a]/80 border border-white/10">
+          <h3
+            className="text-xs text-white/50 mb-4"
+            style={{
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+            }}
+          >
             Recent Requests
           </h3>
           <div className="space-y-2">
             {recentLogs.map((log) => (
               <div
                 key={log.id}
-                className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/30"
+                className="flex items-center justify-between py-2 px-3 bg-white/5"
               >
                 <div className="flex items-center gap-3">
                   <span
                     className={cn(
-                      'text-xs font-mono px-2 py-0.5 rounded',
-                      log.method === 'GET' && 'bg-teal-500/20 text-teal-400',
+                      'text-xs font-mono px-2 py-0.5',
+                      log.method === 'GET' && 'bg-[#00ff00]/20 text-[#00ff00]',
                       log.method === 'POST' && 'bg-blue-500/20 text-blue-400',
-                      log.method === 'PUT' && 'bg-amber-500/20 text-amber-400',
-                      log.method === 'DELETE' && 'bg-rose-500/20 text-rose-400'
+                      log.method === 'PUT' && 'bg-[#ffb800]/20 text-[#ffb800]',
+                      log.method === 'DELETE' && 'bg-[#ff0000]/20 text-[#ff0000]'
                     )}
                   >
                     {log.method}
                   </span>
-                  <span className="text-sm font-mono text-slate-300">
+                  <span className="text-sm font-mono text-white/80">
                     {log.path}
                   </span>
                 </div>
@@ -238,13 +301,13 @@ export function DashboardPage() {
                     className={cn(
                       'text-xs font-mono',
                       (log.status ?? 0) < 400
-                        ? 'text-teal-400'
-                        : 'text-rose-400'
+                        ? 'text-[#00ff00]'
+                        : 'text-[#ff0000]'
                     )}
                   >
                     {log.status ?? '-'}
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-white/40 font-mono">
                     {formatTimeAgo(log.timestamp)}
                   </span>
                 </div>
@@ -253,7 +316,7 @@ export function DashboardPage() {
           </div>
           <Link href={`/tunnels/${firstSessionId}`}>
             <GlowButton variant="ghost" size="sm" className="w-full mt-4">
-              View All Logs
+              VIEW ALL LOGS
             </GlowButton>
           </Link>
         </div>

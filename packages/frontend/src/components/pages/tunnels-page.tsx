@@ -33,8 +33,8 @@ export function TunnelsPage() {
   const renderTunnelsContent = () => {
     if (isLoading) {
       return (
-        <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
-          <div className="text-center text-slate-400">Loading tunnels...</div>
+        <div className="p-8 bg-[#0a0a0a]/80 border border-white/10">
+          <div className="text-center text-white/60 font-mono uppercase tracking-wider">Loading tunnels...</div>
         </div>
       );
     }
@@ -45,50 +45,87 @@ export function TunnelsPage() {
           <div className="space-y-3">
             {tunnels.map((tunnel) => (
               <Link key={tunnel.id} href={`/tunnels/${tunnel.id}`}>
-                <div className="p-5 rounded-xl bg-slate-900/50 border border-teal-500/20 hover:border-teal-500/40 transition-all cursor-pointer">
+                <div className="p-5 bg-[#0a0a0a]/80 border-l-4 border-l-[#00ff00] border border-white/10 hover:border-white/20 transition-all cursor-pointer">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-teal-400 animate-pulse" />
+                      <div className="w-3 h-3 bg-[#00ff00] animate-pulse shadow-[0_0_10px_rgba(0,255,0,0.5)]" />
                       <div>
-                        <div className="font-medium text-white">
+                        <div
+                          className="text-lg text-white"
+                          style={{
+                            fontFamily: "'Times New Roman', Georgia, serif",
+                            fontWeight: 900,
+                            transform: 'scaleY(0.8) scaleX(0.9)',
+                            transformOrigin: 'left',
+                            letterSpacing: '0.02em',
+                            textTransform: 'uppercase',
+                          }}
+                        >
                           {tunnel.subdomain}
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-                          <span className="font-mono">
+                        <div className="flex items-center gap-2 text-xs text-white/40 mt-1 font-mono">
+                          <span>
                             localhost:{tunnel.localPort}
                           </span>
-                          <span>→</span>
-                          <span className="font-mono text-teal-400">
+                          <span>-&gt;</span>
+                          <span className="text-[#00ff00]">
                             {tunnel.publicUrl.replace('https://', '')}
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-slate-500">Uptime</div>
-                      <div className="text-sm font-mono text-slate-300">
+                      <div
+                        className="text-[0.65rem] text-white/40"
+                        style={{
+                          fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                          letterSpacing: '0.2em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        Uptime
+                      </div>
+                      <div className="text-sm font-mono text-white/80">
                         {formatUptime(tunnel.connectedAt)}
                       </div>
                     </div>
                   </div>
 
                   {/* Stats row */}
-                  <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800">
+                  <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
                     <div>
-                      <div className="text-xs text-slate-500">Bytes In</div>
+                      <div
+                        className="text-[0.65rem] text-white/40"
+                        style={{
+                          fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                          letterSpacing: '0.2em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        Bytes In
+                      </div>
                       <div className="text-sm font-mono text-white">
                         {formatBytes(tunnel.bytesIn)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-slate-500">Bytes Out</div>
+                      <div
+                        className="text-[0.65rem] text-white/40"
+                        style={{
+                          fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                          letterSpacing: '0.2em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        Bytes Out
+                      </div>
                       <div className="text-sm font-mono text-white">
                         {formatBytes(tunnel.bytesOut)}
                       </div>
                     </div>
                     <div className="text-right">
                       <GlowButton variant="ghost" size="sm">
-                        View Details →
+                        VIEW DETAILS -&gt;
                       </GlowButton>
                     </div>
                   </div>
@@ -98,16 +135,23 @@ export function TunnelsPage() {
           </div>
 
           {/* Quick Start */}
-          <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-800">
+          <div className="p-4 bg-white/5 border border-white/10">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-                <TerminalIcon className="w-5 h-5 text-teal-400" />
+              <div className="w-10 h-10 bg-[#00ff00]/10 border border-[#00ff00]/20 flex items-center justify-center">
+                <TerminalIcon className="w-5 h-5 text-[#00ff00]" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-white">
+                <div
+                  className="text-xs text-white"
+                  style={{
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Start another tunnel
                 </div>
-                <code className="text-xs text-slate-400 font-mono">
+                <code className="text-xs text-white/40 font-mono">
                   noverlink http 5000
                 </code>
               </div>
@@ -119,7 +163,7 @@ export function TunnelsPage() {
     }
     // No active tunnels
     return (
-      <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
+      <div className="p-8 bg-[#0a0a0a]/80 border border-white/10">
         <div className="text-center max-w-lg mx-auto">
           {/* Visual */}
           <div className="mb-8 opacity-50">
@@ -133,43 +177,80 @@ export function TunnelsPage() {
             />
           </div>
 
-          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-            <TerminalIcon className="w-6 h-6 text-slate-500" />
+          <div className="w-12 h-12 mx-auto mb-4 bg-white/5 border border-white/20 flex items-center justify-center">
+            <TerminalIcon className="w-6 h-6 text-white/40" />
           </div>
-          <h3 className="text-lg font-medium text-white mb-2">
+          <h3
+            className="text-xl text-white mb-2 uppercase"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+              transform: 'scaleY(0.75) scaleX(0.9)',
+              letterSpacing: '0.03em',
+            }}
+          >
             No active tunnels
           </h3>
-          <p className="text-slate-400 mb-6 text-sm">
+          <p
+            className="text-white/50 mb-6 text-xs"
+            style={{
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+            }}
+          >
             Start a tunnel from your terminal to see it here
           </p>
 
           {/* CLI Instructions */}
-          <div className="bg-slate-950 rounded-lg p-4 text-left mb-6">
+          <div className="bg-black p-4 text-left mb-6 border border-white/10">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-500">Terminal</span>
+              <span
+                className="text-[0.65rem] text-white/40"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Terminal
+              </span>
               <CopyButton text="noverlink http 3000" />
             </div>
-            <code className="text-sm text-teal-400 font-mono">
+            <code className="text-sm text-[#00ff00] font-mono">
               $ noverlink http 3000
             </code>
           </div>
 
-          <p className="text-xs text-slate-500 mb-4">
+          <p
+            className="text-xs text-white/40 mb-4"
+            style={{
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              letterSpacing: '0.1em',
+            }}
+          >
             Don&apos;t have the CLI installed?
           </p>
 
           {/* Install instructions */}
-          <div className="bg-slate-950 rounded-lg p-4 text-left mb-6">
+          <div className="bg-black p-4 text-left mb-6 border border-white/10">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-500">
+              <span
+                className="text-[0.65rem] text-white/40"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Install CLI (macOS/Linux)
               </span>
               <CopyButton text="brew tap noverwork/noverlink && brew install noverlink" />
             </div>
-            <code className="text-sm text-slate-300 font-mono block">
+            <code className="text-sm text-white/80 font-mono block">
               $ brew tap noverwork/noverlink
             </code>
-            <code className="text-sm text-slate-300 font-mono block mt-1">
+            <code className="text-sm text-white/80 font-mono block mt-1">
               $ brew install noverlink
             </code>
           </div>
@@ -180,7 +261,7 @@ export function TunnelsPage() {
             rel="noopener noreferrer"
           >
             <GlowButton variant="ghost" size="sm">
-              Documentation
+              DOCUMENTATION
             </GlowButton>
           </a>
         </div>
@@ -193,16 +274,32 @@ export function TunnelsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-semibold text-white tracking-tight">
+          <h2
+            className="text-3xl text-white uppercase"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+              transform: 'scaleY(0.7) scaleX(0.85)',
+              transformOrigin: 'left',
+              letterSpacing: '0.05em',
+            }}
+          >
             Active Tunnels
           </h2>
-          <p className="text-slate-400 mt-1">
+          <p
+            className="text-white/50 mt-2 text-xs"
+            style={{
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+            }}
+          >
             Live connections from your CLI sessions
           </p>
         </div>
         {hasTunnels && (
           <PulseBadge variant="connected" appearance="pill">
-            {tunnels.length} Connected
+            {tunnels.length} CONNECTED
           </PulseBadge>
         )}
       </div>
@@ -220,10 +317,10 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="p-1.5 rounded hover:bg-slate-700 transition-colors"
+      className="p-1.5 hover:bg-white/10 transition-colors"
       title="Copy to clipboard"
     >
-      <CopyIcon className="w-4 h-4 text-slate-400" />
+      <CopyIcon className="w-4 h-4 text-white/40" />
     </button>
   );
 }

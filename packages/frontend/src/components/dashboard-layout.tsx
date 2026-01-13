@@ -2,6 +2,8 @@
 
 import {
   cn,
+  EvaFlickerOverlay,
+  EvaGrainOverlay,
   GlowButton,
   GridBackground,
   PulseBadge,
@@ -22,20 +24,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const logout = useLogout();
 
   const formatPlan = (plan: string) => {
-    return plan.charAt(0).toUpperCase() + plan.slice(1);
+    return plan.toUpperCase();
   };
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: DashboardIcon },
-    { href: '/tunnels', label: 'Tunnels', icon: TunnelIcon },
-    { href: '/settings', label: 'Settings', icon: SettingsIcon },
-    { href: '/billings', label: 'Billing', icon: BillingIcon },
+    { href: '/dashboard', label: 'DASHBOARD', icon: DashboardIcon },
+    { href: '/tunnels', label: 'TUNNELS', icon: TunnelIcon },
+    { href: '/settings', label: 'SETTINGS', icon: SettingsIcon },
+    { href: '/billings', label: 'BILLING', icon: BillingIcon },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0a0a0a]">
+      {/* EVA Overlays */}
+      <EvaGrainOverlay />
+      <EvaFlickerOverlay />
+
       {/* Header */}
-      <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+      <header className="bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center gap-3">
@@ -46,11 +52,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 height={32}
                 className="w-8 h-8"
               />
-              <h1 className="text-xl font-bold text-white">Noverlink</h1>
+              <h1
+                className="text-xl text-white uppercase"
+                style={{
+                  fontFamily: "'Times New Roman', Georgia, serif",
+                  fontWeight: 900,
+                  transform: 'scaleY(0.75) scaleX(0.9)',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                NOVERLINK
+              </h1>
             </Link>
             <div className="flex items-center gap-4">
               <PulseBadge variant="connected" appearance="pill">
-                System Online
+                SYSTEM ONLINE
               </PulseBadge>
               <GlowButton variant="ghost" size="sm">
                 <UserIcon className="w-4 h-4" />
@@ -63,7 +79,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Layout */}
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 min-h-[calc(100vh-73px)] bg-slate-900/50 border-r border-slate-800 relative">
+        <aside className="w-64 min-h-[calc(100vh-73px)] bg-[#0a0a0a]/80 border-r border-white/10 relative">
           <nav className="p-4">
             <ul className="space-y-1">
               {navItems.map((item) => {
@@ -74,16 +90,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     <Link
                       href={item.href}
                       className={cn(
-                        'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all',
+                        'flex items-center gap-3 px-4 py-3 text-xs transition-all border-l-2',
                         isActive
-                          ? 'text-white bg-teal-500/10 border border-teal-500/20'
-                          : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                          ? 'text-[#00ff00] bg-[#00ff00]/10 border-[#00ff00]'
+                          : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
                       )}
+                      style={{
+                        fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                      }}
                     >
                       <Icon
                         className={cn(
                           'w-5 h-5',
-                          isActive ? 'text-teal-400' : ''
+                          isActive ? 'text-[#00ff00]' : ''
                         )}
                       />
                       {item.label}
@@ -95,27 +116,47 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </nav>
 
           {/* Sidebar footer */}
-          <div className="absolute bottom-0 left-0 w-64 p-4 border-t border-slate-800">
+          <div className="absolute bottom-0 left-0 w-64 p-4 border-t border-white/10">
             <div className="flex items-center gap-3 px-4 py-2">
-              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                <span className="text-sm font-medium text-slate-300">
+              <div className="w-8 h-8 bg-white/10 border border-white/20 flex items-center justify-center">
+                <span
+                  className="text-sm text-white/80"
+                  style={{
+                    fontFamily: "'Times New Roman', Georgia, serif",
+                    fontWeight: 900,
+                  }}
+                >
                   {profile?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-white truncate">
+                <div
+                  className="text-sm text-white truncate"
+                  style={{
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                  }}
+                >
                   {profile?.name || 'Loading...'}
                 </div>
-                <div className="text-xs text-slate-500">
-                  {profile ? `${formatPlan(profile.plan)} Plan` : '...'}
+                <div
+                  className="text-[0.65rem] text-white/40"
+                  style={{
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {profile ? `${formatPlan(profile.plan)} PLAN` : '...'}
                 </div>
               </div>
               <button
                 onClick={logout}
-                className="p-1.5 rounded-lg hover:bg-slate-700 transition-colors"
+                className="p-1.5 hover:bg-white/10 transition-colors"
                 title="Sign out"
               >
-                <LogoutIcon className="w-4 h-4 text-slate-400" />
+                <LogoutIcon className="w-4 h-4 text-white/40" />
               </button>
             </div>
           </div>

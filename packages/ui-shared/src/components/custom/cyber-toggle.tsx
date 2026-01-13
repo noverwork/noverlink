@@ -29,8 +29,8 @@ function useControlledToggle(
 const toggleVariants = cva(
   [
     'relative inline-flex shrink-0 cursor-pointer items-center',
-    'rounded-full border transition-colors duration-150',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
+    'border transition-all duration-200',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]',
     'disabled:cursor-not-allowed disabled:opacity-50',
   ],
   {
@@ -49,8 +49,8 @@ const toggleVariants = cva(
 
 const thumbVariants = cva(
   [
-    'pointer-events-none block rounded-full bg-white',
-    'transition-transform duration-150',
+    'pointer-events-none block bg-white',
+    'transition-transform duration-200',
   ],
   {
     variants: {
@@ -109,8 +109,8 @@ const CyberToggle = React.forwardRef<HTMLButtonElement, CyberToggleProps>(
         className={cn(
           toggleVariants({ size }),
           controlledChecked
-            ? 'bg-teal-500 border-teal-500'
-            : 'bg-slate-700 border-slate-700',
+            ? 'bg-[#00ff00]/20 border-[#00ff00] shadow-[0_0_10px_rgba(0,255,0,0.3)]'
+            : 'bg-white/5 border-white/20',
           className
         )}
         onClick={handleClick}
@@ -118,7 +118,10 @@ const CyberToggle = React.forwardRef<HTMLButtonElement, CyberToggleProps>(
       >
         <span
           data-state={controlledChecked ? 'checked' : 'unchecked'}
-          className={cn(thumbVariants({ size }))}
+          className={cn(
+            thumbVariants({ size }),
+            controlledChecked && 'bg-[#00ff00] shadow-[0_0_6px_rgba(0,255,0,0.5)]'
+          )}
         />
       </button>
     );
@@ -134,7 +137,7 @@ const CyberToggle = React.forwardRef<HTMLButtonElement, CyberToggleProps>(
           {label && (
             <label
               className={cn(
-                'text-sm font-medium text-slate-200 cursor-pointer',
+                'text-xs font-mono uppercase tracking-wider text-white/80 cursor-pointer',
                 disabled && 'cursor-not-allowed opacity-50'
               )}
               onClick={handleClick}
@@ -143,7 +146,7 @@ const CyberToggle = React.forwardRef<HTMLButtonElement, CyberToggleProps>(
             </label>
           )}
           {description && (
-            <span className="text-xs text-slate-400">{description}</span>
+            <span className="text-xs text-white/40">{description}</span>
           )}
         </div>
       </div>
@@ -190,12 +193,12 @@ const CyberCheckbox = React.forwardRef<HTMLButtonElement, CyberCheckboxProps>(
         disabled={disabled}
         className={cn(
           'relative flex h-5 w-5 items-center justify-center',
-          'rounded border-2 transition-colors duration-150',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
+          'border transition-all duration-200',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]',
           'disabled:cursor-not-allowed disabled:opacity-50',
           controlledChecked
-            ? 'bg-teal-500 border-teal-500'
-            : 'bg-slate-900 border-slate-700',
+            ? 'bg-[#00ff00]/20 border-[#00ff00] shadow-[0_0_6px_rgba(0,255,0,0.3)]'
+            : 'bg-[#0a0a0a] border-white/20',
           className
         )}
         onClick={handleClick}
@@ -203,7 +206,7 @@ const CyberCheckbox = React.forwardRef<HTMLButtonElement, CyberCheckboxProps>(
       >
         {controlledChecked && (
           <svg
-            className="h-3 w-3 text-white"
+            className="h-3 w-3 text-[#00ff00]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -228,7 +231,7 @@ const CyberCheckbox = React.forwardRef<HTMLButtonElement, CyberCheckboxProps>(
         {checkbox}
         <label
           className={cn(
-            'text-sm text-slate-200 cursor-pointer',
+            'text-xs font-mono uppercase tracking-wider text-white/80 cursor-pointer',
             disabled && 'cursor-not-allowed opacity-50'
           )}
           onClick={handleClick}
@@ -307,19 +310,19 @@ const CyberRadioItem = React.forwardRef<HTMLButtonElement, CyberRadioItemProps>(
         disabled={disabled}
         className={cn(
           'relative flex h-5 w-5 items-center justify-center',
-          'rounded-full border-2 transition-colors duration-150',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
+          'rounded-full border transition-all duration-200',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]',
           'disabled:cursor-not-allowed disabled:opacity-50',
           isSelected
-            ? 'border-teal-500'
-            : 'border-slate-700',
+            ? 'border-[#00ff00] shadow-[0_0_6px_rgba(0,255,0,0.3)]'
+            : 'border-white/20',
           className
         )}
         onClick={() => onValueChange(value)}
         {...props}
       >
         {isSelected && (
-          <span className="h-2 w-2 rounded-full bg-teal-400" />
+          <span className="h-2 w-2 rounded-full bg-[#00ff00] shadow-[0_0_4px_rgba(0,255,0,0.5)]" />
         )}
       </button>
     );
@@ -333,7 +336,7 @@ const CyberRadioItem = React.forwardRef<HTMLButtonElement, CyberRadioItemProps>(
         {radio}
         <label
           className={cn(
-            'text-sm text-slate-200 cursor-pointer',
+            'text-xs font-mono uppercase tracking-wider text-white/80 cursor-pointer',
             disabled && 'cursor-not-allowed opacity-50'
           )}
           onClick={() => !disabled && onValueChange(value)}

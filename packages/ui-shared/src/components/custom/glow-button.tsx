@@ -11,27 +11,39 @@ const glowButtonVariants = cva(
     'inline-flex items-center justify-center gap-2',
     'font-medium text-sm',
     'cursor-pointer',
-    'transition-colors',
+    'transition-all duration-200',
     'disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]',
+    // EVA label style
+    'tracking-[0.1em] uppercase',
   ],
   {
     variants: {
       variant: {
         primary: [
-          'border border-teal-500 bg-teal-500 text-white',
-          'hover:bg-teal-400 hover:border-teal-400',
-          'focus-visible:ring-teal-500',
+          'border border-white bg-white text-[#0a0a0a]',
+          'hover:bg-transparent hover:text-white',
+          'focus-visible:ring-white/50',
         ],
         secondary: [
-          'border border-slate-700 text-white',
-          'hover:bg-slate-800',
-          'focus-visible:ring-slate-700',
+          'border border-white/20 text-white',
+          'hover:border-white/40 hover:bg-white/5',
+          'focus-visible:ring-white/30',
         ],
         ghost: [
-          'text-slate-400',
-          'hover:text-white',
-          'focus-visible:ring-slate-700',
+          'text-white/60',
+          'hover:text-white hover:bg-white/5',
+          'focus-visible:ring-white/30',
+        ],
+        danger: [
+          'border border-[#ff0000]/50 text-[#ff0000]',
+          'hover:bg-[#ff0000]/10 hover:border-[#ff0000]',
+          'focus-visible:ring-[#ff0000]/50',
+        ],
+        success: [
+          'border border-[#00ff00]/50 text-[#00ff00]',
+          'hover:bg-[#00ff00]/10 hover:border-[#00ff00]',
+          'focus-visible:ring-[#00ff00]/50',
         ],
       },
       size: {
@@ -52,7 +64,7 @@ const glowButtonVariants = cva(
     defaultVariants: {
       variant: 'primary',
       size: 'default',
-      rounded: 'lg',
+      rounded: 'none',
     },
   }
 );
@@ -109,7 +121,7 @@ const GlowButton = React.forwardRef<HTMLButtonElement, GlowButtonProps>(
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            Processing...
+            PROCESSING...
           </>
         ) : (
           children

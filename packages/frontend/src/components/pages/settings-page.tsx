@@ -54,8 +54,8 @@ export function SettingsPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-            <div className="text-slate-400 text-sm">Loading settings...</div>
+            <div className="w-8 h-8 border-2 border-[#00ff00] border-t-transparent animate-spin" />
+            <div className="text-white/40 text-sm font-mono uppercase tracking-wider">Loading settings...</div>
           </div>
         </div>
       </DashboardLayout>
@@ -65,7 +65,7 @@ export function SettingsPage() {
   if (!profile) {
     return (
       <DashboardLayout>
-        <div className="text-center text-slate-400">
+        <div className="text-center text-white/40 font-mono uppercase tracking-wider">
           Failed to load profile. Please try again.
         </div>
       </DashboardLayout>
@@ -76,34 +76,79 @@ export function SettingsPage() {
     <DashboardLayout>
       {/* Page Header */}
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-white tracking-tight">
+        <h2
+          className="text-3xl text-white uppercase"
+          style={{
+            fontFamily: "'Times New Roman', Georgia, serif",
+            fontWeight: 900,
+            transform: 'scaleY(0.7) scaleX(0.85)',
+            transformOrigin: 'left',
+            letterSpacing: '0.05em',
+          }}
+        >
           Settings
         </h2>
-        <p className="text-slate-400 mt-1">Manage your account settings</p>
+        <p
+          className="text-white/50 mt-2 text-xs"
+          style={{
+            fontFamily: "'Helvetica Neue', Arial, sans-serif",
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Manage your account settings
+        </p>
       </div>
 
       {/* CLI Setup */}
-      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 mb-6">
-        <h3 className="text-lg font-medium text-white mb-4">CLI Setup</h3>
+      <div className="p-6 bg-[#111] border border-white/10 mb-6">
+        <h3
+          className="text-xl text-white mb-4 uppercase"
+          style={{
+            fontFamily: "'Times New Roman', Georgia, serif",
+            fontWeight: 900,
+            transform: 'scaleY(0.75) scaleX(0.9)',
+            transformOrigin: 'left',
+            letterSpacing: '0.03em',
+          }}
+        >
+          CLI Setup
+        </h3>
 
         <div className="space-y-4">
           <div>
-            <div className="text-sm text-slate-400 mb-2">1. Install the CLI</div>
+            <div
+              className="text-[0.65rem] text-white/40 mb-2"
+              style={{
+                fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+              }}
+            >
+              1. Install the CLI
+            </div>
             <div className="flex items-center gap-2">
-              <div className="flex-1 px-4 py-3 rounded-lg bg-slate-950 font-mono text-sm">
-                <div className="text-teal-400">brew tap noverwork/noverlink</div>
-                <div className="text-slate-300 mt-1">brew install noverlink</div>
+              <div className="flex-1 px-4 py-3 bg-black border border-white/10 font-mono text-sm">
+                <div className="text-[#00ff00]">brew tap noverwork/noverlink</div>
+                <div className="text-white/60 mt-1">brew install noverlink</div>
               </div>
               <CopyButton text="brew tap noverwork/noverlink && brew install noverlink" />
             </div>
           </div>
 
           <div>
-            <div className="text-sm text-slate-400 mb-2">
+            <div
+              className="text-[0.65rem] text-white/40 mb-2"
+              style={{
+                fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+              }}
+            >
               2. Login to your account
             </div>
             <div className="flex items-center gap-2">
-              <code className="flex-1 px-4 py-3 rounded-lg bg-slate-950 font-mono text-sm text-slate-300">
+              <code className="flex-1 px-4 py-3 bg-black border border-white/10 font-mono text-sm text-white/60">
                 noverlink login
               </code>
               <CopyButton text="noverlink login" />
@@ -111,9 +156,18 @@ export function SettingsPage() {
           </div>
 
           <div>
-            <div className="text-sm text-slate-400 mb-2">3. Start a tunnel</div>
+            <div
+              className="text-[0.65rem] text-white/40 mb-2"
+              style={{
+                fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+              }}
+            >
+              3. Start a tunnel
+            </div>
             <div className="flex items-center gap-2">
-              <code className="flex-1 px-4 py-3 rounded-lg bg-slate-950 font-mono text-sm text-slate-300">
+              <code className="flex-1 px-4 py-3 bg-black border border-white/10 font-mono text-sm text-white/60">
                 noverlink http 3000
               </code>
               <CopyButton text="noverlink http 3000" />
@@ -123,9 +177,20 @@ export function SettingsPage() {
       </div>
 
       {/* Account Section */}
-      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+      <div className="p-6 bg-[#111] border border-white/10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-white">Account</h3>
+          <h3
+            className="text-xl text-white uppercase"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+              transform: 'scaleY(0.75) scaleX(0.9)',
+              transformOrigin: 'left',
+              letterSpacing: '0.03em',
+            }}
+          >
+            Account
+          </h3>
           {!isEditing && (
             <GlowButton
               variant="secondary"
@@ -139,9 +204,18 @@ export function SettingsPage() {
 
         <div className="space-y-4">
           {/* Name Field */}
-          <div className="flex items-center justify-between py-3 border-b border-slate-800">
+          <div className="flex items-center justify-between py-3 border-b border-white/10">
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">Name</div>
+              <div
+                className="text-xs text-white"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Name
+              </div>
               {isEditing ? (
                 <input
                   type="text"
@@ -149,18 +223,27 @@ export function SettingsPage() {
                   onChange={(e) =>
                     setEditData({ ...editData, name: e.target.value })
                   }
-                  className="mt-1 w-full max-w-xs px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="mt-1 w-full max-w-xs px-3 py-2 bg-black border border-white/10 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#00ff00] focus:border-transparent"
                 />
               ) : (
-                <div className="text-sm text-slate-400">{profile.name}</div>
+                <div className="text-sm text-white/40">{profile.name}</div>
               )}
             </div>
           </div>
 
           {/* Email Field */}
-          <div className="flex items-center justify-between py-3 border-b border-slate-800">
+          <div className="flex items-center justify-between py-3 border-b border-white/10">
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">Email</div>
+              <div
+                className="text-xs text-white"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Email
+              </div>
               {isEditing ? (
                 <input
                   type="email"
@@ -168,10 +251,10 @@ export function SettingsPage() {
                   onChange={(e) =>
                     setEditData({ ...editData, email: e.target.value })
                   }
-                  className="mt-1 w-full max-w-xs px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="mt-1 w-full max-w-xs px-3 py-2 bg-black border border-white/10 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#00ff00] focus:border-transparent"
                 />
               ) : (
-                <div className="text-sm text-slate-400 font-mono">
+                <div className="text-sm text-white/40 font-mono">
                   {profile.email}
                 </div>
               )}
@@ -179,14 +262,23 @@ export function SettingsPage() {
           </div>
 
           {/* Current Plan */}
-          <div className="flex items-center justify-between py-3 border-b border-slate-800">
+          <div className="flex items-center justify-between py-3 border-b border-white/10">
             <div>
-              <div className="text-sm font-medium text-white">Current Plan</div>
+              <div
+                className="text-xs text-white"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Current Plan
+              </div>
               <div className="flex items-center gap-2 mt-1">
                 <PulseBadge variant="connected" appearance="pill" pulse={false}>
                   {formatPlan(profile.plan)}
                 </PulseBadge>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-white/40 font-mono">
                   {profile.maxTunnels} tunnel{profile.maxTunnels !== 1 ? 's' : ''}
                   , {(profile.maxBandwidthMb / 1000).toFixed(0)} GB/month
                 </span>
@@ -221,7 +313,7 @@ export function SettingsPage() {
 
           {/* Error message */}
           {updateMutation.error && (
-            <p className="text-sm text-rose-400">
+            <p className="text-sm text-[#ff0000] font-mono">
               {updateMutation.error.message}
             </p>
           )}
@@ -229,15 +321,28 @@ export function SettingsPage() {
           {/* Delete Account */}
           <div className="flex items-center justify-between py-3">
             <div>
-              <div className="text-sm font-medium text-rose-400">
+              <div
+                className="text-xs text-[#ff0000]"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Delete Account
               </div>
-              <div className="text-xs text-slate-500">
+              <div
+                className="text-[0.65rem] text-white/40 mt-1"
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  letterSpacing: '0.1em',
+                }}
+              >
                 Permanently delete your account and all data
               </div>
             </div>
             <GlowButton variant="ghost" size="sm">
-              <TrashIcon className="w-4 h-4 text-rose-400" />
+              <TrashIcon className="w-4 h-4 text-[#ff0000]" />
             </GlowButton>
           </div>
         </div>
@@ -258,13 +363,13 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="p-2 rounded-lg hover:bg-slate-700 transition-colors"
+      className="p-2 hover:bg-white/5 transition-colors border border-white/10"
       title="Copy to clipboard"
     >
       {copied ? (
-        <CheckIcon className="w-4 h-4 text-teal-400" />
+        <CheckIcon className="w-4 h-4 text-[#00ff00]" />
       ) : (
-        <CopyIcon className="w-4 h-4 text-slate-400" />
+        <CopyIcon className="w-4 h-4 text-white/40" />
       )}
     </button>
   );

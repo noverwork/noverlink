@@ -15,28 +15,28 @@ const pulseBadgeVariants = cva(
     variants: {
       variant: {
         connected: [
-          'text-teal-400',
-          '[--pulse-color:theme(colors.teal.400)]',
+          'text-[#00ff00]',
+          '[--pulse-color:#00ff00]',
         ],
         disconnected: [
-          'text-rose-400',
-          '[--pulse-color:theme(colors.rose.400)]',
+          'text-[#ff0000]',
+          '[--pulse-color:#ff0000]',
         ],
         warning: [
-          'text-amber-400',
-          '[--pulse-color:theme(colors.amber.400)]',
+          'text-[#ffb800]',
+          '[--pulse-color:#ffb800]',
         ],
         info: [
-          'text-cyan-400',
-          '[--pulse-color:theme(colors.cyan.400)]',
+          'text-white/80',
+          '[--pulse-color:rgba(255,255,255,0.8)]',
         ],
         neutral: [
-          'text-slate-400',
-          '[--pulse-color:theme(colors.slate.400)]',
+          'text-white/50',
+          '[--pulse-color:rgba(255,255,255,0.5)]',
         ],
         processing: [
-          'text-purple-400',
-          '[--pulse-color:theme(colors.purple.400)]',
+          'text-[#ffb800]',
+          '[--pulse-color:#ffb800]',
         ],
       },
       size: {
@@ -47,48 +47,17 @@ const pulseBadgeVariants = cva(
       appearance: {
         dot: '',
         pill: [
-          'px-3 py-1 rounded-full',
-          'bg-slate-900',
+          'px-3 py-1',
+          'bg-[#0a0a0a]',
+          'border border-current/30',
         ],
         tag: [
-          'px-2 py-0.5 rounded',
+          'px-2 py-0.5',
           'bg-current/10',
           'border-l-2 border-current',
         ],
       },
     },
-    compoundVariants: [
-      {
-        variant: 'connected',
-        appearance: 'pill',
-        className: 'border border-teal-500/30',
-      },
-      {
-        variant: 'disconnected',
-        appearance: 'pill',
-        className: 'border border-slate-700',
-      },
-      {
-        variant: 'warning',
-        appearance: 'pill',
-        className: 'border border-slate-700',
-      },
-      {
-        variant: 'info',
-        appearance: 'pill',
-        className: 'border border-slate-700',
-      },
-      {
-        variant: 'neutral',
-        appearance: 'pill',
-        className: 'border border-slate-700',
-      },
-      {
-        variant: 'processing',
-        appearance: 'pill',
-        className: 'border border-slate-700',
-      },
-    ],
     defaultVariants: {
       variant: 'connected',
       size: 'default',
@@ -129,10 +98,25 @@ const PulseBadge = React.forwardRef<HTMLSpanElement, PulseBadgeProps>(
     const currentSize = size || 'default';
     const dotSize = dotSizes[currentSize];
 
+    // Glow class based on variant
+    const getGlowClass = () => {
+      if (variant === 'connected') {
+        return 'drop-shadow-[0_0_6px_rgba(0,255,0,0.5)]';
+      }
+      if (variant === 'disconnected') {
+        return 'drop-shadow-[0_0_6px_rgba(255,0,0,0.5)]';
+      }
+      if (variant === 'warning' || variant === 'processing') {
+        return 'drop-shadow-[0_0_6px_rgba(255,184,0,0.5)]';
+      }
+      return '';
+    };
+    const glowClass = getGlowClass();
+
     return (
       <span
         ref={ref}
-        className={cn(pulseBadgeVariants({ variant, size, appearance }), className)}
+        className={cn(pulseBadgeVariants({ variant, size, appearance }), glowClass, className)}
         {...props}
       >
         {showDot && (
@@ -192,10 +176,10 @@ export interface StatusIndicatorProps extends React.HTMLAttributes<HTMLDivElemen
 const StatusIndicator = React.forwardRef<HTMLDivElement, StatusIndicatorProps>(
   ({ className, status, showLabel = true, size = 'default', ...props }, ref) => {
     const statusConfig = {
-      connected: { variant: 'connected' as const, label: 'Connected' },
-      disconnected: { variant: 'disconnected' as const, label: 'Disconnected' },
-      idle: { variant: 'warning' as const, label: 'Idle' },
-      busy: { variant: 'processing' as const, label: 'Busy' },
+      connected: { variant: 'connected' as const, label: 'CONNECTED' },
+      disconnected: { variant: 'disconnected' as const, label: 'DISCONNECTED' },
+      idle: { variant: 'warning' as const, label: 'IDLE' },
+      busy: { variant: 'processing' as const, label: 'BUSY' },
     };
 
     const config = statusConfig[status];
@@ -224,9 +208,9 @@ export interface ConnectionBadgeProps extends React.HTMLAttributes<HTMLDivElemen
 const ConnectionBadge = React.forwardRef<HTMLDivElement, ConnectionBadgeProps>(
   ({ className, connected, latency, showLatency = true, ...props }, ref) => {
     const getLatencyColor = (ms: number) => {
-      if (ms < 50) return 'text-teal-400';
-      if (ms < 150) return 'text-amber-400';
-      return 'text-rose-400';
+      if (ms < 50) return 'text-[#00ff00]';
+      if (ms < 150) return 'text-[#ffb800]';
+      return 'text-[#ff0000]';
     };
 
     return (
@@ -240,7 +224,7 @@ const ConnectionBadge = React.forwardRef<HTMLDivElement, ConnectionBadgeProps>(
           appearance="pill"
           pulse={connected}
         >
-          {connected ? 'Connected' : 'Disconnected'}
+          {connected ? 'CONNECTED' : 'DISCONNECTED'}
         </PulseBadge>
         {connected && showLatency && latency !== undefined && (
           <span
@@ -258,4 +242,4 @@ const ConnectionBadge = React.forwardRef<HTMLDivElement, ConnectionBadgeProps>(
 );
 ConnectionBadge.displayName = 'ConnectionBadge';
 
-export { ConnectionBadge, PulseBadge, pulseBadgeVariants,StatusIndicator };
+export { ConnectionBadge, PulseBadge, pulseBadgeVariants, StatusIndicator };

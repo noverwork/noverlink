@@ -7,24 +7,27 @@ import { cn } from '../../lib/utils';
 
 const tunnelCardVariants = cva(
   [
-    'p-4 rounded-xl',
+    'p-4',
     'flex items-center justify-between',
-    'transition-colors',
+    'transition-all duration-200',
+    'border-l-2',
+    'bg-[#0a0a0a]',
   ],
   {
     variants: {
       status: {
         online: [
-          'border border-teal-500/20 bg-teal-500/5',
-          'hover:border-teal-500/30 hover:bg-teal-500/10',
+          'border-l-[#00ff00]',
+          'hover:bg-[#00ff00]/5',
         ],
         offline: [
-          'border border-slate-800 bg-slate-900/30',
-          'hover:border-slate-700 hover:bg-slate-900/50',
+          'border-l-white/20',
+          'hover:bg-white/5',
+          'opacity-60',
         ],
         error: [
-          'border border-rose-500/20 bg-rose-500/5',
-          'hover:border-rose-500/30 hover:bg-rose-500/10',
+          'border-l-[#ff0000]',
+          'hover:bg-[#ff0000]/5',
         ],
       },
     },
@@ -67,14 +70,14 @@ const TunnelCard = React.forwardRef<HTMLDivElement, TunnelCardProps>(
         className={cn(tunnelCardVariants({ status }), className)}
         {...props}
       >
-        <div className="flex items-center gap-3">
-          {/* Status dot */}
+        <div className="flex items-center gap-4">
+          {/* Status indicator */}
           <div
             className={cn(
               'w-2 h-2 rounded-full',
-              isOnline && 'bg-teal-400',
-              status === 'offline' && 'bg-slate-600',
-              isError && 'bg-rose-400'
+              isOnline && 'bg-[#00ff00] shadow-[0_0_8px_rgba(0,255,0,0.5)]',
+              status === 'offline' && 'bg-white/30',
+              isError && 'bg-[#ff0000] shadow-[0_0_8px_rgba(255,0,0,0.5)]'
             )}
           />
 
@@ -82,20 +85,20 @@ const TunnelCard = React.forwardRef<HTMLDivElement, TunnelCardProps>(
           <div>
             <div
               className={cn(
-                'font-medium',
+                'font-mono text-sm tracking-wider uppercase',
                 isOnline && 'text-white',
-                status === 'offline' && 'text-slate-400',
-                isError && 'text-rose-300'
+                status === 'offline' && 'text-white/50',
+                isError && 'text-[#ff0000]'
               )}
             >
               {name}
             </div>
             {(localPort || publicUrl) && (
-              <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <div className="flex items-center gap-2 text-xs font-mono text-white/50 mt-1">
                 {localPort && <span>:{localPort}</span>}
-                {localPort && publicUrl && <span>→</span>}
+                {localPort && publicUrl && <span className="text-white/30">→</span>}
                 {publicUrl && (
-                  <span className={cn(isOnline && 'text-teal-400/80')}>
+                  <span className={cn(isOnline && 'text-[#00ff00]/80')}>
                     {publicUrl}
                   </span>
                 )}
@@ -109,10 +112,10 @@ const TunnelCard = React.forwardRef<HTMLDivElement, TunnelCardProps>(
           {stats && (
             <div
               className={cn(
-                'text-sm',
-                isOnline && 'text-slate-400',
-                status === 'offline' && 'text-slate-500',
-                isError && 'text-rose-400'
+                'text-xs font-mono',
+                isOnline && 'text-white/60',
+                status === 'offline' && 'text-white/30',
+                isError && 'text-[#ff0000]/80'
               )}
             >
               {stats}
@@ -140,20 +143,20 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       <div
         ref={ref}
         className={cn(
-          'text-center p-4 rounded-xl bg-slate-800/50',
+          'text-center p-4 bg-[#0a0a0a] border border-white/10',
           className
         )}
         {...props}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-2xl font-semibold text-white">{value}</span>
+          <span className="text-2xl font-mono text-white">{value}</span>
           {trend && (
             <span
               className={cn(
-                'text-xs',
-                trend === 'up' && 'text-teal-400',
-                trend === 'down' && 'text-rose-400',
-                trend === 'neutral' && 'text-slate-400'
+                'text-xs font-mono',
+                trend === 'up' && 'text-[#00ff00]',
+                trend === 'down' && 'text-[#ff0000]',
+                trend === 'neutral' && 'text-white/50'
               )}
             >
               {trend === 'up' && '↑'}
@@ -162,9 +165,9 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
             </span>
           )}
         </div>
-        <div className="text-xs text-slate-500 mt-1">
+        <div className="text-xs uppercase tracking-wider text-white/50 mt-1">
           {label}
-          {sublabel && <span className="text-slate-600"> · {sublabel}</span>}
+          {sublabel && <span className="text-white/30"> · {sublabel}</span>}
         </div>
       </div>
     );
@@ -185,7 +188,7 @@ const TunnelStats = React.forwardRef<HTMLDivElement, TunnelStatsProps>(
     return (
       <div
         ref={ref}
-        className={cn('grid grid-cols-2 md:grid-cols-4 gap-4', className)}
+        className={cn('grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10', className)}
         {...props}
       >
         {requests !== undefined && (
@@ -206,4 +209,4 @@ const TunnelStats = React.forwardRef<HTMLDivElement, TunnelStatsProps>(
 );
 TunnelStats.displayName = 'TunnelStats';
 
-export { MetricCard, TunnelCard, tunnelCardVariants,TunnelStats };
+export { MetricCard, TunnelCard, tunnelCardVariants, TunnelStats };

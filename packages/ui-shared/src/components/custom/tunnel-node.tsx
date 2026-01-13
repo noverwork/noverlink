@@ -8,20 +8,21 @@ import { cn } from '../../lib/utils';
 const tunnelNodeVariants = cva(
   [
     'flex items-center justify-center',
-    'rounded-2xl transition-colors',
+    'transition-all duration-200',
+    'border',
   ],
   {
     variants: {
       variant: {
         local: [
-          'bg-slate-800 border border-slate-700',
+          'bg-[#0a0a0a] border-white/20',
         ],
         public: [
-          'bg-gradient-to-br from-teal-500/20 to-cyan-500/20',
-          'border border-teal-500/30',
+          'bg-[#0a0a0a] border-[#00ff00]/50',
+          'shadow-[0_0_15px_rgba(0,255,0,0.15)]',
         ],
         relay: [
-          'bg-slate-800/50 border border-slate-600',
+          'bg-[#0a0a0a] border-white/10',
         ],
       },
       size: {
@@ -31,7 +32,7 @@ const tunnelNodeVariants = cva(
       },
       status: {
         connected: '',
-        disconnected: 'opacity-50',
+        disconnected: 'opacity-40',
         connecting: '',
       },
     },
@@ -46,9 +47,9 @@ const tunnelNodeVariants = cva(
 const iconVariants = cva('', {
   variants: {
     variant: {
-      local: 'text-slate-400',
-      public: 'text-teal-400',
-      relay: 'text-slate-500',
+      local: 'text-white/60',
+      public: 'text-[#00ff00]',
+      relay: 'text-white/40',
     },
     size: {
       sm: 'w-5 h-5',
@@ -104,10 +105,10 @@ const TunnelNode = React.forwardRef<HTMLDivElement, TunnelNodeProps>(
         {(label || sublabel) && (
           <div className="text-center">
             {label && (
-              <div className="text-sm font-medium text-white">{label}</div>
+              <div className="text-xs font-mono uppercase tracking-wider text-white">{label}</div>
             )}
             {sublabel && (
-              <div className="text-xs font-mono text-slate-400">{sublabel}</div>
+              <div className="text-xs font-mono text-white/50">{sublabel}</div>
             )}
           </div>
         )}

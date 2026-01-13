@@ -45,11 +45,9 @@ const TunnelProgress = React.forwardRef<HTMLDivElement, TunnelProgressProps>(
     return (
       <div className="w-full space-y-1">
         {showValue && (
-          <div className="flex justify-between text-xs font-mono">
-            <span className="text-slate-400 uppercase tracking-wider">
-              Progress
-            </span>
-            <span className="text-teal-400">
+          <div className="flex justify-between text-xs font-mono uppercase tracking-wider">
+            <span className="text-white/50">PROGRESS</span>
+            <span className="text-[#00ff00]">
               {indeterminate ? '...' : `${Math.round(percentage)}%`}
             </span>
           </div>
@@ -58,7 +56,7 @@ const TunnelProgress = React.forwardRef<HTMLDivElement, TunnelProgressProps>(
           ref={ref}
           className={cn(
             tunnelProgressVariants({ size }),
-            'rounded-full bg-slate-800',
+            'bg-white/10',
             className
           )}
           role="progressbar"
@@ -70,9 +68,10 @@ const TunnelProgress = React.forwardRef<HTMLDivElement, TunnelProgressProps>(
           {/* Progress bar */}
           <div
             className={cn(
-              'h-full rounded-full transition-all duration-300 ease-out',
+              'h-full transition-all duration-300 ease-out',
               indeterminate ? 'w-1/3' : '',
-              'bg-linear-to-r from-teal-600 to-teal-400'
+              'bg-[#00ff00]',
+              'shadow-[0_0_10px_rgba(0,255,0,0.5)]'
             )}
             style={{
               width: indeterminate ? undefined : `${percentage}%`,
@@ -119,8 +118,10 @@ const SegmentedProgress = React.forwardRef<
         <div
           key={i}
           className={cn(
-            'flex-1 h-full rounded-sm transition-all duration-300',
-            i < filledSegments ? 'bg-teal-500' : 'bg-slate-800'
+            'flex-1 h-full transition-all duration-300',
+            i < filledSegments
+              ? 'bg-[#00ff00] shadow-[0_0_5px_rgba(0,255,0,0.5)]'
+              : 'bg-white/10'
           )}
           style={{
             transitionDelay: `${i * 30}ms`,
@@ -192,7 +193,7 @@ const CircularProgress = React.forwardRef<
             fill="none"
             stroke="currentColor"
             strokeWidth={strokeWidth}
-            className="text-slate-800"
+            className="text-white/10"
           />
           {/* Progress circle */}
           <circle
@@ -200,17 +201,20 @@ const CircularProgress = React.forwardRef<
             cy="50"
             r={radius}
             fill="none"
-            stroke="currentColor"
+            stroke="#00ff00"
             strokeWidth={strokeWidth}
-            strokeLinecap="round"
+            strokeLinecap="square"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            className="text-teal-500 transition-all duration-300 ease-out"
+            className="transition-all duration-300 ease-out"
+            style={{
+              filter: 'drop-shadow(0 0 6px rgba(0, 255, 0, 0.5))',
+            }}
           />
         </svg>
         {showValue && (
           <span
-            className={cn('absolute font-mono text-teal-400', currentSize.text)}
+            className={cn('absolute font-mono text-[#00ff00]', currentSize.text)}
           >
             {Math.round(percentage)}%
           </span>

@@ -9,52 +9,165 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOVERLINK v4.0 — Evangelion Title Card Style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @theme {
   --radius-lg: 0.5rem;
   --radius-md: calc(var(--radius-lg) - 2px);
   --radius-sm: calc(var(--radius-lg) - 4px);
 
-  --color-background: oklch(100% 0 0);
-  --color-foreground: oklch(13.9% 0.012 285.9);
-  --color-card: oklch(100% 0 0);
-  --color-card-foreground: oklch(13.9% 0.012 285.9);
-  --color-popover: oklch(100% 0 0);
-  --color-popover-foreground: oklch(13.9% 0.012 285.9);
-  --color-primary: oklch(56.5% 0.187 265.8);
-  --color-primary-foreground: oklch(99.1% 0.003 286.4);
-  --color-secondary: oklch(97.5% 0.003 286.4);
-  --color-secondary-foreground: oklch(21.7% 0.017 285.9);
-  --color-muted: oklch(97.5% 0.003 286.4);
-  --color-muted-foreground: oklch(53.6% 0.014 285.9);
-  --color-accent: oklch(97.5% 0.003 286.4);
-  --color-accent-foreground: oklch(21.7% 0.017 285.9);
-  --color-destructive: oklch(64.3% 0.242 28.2);
-  --color-destructive-foreground: oklch(99.1% 0.003 286.4);
-  --color-border: oklch(92.1% 0.005 286.4);
-  --color-input: oklch(92.1% 0.005 286.4);
-  --color-ring: oklch(56.5% 0.187 265.8);
+  /* EVA Deep Gray Background */
+  --color-background: #0a0a0a;
+  --color-foreground: #ffffff;
+
+  /* Card surfaces */
+  --color-card: #0f0f0f;
+  --color-card-foreground: #ffffff;
+
+  /* Popover */
+  --color-popover: #0f0f0f;
+  --color-popover-foreground: #ffffff;
+
+  /* Primary - White for main actions */
+  --color-primary: #ffffff;
+  --color-primary-foreground: #0a0a0a;
+
+  /* Secondary - Muted white */
+  --color-secondary: rgba(255, 255, 255, 0.1);
+  --color-secondary-foreground: rgba(255, 255, 255, 0.8);
+
+  /* Muted text */
+  --color-muted: rgba(255, 255, 255, 0.05);
+  --color-muted-foreground: rgba(255, 255, 255, 0.5);
+
+  /* Accent */
+  --color-accent: rgba(255, 255, 255, 0.08);
+  --color-accent-foreground: #ffffff;
+
+  /* Status Colors - EVA palette */
+  --color-connected: #00ff00;
+  --color-warning: #ffb800;
+  --color-error: #ff0000;
+
+  /* Destructive */
+  --color-destructive: #ff0000;
+  --color-destructive-foreground: #ffffff;
+
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-input: rgba(255, 255, 255, 0.1);
+  --color-ring: rgba(255, 255, 255, 0.3);
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: oklch(13.9% 0.012 285.9);
-    --color-foreground: oklch(99.1% 0.003 286.4);
-    --color-card: oklch(13.9% 0.012 285.9);
-    --color-card-foreground: oklch(99.1% 0.003 286.4);
-    --color-popover: oklch(13.9% 0.012 285.9);
-    --color-popover-foreground: oklch(99.1% 0.003 286.4);
-    --color-primary: oklch(64.2% 0.202 265.8);
-    --color-primary-foreground: oklch(21.7% 0.017 285.9);
-    --color-secondary: oklch(27.2% 0.018 285.9);
-    --color-secondary-foreground: oklch(99.1% 0.003 286.4);
-    --color-muted: oklch(27.2% 0.018 285.9);
-    --color-muted-foreground: oklch(70.9% 0.011 285.9);
-    --color-accent: oklch(27.2% 0.018 285.9);
-    --color-accent-foreground: oklch(99.1% 0.003 286.4);
-    --color-destructive: oklch(45.7% 0.189 28.2);
-    --color-destructive-foreground: oklch(99.1% 0.003 286.4);
-    --color-border: oklch(27.2% 0.018 285.9);
-    --color-input: oklch(27.2% 0.018 285.9);
-    --color-ring: oklch(61.2% 0.222 265.8);
+/* EVA Typography - Mechanical Compression */
+@layer utilities {
+  .eva-title {
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-weight: 900;
+    transform: scaleY(0.7) scaleX(0.85);
+    transform-origin: center center;
+    letter-spacing: 0.05em;
   }
+
+  .eva-title-lg {
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-weight: 900;
+    transform: scaleY(0.7) scaleX(0.85);
+    transform-origin: center center;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 60px rgba(255, 255, 255, 0.2);
+  }
+
+  .eva-title-md {
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-weight: 700;
+    transform: scaleY(0.75) scaleX(0.9);
+    transform-origin: center center;
+    letter-spacing: 0.03em;
+  }
+
+  .eva-label {
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* Status glow effects */
+  .glow-connected {
+    color: #00ff00;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5), 0 0 20px rgba(0, 255, 0, 0.3);
+  }
+
+  .glow-warning {
+    color: #ffb800;
+    text-shadow: 0 0 10px rgba(255, 184, 0, 0.5), 0 0 20px rgba(255, 184, 0, 0.3);
+  }
+
+  .glow-error {
+    color: #ff0000;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5), 0 0 20px rgba(255, 0, 0, 0.3);
+  }
+
+  /* Border glow */
+  .border-glow-connected {
+    border-color: #00ff00;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.1);
+  }
+
+  .border-glow-warning {
+    border-color: #ffb800;
+    box-shadow: 0 0 10px rgba(255, 184, 0, 0.3), inset 0 0 10px rgba(255, 184, 0, 0.1);
+  }
+
+  .border-glow-error {
+    border-color: #ff0000;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.1);
+  }
+}
+
+/* Film Grain Animation */
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+/* Title reveal animation */
+@keyframes title-reveal {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.7) scaleX(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(0.7) scaleX(0.85);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Screen Flicker Animation */
+@keyframes flicker {
+  0%   { opacity: 0.97; }
+  5%   { opacity: 0.95; }
+  10%  { opacity: 0.97; }
+  15%  { opacity: 0.94; }
+  20%  { opacity: 0.98; }
+  50%  { opacity: 0.96; }
+  80%  { opacity: 0.97; }
+  90%  { opacity: 0.94; }
+  100% { opacity: 0.98; }
 }

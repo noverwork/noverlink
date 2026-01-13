@@ -57,7 +57,7 @@ const sampleData: TableRow[] = [
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold text-teal-400 uppercase tracking-wider border-b border-teal-500/20 pb-2">
+      <h2 className="text-sm font-mono uppercase tracking-wider text-white/60 border-b border-white/10 pb-2">
         {title}
       </h2>
       {children}
@@ -95,16 +95,20 @@ export default function DevPage() {
   const [showOverlay, setShowOverlay] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="max-w-7xl mx-auto p-8 space-y-12">
-        {/* Header */}
+        {/* Header - EVA Compressed Style */}
         <header className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-white">
-            NOVERLINK <span className="text-teal-400">UI</span>
+          <h1 className="font-mono uppercase tracking-[0.5em] text-white text-4xl font-bold">
+            NOVERLINK
           </h1>
-          <p className="text-slate-400 font-mono text-sm">
-            Component Library Preview — Design C
-          </p>
+          <div className="flex items-center justify-center gap-4">
+            <div className="h-px w-16 bg-white/20" />
+            <p className="font-mono uppercase tracking-wider text-white/50 text-xs">
+              Component Library Preview
+            </p>
+            <div className="h-px w-16 bg-white/20" />
+          </div>
         </header>
 
         {/* Tunnel Visualization */}
@@ -126,7 +130,7 @@ export default function DevPage() {
 
             <ComponentGroup label="Connection States">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                <div className="p-4 bg-slate-900/50 rounded-xl">
+                <div className="p-4 bg-white/5 border border-white/10">
                   <TunnelConnection
                     localLabel="Connected"
                     status="connected"
@@ -134,14 +138,14 @@ export default function DevPage() {
                     animated
                   />
                 </div>
-                <div className="p-4 bg-slate-900/50 rounded-xl">
+                <div className="p-4 bg-white/5 border border-white/10">
                   <TunnelConnection
                     localLabel="Connecting"
                     status="connecting"
                     tunnelName="pending"
                   />
                 </div>
-                <div className="p-4 bg-slate-900/50 rounded-xl">
+                <div className="p-4 bg-white/5 border border-white/10">
                   <TunnelConnection
                     localLabel="Disconnected"
                     status="disconnected"
@@ -354,19 +358,19 @@ export default function DevPage() {
           <div className="flex flex-wrap gap-8 items-center">
             <div className="text-center space-y-2">
               <TunnelLoader size="lg" />
-              <span className="text-xs text-slate-400">TunnelLoader</span>
+              <span className="text-xs text-white/40 font-mono uppercase">TunnelLoader</span>
             </div>
             <div className="text-center space-y-2">
               <TunnelLoader size="default" />
-              <span className="text-xs text-slate-400">Default</span>
+              <span className="text-xs text-white/40 font-mono uppercase">Default</span>
             </div>
             <div className="text-center space-y-2">
               <SpinnerLoader size="lg" />
-              <span className="text-xs text-slate-400">SpinnerLoader</span>
+              <span className="text-xs text-white/40 font-mono uppercase">SpinnerLoader</span>
             </div>
             <div className="text-center space-y-2">
               <ConnectionLoader />
-              <span className="text-xs text-slate-400">ConnectionLoader</span>
+              <span className="text-xs text-white/40 font-mono uppercase">ConnectionLoader</span>
             </div>
           </div>
 
@@ -374,9 +378,9 @@ export default function DevPage() {
             <GlowButton onClick={() => setShowOverlay(!showOverlay)}>
               Toggle Loading Overlay
             </GlowButton>
-            <div className="mt-4 h-32 bg-slate-900/50 rounded-lg relative">
+            <div className="mt-4 h-32 bg-white/5 border border-white/10 relative">
               <LoadingOverlay loading={showOverlay} text="Loading...">
-                <div className="p-4 text-slate-400">
+                <div className="p-4 text-white/50">
                   Content behind the overlay
                 </div>
               </LoadingOverlay>
@@ -396,7 +400,7 @@ export default function DevPage() {
                 onChange={(e) => setProgress(Number(e.target.value))}
                 className="w-full"
               />
-              <span className="text-xs text-slate-400">Drag to change: {progress}%</span>
+              <span className="text-xs text-white/40 font-mono uppercase">Drag to change: {progress}%</span>
             </div>
 
             <TunnelProgress value={progress} showValue />
@@ -451,19 +455,19 @@ export default function DevPage() {
               color="white"
               size={24}
               opacity={0.03}
-              className="h-48 rounded-lg border border-white/10 bg-slate-900"
+              className="h-48 border border-white/10 bg-white/5"
             >
               <div className="p-4">
-                <span className="text-white font-mono">GridBackground</span>
-                <p className="text-slate-400 text-sm mt-2">Subtle dot grid pattern</p>
+                <span className="text-white font-mono uppercase tracking-wider text-sm">GridBackground</span>
+                <p className="text-white/40 text-sm mt-2 font-mono">Subtle dot grid pattern</p>
               </div>
             </GridBackground>
 
-            <div className="relative h-48 rounded-lg overflow-hidden border border-white/10 bg-slate-900">
-              <ParticleField count={30} color="rgba(20,184,166,0.3)" connected />
+            <div className="relative h-48 overflow-hidden border border-white/10 bg-white/5">
+              <ParticleField count={30} color="rgba(0,255,0,0.3)" connected />
               <div className="relative z-10 p-4">
-                <span className="text-white font-mono">ParticleField</span>
-                <p className="text-slate-400 text-sm mt-2">Teal particles with connections</p>
+                <span className="text-white font-mono uppercase tracking-wider text-sm">ParticleField</span>
+                <p className="text-white/40 text-sm mt-2 font-mono">Green particles with connections</p>
               </div>
             </div>
           </div>
@@ -471,7 +475,7 @@ export default function DevPage() {
 
         {/* Footer */}
         <footer className="text-center pt-8 border-t border-white/10">
-          <p className="text-slate-500 text-sm font-mono">
+          <p className="text-white/30 text-xs font-mono uppercase tracking-wider">
             Built with React 19 + Tailwind CSS 4.1 + Radix UI
           </p>
         </footer>

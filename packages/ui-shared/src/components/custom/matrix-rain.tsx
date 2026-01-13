@@ -59,7 +59,7 @@ const ParticleField = React.forwardRef<HTMLDivElement, ParticleFieldProps>(
     {
       className,
       count = 50,
-      color = 'rgba(20,184,166,0.3)',
+      color = 'rgba(0,255,0,0.3)',
       speed = 0.3,
       connected = true,
       ...props
@@ -161,4 +161,31 @@ const ParticleField = React.forwardRef<HTMLDivElement, ParticleFieldProps>(
 );
 ParticleField.displayName = 'ParticleField';
 
-export { GridBackground, ParticleField };
+// Film Grain Overlay component for EVA aesthetic
+export interface GrainOverlayProps extends React.HTMLAttributes<HTMLDivElement> {
+  opacity?: number;
+  animated?: boolean;
+}
+
+const GrainOverlay = React.forwardRef<HTMLDivElement, GrainOverlayProps>(
+  ({ className, opacity = 0.08, animated = true, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn('absolute inset-0 pointer-events-none z-50', className)}
+        style={{ opacity }}
+        {...props}
+      >
+        <svg className="w-full h-full" style={{ animation: animated ? 'grain 0.5s steps(1) infinite' : undefined }}>
+          <filter id="grain-filter">
+            <feTurbulence baseFrequency="0.9" numOctaves="4" stitchTiles="stitch" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#grain-filter)" />
+        </svg>
+      </div>
+    );
+  }
+);
+GrainOverlay.displayName = 'GrainOverlay';
+
+export { GrainOverlay, GridBackground, ParticleField };

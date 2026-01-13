@@ -2,6 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  EvaFlickerOverlay,
+  EvaGrainOverlay,
   GlowButton,
   InputGroup,
   InputGroupAddon,
@@ -183,12 +185,19 @@ function FormField({
 }) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-white">
+      <label
+        className="block text-xs text-white/60"
+        style={{
+          fontFamily: "'Helvetica Neue', Arial, sans-serif",
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+        }}
+      >
         {label}
-        {required && <span className="text-rose-400 ml-1">*</span>}
+        {required && <span className="text-[#ff0000] ml-1">*</span>}
       </label>
       {children}
-      {error && <p className="text-xs text-rose-400">{error}</p>}
+      {error && <p className="text-xs text-[#ff0000]">{error}</p>}
     </div>
   );
 }
@@ -231,7 +240,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-12 min-h-screen">
+    <div className="flex flex-col items-center justify-center px-6 py-12 min-h-screen bg-[#0a0a0a]">
+      {/* EVA Overlays */}
+      <EvaGrainOverlay />
+      <EvaFlickerOverlay />
+
       {/* Logo */}
       <div className="mb-10 flex flex-col items-center">
         <Link href="/" className="flex items-center gap-3 mb-3">
@@ -242,23 +255,55 @@ export default function RegisterPage() {
             height={48}
             className="w-12 h-12"
           />
-          <span className="text-3xl font-bold text-white tracking-tight">
+          <span
+            className="text-3xl text-white"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+              transform: 'scaleY(0.75) scaleX(0.9)',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}
+          >
             Noverlink
           </span>
         </Link>
-        <p className="text-slate-400 text-sm">
+        <p
+          className="text-xs text-white/40"
+          style={{
+            fontFamily: "'Helvetica Neue', Arial, sans-serif",
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+          }}
+        >
           Secure tunnel management platform
         </p>
       </div>
 
       {/* Register Card */}
       <div className="w-full max-w-[420px]">
-        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-xl">
+        <div className="bg-[#111] backdrop-blur-xl border border-white/10 p-8 shadow-xl">
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-white mb-2">
+            <h1
+              className="text-2xl text-white mb-2"
+              style={{
+                fontFamily: "'Times New Roman', Georgia, serif",
+                fontWeight: 900,
+                transform: 'scaleY(0.75) scaleX(0.9)',
+                transformOrigin: 'left',
+                letterSpacing: '0.03em',
+                textTransform: 'uppercase',
+              }}
+            >
               Create an account
             </h1>
-            <p className="text-slate-400">
+            <p
+              className="text-xs text-white/40"
+              style={{
+                fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                letterSpacing: '0.1em',
+              }}
+            >
               Get started with Noverlink for free
             </p>
           </div>
@@ -349,7 +394,7 @@ export default function RegisterPage() {
             </FormField>
 
             {registerMutation.error && (
-              <p className="text-sm text-rose-400 text-center">
+              <p className="text-sm text-[#ff0000] text-center">
                 {registerMutation.error.message}
               </p>
             )}
@@ -368,10 +413,10 @@ export default function RegisterPage() {
           {/* Divider */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700/50" />
+              <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-slate-900 px-3 text-slate-500 tracking-wider">
+              <span className="bg-[#111] px-3 text-white/40 tracking-wider font-mono">
                 Or continue with
               </span>
             </div>
@@ -407,11 +452,11 @@ export default function RegisterPage() {
         </div>
 
         {/* Sign in link */}
-        <p className="mt-8 text-center text-sm text-slate-400">
+        <p className="mt-8 text-center text-sm text-white/40 font-mono">
           Already have an account?{' '}
           <Link
             href="/login"
-            className="text-teal-400 hover:text-teal-300 transition-colors font-medium"
+            className="text-[#00ff00] hover:text-[#00ff00]/80 transition-colors font-medium"
           >
             Sign in
           </Link>

@@ -58,16 +58,16 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
   const renderLogEntries = () => {
     if (logsLoading) {
       return (
-        <div className="py-8 text-center text-slate-400">Loading logs...</div>
+        <div className="py-8 text-center text-white/40">Loading logs...</div>
       );
     }
     if (logs.length === 0) {
       return (
-        <div className="py-8 text-center text-slate-400">No requests yet</div>
+        <div className="py-8 text-center text-white/40">No requests yet</div>
       );
     }
     return (
-      <div className="divide-y divide-slate-800/50">
+      <div className="divide-y divide-white/10">
         {logs.map((log) => {
           const isSelected = selectedLogId === log.id;
           return (
@@ -79,51 +79,51 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
                 className={cn(
                   'grid grid-cols-12 gap-4 px-3 py-3 text-sm cursor-pointer transition-colors',
                   isSelected
-                    ? 'bg-slate-800/50'
-                    : 'hover:bg-slate-800/30'
+                    ? 'bg-white/5'
+                    : 'hover:bg-white/[0.03]'
                 )}
               >
                 <div className="col-span-1">
                   <span
                     className={cn(
-                      'text-xs font-mono px-2 py-0.5 rounded',
-                      log.method === 'GET' && 'bg-teal-500/20 text-teal-400',
+                      'text-xs font-mono uppercase px-2 py-0.5',
+                      log.method === 'GET' && 'bg-[#00ff00]/20 text-[#00ff00]',
                       log.method === 'POST' && 'bg-blue-500/20 text-blue-400',
-                      log.method === 'PUT' && 'bg-amber-500/20 text-amber-400',
-                      log.method === 'DELETE' && 'bg-rose-500/20 text-rose-400'
+                      log.method === 'PUT' && 'bg-[#ffb800]/20 text-[#ffb800]',
+                      log.method === 'DELETE' && 'bg-[#ff0000]/20 text-[#ff0000]'
                     )}
                   >
                     {log.method}
                   </span>
                 </div>
-                <div className="col-span-5 font-mono text-slate-300 truncate">
+                <div className="col-span-5 font-mono text-white/60 truncate">
                   {log.path}
                 </div>
                 <div className="col-span-2">
                   <span
                     className={cn(
                       'font-mono text-xs',
-                      (log.status ?? 0) < 300 && 'text-teal-400',
+                      (log.status ?? 0) < 300 && 'text-[#00ff00]',
                       (log.status ?? 0) >= 300 &&
                         (log.status ?? 0) < 400 &&
-                        'text-amber-400',
+                        'text-[#ffb800]',
                       (log.status ?? 0) >= 400 &&
                         (log.status ?? 0) < 500 &&
-                        'text-orange-400',
-                      (log.status ?? 0) >= 500 && 'text-rose-400'
+                        'text-[#ffb800]',
+                      (log.status ?? 0) >= 500 && 'text-[#ff0000]'
                     )}
                   >
                     {log.status ?? '-'}
                   </span>
                 </div>
-                <div className="col-span-2 font-mono text-slate-400">
+                <div className="col-span-2 font-mono text-white/40">
                   {log.durationMs ? `${log.durationMs}ms` : '-'}
                 </div>
-                <div className="col-span-2 text-right font-mono text-slate-500 flex items-center justify-end gap-2">
+                <div className="col-span-2 text-right font-mono text-white/40 flex items-center justify-end gap-2">
                   {formatTime(log.timestamp)}
                   <ChevronIcon
                     className={cn(
-                      'w-4 h-4 text-slate-500 transition-transform',
+                      'w-4 h-4 text-white/40 transition-transform',
                       isSelected && 'rotate-180'
                     )}
                   />
@@ -147,8 +147,8 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
   if (tunnelLoading) {
     return (
       <DashboardLayout>
-        <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
-          <div className="text-center text-slate-400">Loading tunnel...</div>
+        <div className="p-8 bg-[#111] border border-white/10">
+          <div className="text-center text-white/40">Loading tunnel...</div>
         </div>
       </DashboardLayout>
     );
@@ -157,8 +157,8 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
   if (!tunnel) {
     return (
       <DashboardLayout>
-        <div className="p-8 rounded-xl bg-slate-900/50 border border-slate-800">
-          <div className="text-center text-slate-400">Tunnel not found</div>
+        <div className="p-8 bg-[#111] border border-white/10">
+          <div className="text-center text-white/40">Tunnel not found</div>
         </div>
       </DashboardLayout>
     );
@@ -172,9 +172,14 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
       <div className="mb-6">
         <Link
           href="/tunnels"
-          className="text-sm text-slate-400 hover:text-white transition-colors"
+          className="text-xs text-white/40 hover:text-[#00ff00] transition-colors"
+          style={{
+            fontFamily: "'Helvetica Neue', Arial, sans-serif",
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+          }}
         >
-          ← Back to Tunnels
+          &larr; Back to Tunnels
         </Link>
       </div>
 
@@ -182,22 +187,31 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
         <div className="flex items-center gap-4">
           <div
             className={cn(
-              'w-3 h-3 rounded-full',
-              isActive ? 'bg-teal-400 animate-pulse' : 'bg-slate-500'
+              'w-3 h-3',
+              isActive ? 'bg-[#00ff00] animate-pulse shadow-[0_0_10px_rgba(0,255,0,0.5)]' : 'bg-white/20'
             )}
           />
           <div>
-            <h2 className="text-2xl font-semibold text-white tracking-tight">
+            <h2
+              className="text-3xl text-white uppercase"
+              style={{
+                fontFamily: "'Times New Roman', Georgia, serif",
+                fontWeight: 900,
+                transform: 'scaleY(0.7) scaleX(0.85)',
+                transformOrigin: 'left',
+                letterSpacing: '0.05em',
+              }}
+            >
               {tunnel.subdomain}
             </h2>
-            <div className="flex items-center gap-2 text-sm text-slate-400 mt-1">
+            <div className="flex items-center gap-2 text-sm text-white/40 mt-1">
               <span className="font-mono">localhost:{tunnel.localPort}</span>
-              <span>→</span>
+              <span>&rarr;</span>
               <a
                 href={tunnel.publicUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-teal-400 hover:underline"
+                className="font-mono text-[#00ff00] hover:underline"
               >
                 {tunnel.publicUrl.replace('https://', '')}
               </a>
@@ -214,7 +228,7 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
       </div>
 
       {/* Connection Visualization */}
-      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 mb-6">
+      <div className="p-6 bg-[#111] border border-white/10 mb-6">
         <TunnelConnection
           localLabel="localhost"
           localSublabel={`:${tunnel.localPort}`}
@@ -255,9 +269,20 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
       </div>
 
       {/* Request Logs */}
-      <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+      <div className="p-6 bg-[#111] border border-white/10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-white">Request Log</h3>
+          <h3
+            className="text-xl text-white uppercase"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+              transform: 'scaleY(0.75) scaleX(0.9)',
+              transformOrigin: 'left',
+              letterSpacing: '0.03em',
+            }}
+          >
+            Request Log
+          </h3>
           <div className="flex items-center gap-2">
             {isActive && (
               <PulseBadge variant="connected" size="sm">
@@ -268,7 +293,14 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
         </div>
 
         {/* Log table header */}
-        <div className="grid grid-cols-12 gap-4 px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-800">
+        <div
+          className="grid grid-cols-12 gap-4 px-3 py-2 text-[0.65rem] text-white/40 border-b border-white/10"
+          style={{
+            fontFamily: "'Helvetica Neue', Arial, sans-serif",
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+          }}
+        >
           <div className="col-span-1">Method</div>
           <div className="col-span-5">Path</div>
           <div className="col-span-2">Status</div>
@@ -281,7 +313,7 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
 
         {/* Load more */}
         {logsData?.hasMore && (
-          <div className="pt-4 border-t border-slate-800 mt-4">
+          <div className="pt-4 border-t border-white/10 mt-4">
             <GlowButton variant="ghost" size="sm" className="w-full">
               Load More
             </GlowButton>
@@ -290,29 +322,29 @@ export function TunnelDetailPage({ tunnelId }: TunnelDetailPageProps) {
       </div>
 
       {/* Connection Info */}
-      <div className="mt-6 p-4 rounded-xl bg-slate-800/30 border border-slate-800">
+      <div className="mt-6 p-4 bg-[#111] border border-white/10">
         <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="text-sm text-slate-400">
-            <span className="text-slate-500">Session ID:</span>{' '}
+          <div className="text-sm text-white/40">
+            <span className="text-white/60">Session ID:</span>{' '}
             <span className="font-mono">{tunnel.id}</span>
           </div>
-          <div className="text-sm text-slate-400">
-            <span className="text-slate-500">Connected:</span>{' '}
+          <div className="text-sm text-white/40">
+            <span className="text-white/60">Connected:</span>{' '}
             <span className="font-mono">
               {new Date(tunnel.connectedAt).toLocaleString()}
             </span>
           </div>
           {tunnel.disconnectedAt && (
-            <div className="text-sm text-slate-400">
-              <span className="text-slate-500">Disconnected:</span>{' '}
+            <div className="text-sm text-white/40">
+              <span className="text-white/60">Disconnected:</span>{' '}
               <span className="font-mono">
                 {new Date(tunnel.disconnectedAt).toLocaleString()}
               </span>
             </div>
           )}
           {tunnel.clientVersion && (
-            <div className="text-sm text-slate-400">
-              <span className="text-slate-500">CLI Version:</span>{' '}
+            <div className="text-sm text-white/40">
+              <span className="text-white/60">CLI Version:</span>{' '}
               <span className="font-mono">{tunnel.clientVersion}</span>
             </div>
           )}
@@ -330,10 +362,10 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="p-1 rounded hover:bg-slate-700 transition-colors"
+      className="p-1 hover:bg-white/10 transition-colors"
       title="Copy to clipboard"
     >
-      <CopyIcon className="w-3.5 h-3.5 text-slate-400" />
+      <CopyIcon className="w-3.5 h-3.5 text-white/40" />
     </button>
   );
 }
@@ -378,8 +410,8 @@ interface LogDetailPanelProps {
 function LogDetailPanel({ detail, isLoading }: LogDetailPanelProps) {
   if (isLoading) {
     return (
-      <div className="px-4 py-6 bg-slate-900/80 border-t border-slate-800">
-        <div className="text-sm text-slate-400">Loading details...</div>
+      <div className="px-4 py-6 bg-black/50 border-t border-white/10">
+        <div className="text-sm text-white/40">Loading details...</div>
       </div>
     );
   }
@@ -389,12 +421,12 @@ function LogDetailPanel({ detail, isLoading }: LogDetailPanelProps) {
   }
 
   return (
-    <div className="px-4 py-4 bg-slate-900/80 border-t border-slate-800 space-y-4">
+    <div className="px-4 py-4 bg-black/50 border-t border-white/10 space-y-4">
       {/* Truncation Warning */}
       {detail.bodyTruncated && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
-          <span className="text-amber-400 text-xs">⚠</span>
-          <span className="text-xs text-amber-400">
+        <div className="flex items-center gap-2 px-3 py-2 bg-[#ffb800]/10 border border-[#ffb800]/20">
+          <span className="text-[#ffb800] text-xs">!</span>
+          <span className="text-xs text-[#ffb800] font-mono uppercase tracking-wider">
             Body truncated (original:{' '}
             {detail.originalRequestSize
               ? `req ${Math.round(detail.originalRequestSize / 1024)}KB`
@@ -413,15 +445,15 @@ function LogDetailPanel({ detail, isLoading }: LogDetailPanelProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Request Panel */}
         <div className="space-y-3">
-          <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+          <h4 className="text-xs font-mono uppercase tracking-wider text-white/40">
             Request
           </h4>
 
           {/* Request Headers */}
           <div>
-            <div className="text-xs text-slate-500 mb-1">Headers</div>
-            <div className="bg-slate-950 rounded-lg p-3 max-h-48 overflow-auto">
-              <pre className="text-xs font-mono text-slate-300 whitespace-pre-wrap">
+            <div className="text-xs text-white/40 mb-1 font-mono uppercase tracking-wider">Headers</div>
+            <div className="bg-black p-3 max-h-48 overflow-auto border border-white/10">
+              <pre className="text-xs font-mono text-white/60 whitespace-pre-wrap">
                 {formatHeaders(detail.requestHeaders)}
               </pre>
             </div>
@@ -430,9 +462,9 @@ function LogDetailPanel({ detail, isLoading }: LogDetailPanelProps) {
           {/* Request Body */}
           {detail.requestBody && (
             <div>
-              <div className="text-xs text-slate-500 mb-1">Body</div>
-              <div className="bg-slate-950 rounded-lg p-3 max-h-64 overflow-auto">
-                <pre className="text-xs font-mono text-slate-300 whitespace-pre-wrap">
+              <div className="text-xs text-white/40 mb-1 font-mono uppercase tracking-wider">Body</div>
+              <div className="bg-black p-3 max-h-64 overflow-auto border border-white/10">
+                <pre className="text-xs font-mono text-white/60 whitespace-pre-wrap">
                   {formatBody(detail.requestBody, detail.requestHeaders['content-type'])}
                 </pre>
               </div>
@@ -442,16 +474,16 @@ function LogDetailPanel({ detail, isLoading }: LogDetailPanelProps) {
 
         {/* Response Panel */}
         <div className="space-y-3">
-          <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+          <h4 className="text-xs font-mono uppercase tracking-wider text-white/40">
             Response
           </h4>
 
           {/* Response Headers */}
           {detail.responseHeaders && (
             <div>
-              <div className="text-xs text-slate-500 mb-1">Headers</div>
-              <div className="bg-slate-950 rounded-lg p-3 max-h-48 overflow-auto">
-                <pre className="text-xs font-mono text-slate-300 whitespace-pre-wrap">
+              <div className="text-xs text-white/40 mb-1 font-mono uppercase tracking-wider">Headers</div>
+              <div className="bg-black p-3 max-h-48 overflow-auto border border-white/10">
+                <pre className="text-xs font-mono text-white/60 whitespace-pre-wrap">
                   {formatHeaders(detail.responseHeaders)}
                 </pre>
               </div>
@@ -461,9 +493,9 @@ function LogDetailPanel({ detail, isLoading }: LogDetailPanelProps) {
           {/* Response Body */}
           {detail.responseBody && (
             <div>
-              <div className="text-xs text-slate-500 mb-1">Body</div>
-              <div className="bg-slate-950 rounded-lg p-3 max-h-64 overflow-auto">
-                <pre className="text-xs font-mono text-slate-300 whitespace-pre-wrap">
+              <div className="text-xs text-white/40 mb-1 font-mono uppercase tracking-wider">Body</div>
+              <div className="bg-black p-3 max-h-64 overflow-auto border border-white/10">
+                <pre className="text-xs font-mono text-white/60 whitespace-pre-wrap">
                   {formatBody(
                     detail.responseBody,
                     detail.responseHeaders?.['content-type']
@@ -474,7 +506,7 @@ function LogDetailPanel({ detail, isLoading }: LogDetailPanelProps) {
           )}
 
           {!detail.responseHeaders && !detail.responseBody && (
-            <div className="text-xs text-slate-500 italic">No response recorded</div>
+            <div className="text-xs text-white/40 italic font-mono">No response recorded</div>
           )}
         </div>
       </div>

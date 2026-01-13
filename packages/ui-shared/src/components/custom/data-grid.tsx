@@ -8,16 +8,16 @@ import { cn } from '../../lib/utils';
 const dataGridVariants = cva(
   [
     'relative overflow-hidden',
-    'bg-slate-950',
-    'border rounded-lg',
+    'bg-[#0a0a0a]',
+    'border',
     'font-mono text-sm',
   ],
   {
     variants: {
       variant: {
-        default: 'border-white/[0.08]',
-        minimal: 'border-white/[0.08]',
-        slate: 'border-slate-700',
+        default: 'border-white/10',
+        minimal: 'border-white/5',
+        slate: 'border-white/10',
       },
     },
     defaultVariants: {
@@ -58,7 +58,7 @@ function LoadingRow({ colSpan }: { colSpan: number }) {
   return (
     <tr>
       <td colSpan={colSpan} className="px-4 py-8 text-center">
-        <div className="flex items-center justify-center gap-2 text-slate-400">
+        <div className="flex items-center justify-center gap-2 text-white/50">
           <svg
             className="animate-spin h-4 w-4"
             xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +79,7 @@ function LoadingRow({ colSpan }: { colSpan: number }) {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          Loading...
+          LOADING...
         </div>
       </td>
     </tr>
@@ -89,7 +89,7 @@ function LoadingRow({ colSpan }: { colSpan: number }) {
 function EmptyRow({ colSpan, message }: { colSpan: number; message: string }) {
   return (
     <tr>
-      <td colSpan={colSpan} className="px-4 py-8 text-center text-slate-400">
+      <td colSpan={colSpan} className="px-4 py-8 text-center text-white/40">
         {message}
       </td>
     </tr>
@@ -134,7 +134,7 @@ function DataRows<T>({
             <td
               key={String(column.key)}
               className={cn(
-                'px-4 py-3 text-slate-200',
+                'px-4 py-3 text-white/80',
                 column.align === 'center' && 'text-center',
                 column.align === 'right' && 'text-right'
               )}
@@ -157,7 +157,7 @@ function DataGridInner<T extends Record<string, unknown>>(
     columns,
     data,
     onRowClick,
-    emptyMessage = 'No data available',
+    emptyMessage = 'NO DATA AVAILABLE',
     loading = false,
     striped = true,
     hoverable = true,
@@ -167,25 +167,25 @@ function DataGridInner<T extends Record<string, unknown>>(
 ) {
   const variantColors: Record<string, VariantColors> = {
     default: {
-      header: 'bg-slate-900 text-slate-400',
-      border: 'border-white/[0.08]',
-      hover: 'hover:bg-slate-800',
-      stripe: 'bg-slate-900/50',
-      row: 'bg-slate-900/50',
+      header: 'bg-[#0f0f0f] text-white/50',
+      border: 'border-white/10',
+      hover: 'hover:bg-white/5',
+      stripe: 'bg-white/[0.02]',
+      row: 'bg-[#0a0a0a]',
     },
     minimal: {
-      header: 'bg-slate-900 text-slate-400',
-      border: 'border-white/[0.08]',
-      hover: 'hover:bg-slate-800',
-      stripe: 'bg-slate-900/50',
-      row: 'bg-slate-900/50',
+      header: 'bg-[#0a0a0a] text-white/40',
+      border: 'border-white/5',
+      hover: 'hover:bg-white/5',
+      stripe: 'bg-white/[0.02]',
+      row: 'bg-[#0a0a0a]',
     },
     slate: {
-      header: 'bg-slate-900 text-slate-400',
-      border: 'border-slate-700',
-      hover: 'hover:bg-slate-800',
-      stripe: 'bg-slate-900/50',
-      row: 'bg-slate-900/50',
+      header: 'bg-[#0f0f0f] text-white/50',
+      border: 'border-white/10',
+      hover: 'hover:bg-white/5',
+      stripe: 'bg-white/[0.02]',
+      row: 'bg-[#0a0a0a]',
     },
   };
 
@@ -237,7 +237,7 @@ function DataGridInner<T extends Record<string, unknown>>(
                 <th
                   key={String(column.key)}
                   className={cn(
-                    'px-4 py-3 text-xs font-medium uppercase tracking-wider',
+                    'px-4 py-3 text-xs font-medium uppercase tracking-[0.2em]',
                     column.align === 'center' && 'text-center',
                     column.align === 'right' && 'text-right',
                     !column.align && 'text-left'
@@ -271,11 +271,11 @@ export interface DataCellProps extends React.HTMLAttributes<HTMLDivElement> {
 const DataCell = React.forwardRef<HTMLDivElement, DataCellProps>(
   ({ className, label, value, variant = 'default', ...props }, ref) => {
     const variantStyles = {
-      default: 'text-slate-200',
-      success: 'text-teal-400',
-      warning: 'text-yellow-400',
-      danger: 'text-red-400',
-      info: 'text-teal-400',
+      default: 'text-white/80',
+      success: 'text-[#00ff00]',
+      warning: 'text-[#ffb800]',
+      danger: 'text-[#ff0000]',
+      info: 'text-white',
     };
 
     return (
@@ -285,7 +285,7 @@ const DataCell = React.forwardRef<HTMLDivElement, DataCellProps>(
         {...props}
       >
         {label && (
-          <span className="text-[10px] uppercase tracking-wider text-slate-400">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">
             {label}
           </span>
         )}

@@ -18,7 +18,7 @@ pub struct TicketPayload {
     /// User's subscription plan
     pub plan: String,
     /// Maximum number of concurrent tunnels allowed
-    pub max_tunnels: u8,
+    pub max_tunnels: u32,
     /// Reserved subdomain (None = random assignment)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub subdomain: Option<String>,

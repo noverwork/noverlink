@@ -2,6 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  EvaFlickerOverlay,
+  EvaGrainOverlay,
   GlowButton,
   InputGroup,
   InputGroupAddon,
@@ -156,12 +158,19 @@ function FormField({
 }) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-white">
+      <label
+        className="block text-xs text-white/60"
+        style={{
+          fontFamily: "'Helvetica Neue', Arial, sans-serif",
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+        }}
+      >
         {label}
-        {required && <span className="text-rose-400 ml-1">*</span>}
+        {required && <span className="text-[#ff0000] ml-1">*</span>}
       </label>
       {children}
-      {error && <p className="text-xs text-rose-400">{error}</p>}
+      {error && <p className="text-xs text-[#ff0000]">{error}</p>}
     </div>
   );
 }
@@ -198,7 +207,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-12 min-h-screen">
+    <div className="flex flex-col items-center justify-center px-6 py-12 min-h-screen bg-[#0a0a0a]">
+      {/* EVA Overlays */}
+      <EvaGrainOverlay />
+      <EvaFlickerOverlay />
+
       {/* Logo */}
       <div className="mb-10 flex flex-col items-center">
         <Link href="/" className="flex items-center gap-3 mb-3">
@@ -209,23 +222,55 @@ export default function LoginPage() {
             height={48}
             className="w-12 h-12"
           />
-          <span className="text-3xl font-bold text-white tracking-tight">
+          <span
+            className="text-3xl text-white"
+            style={{
+              fontFamily: "'Times New Roman', Georgia, serif",
+              fontWeight: 900,
+              transform: 'scaleY(0.75) scaleX(0.9)',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}
+          >
             Noverlink
           </span>
         </Link>
-        <p className="text-slate-400 text-sm">
+        <p
+          className="text-xs text-white/40"
+          style={{
+            fontFamily: "'Helvetica Neue', Arial, sans-serif",
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+          }}
+        >
           Secure tunnel management platform
         </p>
       </div>
 
       {/* Login Card */}
       <div className="w-full max-w-[420px]">
-        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-xl">
+        <div className="bg-[#111] backdrop-blur-xl border border-white/10 p-8 shadow-xl">
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-white mb-2">
+            <h1
+              className="text-2xl text-white mb-2"
+              style={{
+                fontFamily: "'Times New Roman', Georgia, serif",
+                fontWeight: 900,
+                transform: 'scaleY(0.75) scaleX(0.9)',
+                transformOrigin: 'left',
+                letterSpacing: '0.03em',
+                textTransform: 'uppercase',
+              }}
+            >
               Welcome back
             </h1>
-            <p className="text-slate-400">
+            <p
+              className="text-xs text-white/40"
+              style={{
+                fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                letterSpacing: '0.1em',
+              }}
+            >
               Sign in to your account to continue
             </p>
           </div>
@@ -277,21 +322,21 @@ export default function LoginPage() {
               <label className="flex items-center gap-2.5 cursor-pointer select-none">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-teal-500 focus:ring-teal-500 focus:ring-offset-0 focus:ring-offset-slate-900 cursor-pointer"
+                  className="w-4 h-4 border-white/20 bg-[#111] text-[#00ff00] focus:ring-[#00ff00] focus:ring-offset-0 focus:ring-offset-[#0a0a0a] cursor-pointer accent-[#00ff00]"
                   {...register('rememberMe')}
                 />
-                <span className="text-sm text-slate-300">Remember me</span>
+                <span className="font-mono uppercase tracking-wider text-xs text-white/60">Remember me</span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-teal-400 hover:text-teal-300 transition-colors font-medium"
+                className="font-mono uppercase tracking-wider text-xs text-[#00ff00] hover:text-[#00ff00]/80 transition-colors"
               >
                 Forgot password?
               </Link>
             </div>
 
             {loginMutation.error && (
-              <p className="text-sm text-rose-400 text-center">
+              <p className="text-sm text-[#ff0000] text-center">
                 {loginMutation.error.message}
               </p>
             )}
@@ -310,10 +355,10 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700/50" />
+              <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-slate-900 px-3 text-slate-500 tracking-wider">
+              <span className="bg-[#111] px-3 text-white/40 font-mono tracking-wider">
                 Or continue with
               </span>
             </div>
@@ -349,11 +394,11 @@ export default function LoginPage() {
         </div>
 
         {/* Sign up link */}
-        <p className="mt-8 text-center text-sm text-slate-400">
+        <p className="mt-8 text-center font-mono uppercase tracking-wider text-xs text-white/40">
           Don&apos;t have an account?{' '}
           <Link
             href="/register"
-            className="text-teal-400 hover:text-teal-300 transition-colors font-medium"
+            className="text-[#00ff00] hover:text-[#00ff00]/80 transition-colors"
           >
             Sign up for free
           </Link>
