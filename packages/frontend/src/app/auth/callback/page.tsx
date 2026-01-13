@@ -1,5 +1,6 @@
 'use client';
 
+import { EvaFlickerOverlay, EvaGrainOverlay } from '@noverlink/ui-shared';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
 
@@ -28,24 +29,38 @@ function CallbackHandler() {
   }, [searchParams, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
-      <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      <p className="mt-4 text-slate-400">Completing sign in...</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a]">
+      <div className="w-8 h-8 border-2 border-[#00ff00] border-t-transparent rounded-full animate-spin" />
+      <p
+        className="mt-4 text-white/40 uppercase tracking-wider text-xs"
+        style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
+      >
+        Completing sign in...
+      </p>
     </div>
   );
 }
 
 export default function OAuthCallbackPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
-          <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-          <p className="mt-4 text-slate-400">Loading...</p>
-        </div>
-      }
-    >
-      <CallbackHandler />
-    </Suspense>
+    <>
+      <EvaGrainOverlay />
+      <EvaFlickerOverlay />
+      <Suspense
+        fallback={
+          <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a]">
+            <div className="w-8 h-8 border-2 border-[#00ff00] border-t-transparent rounded-full animate-spin" />
+            <p
+              className="mt-4 text-white/40 uppercase tracking-wider text-xs"
+              style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
+            >
+              Loading...
+            </p>
+          </div>
+        }
+      >
+        <CallbackHandler />
+      </Suspense>
+    </>
   );
 }
