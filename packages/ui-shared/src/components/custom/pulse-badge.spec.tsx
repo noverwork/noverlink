@@ -12,31 +12,37 @@ describe('PulseBadge', () => {
   it('should apply connected variant by default', () => {
     render(<PulseBadge>Status</PulseBadge>);
     const badge = screen.getByText('Status').closest('span');
-    expect(badge?.className).toContain('text-teal-400');
+    expect(badge?.className).toContain('text-[#00ff00]');
   });
 
   it('should apply disconnected variant', () => {
     render(<PulseBadge variant="disconnected">Offline</PulseBadge>);
     const badge = screen.getByText('Offline').closest('span');
-    expect(badge?.className).toContain('text-rose-400');
+    expect(badge?.className).toContain('text-[#ff0000]');
   });
 
   it('should apply warning variant', () => {
     render(<PulseBadge variant="warning">Warning</PulseBadge>);
     const badge = screen.getByText('Warning').closest('span');
-    expect(badge?.className).toContain('text-amber-400');
-  });
-
-  it('should apply info variant', () => {
-    render(<PulseBadge variant="info">Info</PulseBadge>);
-    const badge = screen.getByText('Info').closest('span');
-    expect(badge?.className).toContain('text-cyan-400');
+    expect(badge?.className).toContain('text-[#ffb800]');
   });
 
   it('should apply processing variant', () => {
     render(<PulseBadge variant="processing">Processing</PulseBadge>);
     const badge = screen.getByText('Processing').closest('span');
-    expect(badge?.className).toContain('text-purple-400');
+    expect(badge?.className).toContain('text-[#ffb800]');
+  });
+
+  it('should apply info variant', () => {
+    render(<PulseBadge variant="info">Info</PulseBadge>);
+    const badge = screen.getByText('Info').closest('span');
+    expect(badge?.className).toContain('text-white/80');
+  });
+
+  it('should apply neutral variant', () => {
+    render(<PulseBadge variant="neutral">Neutral</PulseBadge>);
+    const badge = screen.getByText('Neutral').closest('span');
+    expect(badge?.className).toContain('text-white/50');
   });
 
   it('should show pulsing dot by default', () => {
@@ -54,8 +60,9 @@ describe('PulseBadge', () => {
   it('should apply pill appearance', () => {
     render(<PulseBadge appearance="pill">Pill</PulseBadge>);
     const badge = screen.getByText('Pill').closest('span');
-    expect(badge?.className).toContain('rounded-full');
-    expect(badge?.className).toContain('bg-slate-900');
+    expect(badge?.className).toContain('px-3');
+    expect(badge?.className).toContain('py-1');
+    expect(badge?.className).toContain('bg-[#0a0a0a]');
   });
 
   it('should apply tag appearance', () => {
@@ -85,27 +92,27 @@ describe('PulseBadge', () => {
 describe('StatusIndicator', () => {
   it('should show connected status', () => {
     render(<StatusIndicator status="connected" />);
-    expect(screen.getByText('Connected')).toBeTruthy();
+    expect(screen.getByText('CONNECTED')).toBeTruthy();
   });
 
   it('should show disconnected status', () => {
     render(<StatusIndicator status="disconnected" />);
-    expect(screen.getByText('Disconnected')).toBeTruthy();
+    expect(screen.getByText('DISCONNECTED')).toBeTruthy();
   });
 
   it('should show idle status', () => {
     render(<StatusIndicator status="idle" />);
-    expect(screen.getByText('Idle')).toBeTruthy();
+    expect(screen.getByText('IDLE')).toBeTruthy();
   });
 
   it('should show busy status', () => {
     render(<StatusIndicator status="busy" />);
-    expect(screen.getByText('Busy')).toBeTruthy();
+    expect(screen.getByText('BUSY')).toBeTruthy();
   });
 
   it('should hide label when showLabel is false', () => {
     render(<StatusIndicator status="connected" showLabel={false} />);
-    expect(screen.queryByText('Connected')).toBeFalsy();
+    expect(screen.queryByText('CONNECTED')).toBeFalsy();
   });
 
   it('should pulse for connected status', () => {
@@ -122,12 +129,12 @@ describe('StatusIndicator', () => {
 describe('ConnectionBadge', () => {
   it('should show Connected when connected', () => {
     render(<ConnectionBadge connected={true} />);
-    expect(screen.getByText('Connected')).toBeTruthy();
+    expect(screen.getByText('CONNECTED')).toBeTruthy();
   });
 
   it('should show Disconnected when not connected', () => {
     render(<ConnectionBadge connected={false} />);
-    expect(screen.getByText('Disconnected')).toBeTruthy();
+    expect(screen.getByText('DISCONNECTED')).toBeTruthy();
   });
 
   it('should show latency when connected and showLatency is true', () => {
@@ -145,21 +152,21 @@ describe('ConnectionBadge', () => {
     expect(screen.queryByText('50ms')).toBeFalsy();
   });
 
-  it('should apply teal color for low latency', () => {
+  it('should apply green color for low latency', () => {
     render(<ConnectionBadge connected={true} latency={30} />);
     const latencyElement = screen.getByText('30ms');
-    expect(latencyElement.className).toContain('text-teal-400');
+    expect(latencyElement.className).toContain('text-[#00ff00]');
   });
 
   it('should apply amber color for medium latency', () => {
     render(<ConnectionBadge connected={true} latency={100} />);
     const latencyElement = screen.getByText('100ms');
-    expect(latencyElement.className).toContain('text-amber-400');
+    expect(latencyElement.className).toContain('text-[#ffb800]');
   });
 
-  it('should apply rose color for high latency', () => {
+  it('should apply red color for high latency', () => {
     render(<ConnectionBadge connected={true} latency={200} />);
     const latencyElement = screen.getByText('200ms');
-    expect(latencyElement.className).toContain('text-rose-400');
+    expect(latencyElement.className).toContain('text-[#ff0000]');
   });
 });

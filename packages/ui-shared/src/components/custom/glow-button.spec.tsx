@@ -21,19 +21,34 @@ describe('GlowButton', () => {
   it('should apply primary variant by default', () => {
     render(<GlowButton>Primary</GlowButton>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('bg-teal-500');
+    expect(button.className).toContain('bg-white');
+    expect(button.className).toContain('text-[#0a0a0a]');
   });
 
   it('should apply secondary variant', () => {
     render(<GlowButton variant="secondary">Secondary</GlowButton>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('border-slate-700');
+    expect(button.className).toContain('border-white/20');
   });
 
   it('should apply ghost variant', () => {
     render(<GlowButton variant="ghost">Ghost</GlowButton>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('text-slate-400');
+    expect(button.className).toContain('text-white/60');
+  });
+
+  it('should apply danger variant', () => {
+    render(<GlowButton variant="danger">Danger</GlowButton>);
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('border-[#ff0000]/50');
+    expect(button.className).toContain('text-[#ff0000]');
+  });
+
+  it('should apply success variant', () => {
+    render(<GlowButton variant="success">Success</GlowButton>);
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('border-[#00ff00]/50');
+    expect(button.className).toContain('text-[#00ff00]');
   });
 
   it('should be disabled when disabled prop is true', () => {
@@ -48,7 +63,7 @@ describe('GlowButton', () => {
 
   it('should show loading state', () => {
     render(<GlowButton loading>Submit</GlowButton>);
-    expect(screen.getByText('Processing...')).toBeTruthy();
+    expect(screen.getByText('PROCESSING...')).toBeTruthy();
   });
 
   it('should apply size variants', () => {

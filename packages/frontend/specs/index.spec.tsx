@@ -24,12 +24,12 @@ describe('Landing Page', () => {
 
   it('should display the Noverlink brand', () => {
     render(<Page />);
-    expect(screen.getByText('Noverlink')).toBeTruthy();
+    expect(screen.getByText('NOVERLINK')).toBeTruthy();
   });
 
   it('should have a hero section with main heading', () => {
     render(<Page />);
-    expect(screen.getByText('Expose localhost to the world')).toBeTruthy();
+    expect(screen.getByText('EXPOSE LOCALHOST TO THE WORLD')).toBeTruthy();
   });
 
   it('should have a login link in the header', () => {
@@ -41,25 +41,25 @@ describe('Landing Page', () => {
   it('should display the tunnel demonstration', () => {
     render(<Page />);
     expect(screen.getByText('$ noverlink http 3000')).toBeTruthy();
-    expect(screen.getByText('✓ Tunnel established')).toBeTruthy();
+    expect(screen.getByText('OK TUNNEL ESTABLISHED')).toBeTruthy();
   });
 
   it('should display feature cards', () => {
     render(<Page />);
-    expect(screen.getByText('Open Source')).toBeTruthy();
-    expect(screen.getByText('High Performance')).toBeTruthy();
-    expect(screen.getByText('Secure by Default')).toBeTruthy();
-    expect(screen.getByText('Custom Subdomains')).toBeTruthy();
-    expect(screen.getByText('Request Inspector')).toBeTruthy();
-    expect(screen.getByText('Real-time Dashboard')).toBeTruthy();
+    expect(screen.getByText('OPEN SOURCE')).toBeTruthy();
+    expect(screen.getByText('HIGH PERFORMANCE')).toBeTruthy();
+    expect(screen.getByText('SECURE BY DEFAULT')).toBeTruthy();
+    expect(screen.getByText('CUSTOM SUBDOMAINS')).toBeTruthy();
+    expect(screen.getByText('REQUEST INSPECTOR')).toBeTruthy();
+    expect(screen.getByText('REAL-TIME DASHBOARD')).toBeTruthy();
   });
 
   it('should display pricing plans', () => {
     render(<Page />);
-    expect(screen.getByText('Self-Hosted')).toBeTruthy();
-    expect(screen.getByText('Sandbox')).toBeTruthy();
-    expect(screen.getByText('Starter')).toBeTruthy();
-    expect(screen.getByText('Pro')).toBeTruthy();
+    expect(screen.getByText('SELF-HOSTED')).toBeTruthy();
+    expect(screen.getByText('SANDBOX')).toBeTruthy();
+    expect(screen.getByText('STARTER')).toBeTruthy();
+    expect(screen.getByText('PRO')).toBeTruthy();
   });
 
   it('should display pricing amounts', () => {
@@ -71,7 +71,7 @@ describe('Landing Page', () => {
 
   it('should have footer with copyright', () => {
     render(<Page />);
-    expect(screen.getByText(/© 2024 Noverlink/)).toBeTruthy();
+    expect(screen.getByText(/2024 NOVERLINK\. ALL RIGHTS RESERVED\./)).toBeTruthy();
   });
 
   it('should have footer links', () => {
@@ -83,7 +83,7 @@ describe('Landing Page', () => {
 
   it('should have CTA section', () => {
     render(<Page />);
-    expect(screen.getByText('Ready to get started?')).toBeTruthy();
+    expect(screen.getByText('READY TO GET STARTED?')).toBeTruthy();
     expect(screen.getAllByText('Try the Sandbox').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Self-Host (Free)').length).toBeGreaterThan(0);
   });
