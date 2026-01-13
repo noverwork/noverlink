@@ -1,6 +1,9 @@
 'use client';
 
-import { GridBackground } from '@noverlink/ui-shared';
+import {
+  EvaFlickerOverlay,
+  EvaGrainOverlay,
+} from '@noverlink/ui-shared';
 
 export default function AuthLayout({
   children,
@@ -8,13 +11,14 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen bg-slate-950 flex items-center justify-center">
-      {/* Background effects */}
-      <GridBackground className="opacity-30" />
+    <div className="relative min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      {/* EVA Overlays */}
+      <EvaGrainOverlay />
+      <EvaFlickerOverlay />
 
-      {/* Gradient orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+      {/* Subtle ambient glow */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#00ff00]/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#00ff00]/3 rounded-full blur-3xl" />
 
       {/* Content */}
       <div className="relative z-10 w-full">
