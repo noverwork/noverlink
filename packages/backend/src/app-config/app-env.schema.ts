@@ -105,4 +105,12 @@ export class AppEnvSchema {
   @IsString()
   @MinLength(16)
   [EnvField.PolarWebhookSecret]?: string;
+
+  @IsOptional()
+  @IsString()
+  [EnvField.PolarStarterProductId]?: string;
+
+  @IsOptional()
+  @IsString()
+  [EnvField.PolarProProductId]?: string;
 }

@@ -7,6 +7,8 @@ import {
   SegmentedProgress,
 } from '@noverlink/ui-shared';
 
+import { useProfile } from '@/lib/hooks/use-auth';
+
 import { DashboardLayout } from '../dashboard-layout';
 
 interface Plan {
@@ -27,6 +29,8 @@ const POLAR_PRODUCTS = {
 };
 
 export function BillingsPage() {
+  const { data: profile } = useProfile();
+
   const plans: Plan[] = [
     {
       name: 'Sandbox',
@@ -198,7 +202,7 @@ export function BillingsPage() {
       {/* Pricing Plans */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
         {plans.map((plan) => (
-          <PlanCard key={plan.name} plan={plan} />
+          <PlanCard key={plan.name} plan={plan} email={profile?.email} />
         ))}
       </div>
 
@@ -235,7 +239,7 @@ export function BillingsPage() {
   );
 }
 
-function PlanCard({ plan }: { plan: Plan }) {
+function PlanCard({ plan, email }: { plan: Plan; email?: string }) {
   const getBorderClass = () => {
     if (plan.popular) return 'border-[#00ff00]/50';
     if (plan.current) return 'border-[#00ff00]/30';
@@ -324,12 +328,12 @@ function PlanCard({ plan }: { plan: Plan }) {
       </ul>
 
       {/* CTA Button */}
-      <PlanCtaButton plan={plan} />
+      <PlanCtaButton plan={plan} email={email} />
     </div>
   );
 }
 
-function PlanCtaButton({ plan }: { plan: Plan }) {
+function PlanCtaButton({ plan, email }: { plan: Plan; email?: string }) {
   if (plan.current) {
     return (
       <GlowButton variant="secondary" className="w-full" disabled>
@@ -338,12 +342,17 @@ function PlanCtaButton({ plan }: { plan: Plan }) {
     );
   }
 
-  const checkoutUrl = plan.productId
-    ? `/api/checkout?products=${plan.productId}`
-    : '#';
+  const buildCheckoutUrl = () => {
+    if (!plan.productId) return '#';
+    const params = new URLSearchParams({ products: plan.productId });
+    if (email) {
+      params.set('customerEmail', email);
+    }
+    return `/api/checkout?${params.toString()}`;
+  };
 
   const handleClick = () => {
-    window.location.href = checkoutUrl;
+    window.location.href = buildCheckoutUrl();
   };
 
   return (

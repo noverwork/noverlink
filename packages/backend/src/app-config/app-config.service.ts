@@ -93,6 +93,10 @@ export class AppConfigService {
       webhookSecret: this.configService.getOrThrow<string>(
         EnvField.PolarWebhookSecret
       ),
+      starterProductId: this.configService.get<string>(
+        EnvField.PolarStarterProductId
+      ),
+      proProductId: this.configService.get<string>(EnvField.PolarProProductId),
     };
   }
 }

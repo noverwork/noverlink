@@ -9,6 +9,7 @@ import {
   User,
 } from '@noverlink/backend-shared';
 
+import { AppConfigService } from '../app-config';
 import type {
   SubscriptionActiveDto,
   SubscriptionCanceledDto,
@@ -19,7 +20,10 @@ import type {
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
 
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly configService: AppConfigService
+  ) {}
 
   async syncCheckout(dto: SyncCheckoutDto): Promise<void> {
     this.logger.log(`Syncing checkout for ${dto.customerEmail}`);
@@ -119,17 +123,18 @@ export class BillingService {
    * Returns the plan ID string (e.g., 'sandbox', 'starter', 'pro')
    */
   private getPlanIdFromProductId(productId: string): string {
-    // Map Polar product IDs to plans
-    // You'll need to update these with your actual product IDs
-    if (productId.includes('starter') || productId.includes('hobby')) {
+    const { starterProductId, proProductId } = this.configService.polar;
+
+    if (starterProductId && productId === starterProductId) {
       return 'starter';
     }
-    if (productId.includes('pro')) {
+    if (proProductId && productId === proProductId) {
       return 'pro';
     }
-    if (productId.includes('enterprise')) {
-      return 'enterprise';
-    }
+
+    this.logger.warn(
+      `Unknown product ID: ${productId}. Configured: starter=${starterProductId}, pro=${proProductId}`
+    );
     return DEFAULT_PLAN_ID;
   }
 }
