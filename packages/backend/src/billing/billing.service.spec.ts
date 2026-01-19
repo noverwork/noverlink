@@ -10,6 +10,7 @@ import {
   User,
 } from '@noverlink/backend-shared';
 
+import { AppConfigService } from '../app-config';
 import { BillingService } from './billing.service';
 
 describe('BillingService', () => {
@@ -45,7 +46,19 @@ describe('BillingService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BillingService, { provide: EntityManager, useValue: mockEm }],
+      providers: [
+        BillingService,
+        { provide: EntityManager, useValue: mockEm },
+        {
+          provide: AppConfigService,
+          useValue: {
+            polar: {
+              starterProductId: 'noverlink-starter-plan',
+              proProductId: 'noverlink-pro-plan',
+            },
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<BillingService>(BillingService);
@@ -68,7 +81,7 @@ describe('BillingService', () => {
 
       await service.syncCheckout({
         customerEmail: 'test@example.com',
-        productId: 'prod_starter_monthly',
+        productId: 'noverlink-starter-plan',
         subscriptionId: 'sub_123',
         customerId: 'cus_456',
       });
@@ -81,7 +94,7 @@ describe('BillingService', () => {
         expect.objectContaining({
           polarSubscriptionId: 'sub_123',
           polarCustomerId: 'cus_456',
-          polarProductId: 'prod_starter_monthly',
+          polarProductId: 'noverlink-starter-plan',
           status: SubscriptionStatus.ACTIVE,
         })
       );
@@ -94,7 +107,7 @@ describe('BillingService', () => {
 
       await service.syncCheckout({
         customerEmail: 'unknown@example.com',
-        productId: 'prod_starter',
+        productId: 'noverlink-starter-plan',
       });
 
       expect(em.create).not.toHaveBeenCalled();
@@ -112,7 +125,7 @@ describe('BillingService', () => {
 
       await service.syncCheckout({
         customerEmail: 'test@example.com',
-        productId: 'prod_pro',
+        productId: 'noverlink-pro-plan',
         subscriptionId: 'sub_123',
       });
 
@@ -120,7 +133,7 @@ describe('BillingService', () => {
       expect(em.flush).toHaveBeenCalled();
     });
 
-    it('should map starter/hobby product to starter plan', async () => {
+    it('should map starter product to starter plan', async () => {
       const user = { ...mockUser, plan: ref(mockPlan) };
       em.findOne.mockImplementation(async (entity) => {
         if (entity === User) return user;
@@ -129,7 +142,7 @@ describe('BillingService', () => {
 
       await service.syncCheckout({
         customerEmail: 'test@example.com',
-        productId: 'noverlink-hobby-plan',
+        productId: 'noverlink-starter-plan',
       });
 
       expect(em.getReference).toHaveBeenCalledWith(Plan, 'starter');
@@ -150,7 +163,7 @@ describe('BillingService', () => {
       expect(em.getReference).toHaveBeenCalledWith(Plan, 'pro');
     });
 
-    it('should map enterprise product to enterprise plan', async () => {
+    it('should default to sandbox plan for unknown enterprise product', async () => {
       const user = { ...mockUser, plan: ref(mockPlan) };
       em.findOne.mockImplementation(async (entity) => {
         if (entity === User) return user;
@@ -162,7 +175,7 @@ describe('BillingService', () => {
         productId: 'noverlink-enterprise-plan',
       });
 
-      expect(em.getReference).toHaveBeenCalledWith(Plan, 'enterprise');
+      expect(em.getReference).toHaveBeenCalledWith(Plan, DEFAULT_PLAN_ID);
     });
 
     it('should default to sandbox plan for unknown product', async () => {
@@ -193,7 +206,7 @@ describe('BillingService', () => {
       await service.handleSubscriptionActive({
         subscriptionId: 'sub_123',
         customerId: 'cus_123',
-        productId: 'prod_pro_monthly',
+        productId: 'noverlink-pro-plan',
         status: 'active',
         currentPeriodEnd: '2025-12-31T23:59:59Z',
       });
@@ -215,7 +228,7 @@ describe('BillingService', () => {
       await service.handleSubscriptionActive({
         subscriptionId: 'sub_123',
         customerId: 'cus_123',
-        productId: 'prod_starter',
+        productId: 'noverlink-starter-plan',
         status: 'active',
         currentPeriodEnd: '2025-06-15T12:00:00Z',
       });
@@ -231,7 +244,7 @@ describe('BillingService', () => {
       await service.handleSubscriptionActive({
         subscriptionId: 'sub_unknown',
         customerId: 'cus_unknown',
-        productId: 'prod_pro',
+        productId: 'noverlink-pro-plan',
         status: 'active',
       });
 
