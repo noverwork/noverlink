@@ -2,31 +2,6 @@
   "name": "@truley-interview/frontend",
   "version": "0.0.1",
   "private": true,
-  "nx": {
-    "targets": {
-      "serve": {
-        "executor": "@nx/next:server",
-        "defaultConfiguration": "development",
-        "options": {
-          "buildTarget": "@truley-interview/frontend:build",
-          "dev": true,
-          "port": 4200
-        },
-        "configurations": {
-          "development": {
-            "buildTarget": "@truley-interview/frontend:build",
-            "dev": true,
-            "port": 4200
-          },
-          "production": {
-            "buildTarget": "@truley-interview/frontend:build",
-            "dev": false,
-            "port": 4200
-          }
-        }
-      }
-    }
-  },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
@@ -34,6 +9,7 @@
     "@truley-interview/interfaces": "*",
     "@truley-interview/shared": "*",
     "clsx": "^2.1.1",
+    "react-router-dom": "^7.9.3",
     "tailwind-merge": "^3.3.1"
   }
 }

@@ -1,14 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/jest",
-    "jsx": "preserve",
-    "types": ["jest", "node"],
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "node", "vite/client"],
     "module": "esnext",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
-    "jest.config.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.tsx",
@@ -17,11 +19,12 @@
     "src/**/*.spec.js",
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "vite.config.ts"
   ],
   "references": [
     {
-      "path": "./tsconfig.json"
+      "path": "./tsconfig.app.json"
     }
   ]
 }
