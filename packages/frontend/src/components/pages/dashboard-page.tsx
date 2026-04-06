@@ -7,7 +7,7 @@ import {
   PulseBadge,
   TunnelCard,
   TunnelConnection,
-} from '@noverlink/ui-shared';
+} from '@truley-interview/ui-shared';
 import Link from 'next/link';
 
 import { useSessionLogs, useSessions, useStats } from '../../lib/hooks';
@@ -184,7 +184,7 @@ export function DashboardPage() {
                   Start another tunnel
                 </div>
                 <code className="text-xs text-white/40 font-mono">
-                  noverlink http 8080
+                  truley-interview http 8080
                 </code>
               </div>
             </div>
@@ -200,7 +200,7 @@ export function DashboardPage() {
                 localLabel="localhost"
                 localSublabel=":3000"
                 publicLabel="your-tunnel"
-                publicSublabel=".noverlink.com"
+                publicSublabel=".truley-interview.com"
                 status="disconnected"
                 animated={false}
               />
@@ -244,12 +244,12 @@ export function DashboardPage() {
                 Terminal
               </div>
               <code className="text-sm text-[#00ff00] font-mono">
-                $ noverlink http 3000
+                $ truley-interview http 3000
               </code>
             </div>
 
             <a
-              href="https://github.com/noverwork/noverlink"
+              href="https://github.com/noverwork/truley-interview"
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -1,23 +1,5 @@
-import {
-  Domain,
-  HttpRequest,
-  OAuthConnection,
-  RelayServer,
-  Subscription,
-  TunnelSession,
-  UsageQuota,
-  User,
-} from './entities';
+import { Domain, OAuthConnection, User } from './entities';
 
 export * from './entities';
 
-export const ENTITIES = [
-  User,
-  Domain,
-  TunnelSession,
-  HttpRequest,
-  UsageQuota,
-  OAuthConnection,
-  Subscription,
-  RelayServer,
-];
+export const ENTITIES = [User, Domain, OAuthConnection];

@@ -1,4 +1,4 @@
-import { EvaFlickerOverlay, EvaGrainOverlay } from '@noverlink/ui-shared';
+import { EvaFlickerOverlay, EvaGrainOverlay } from '@truley-interview/ui-shared';
 import Link from 'next/link';
 
 export default function TermsOfUsePage() {
@@ -51,7 +51,7 @@ export default function TermsOfUsePage() {
                   letterSpacing: '0.02em',
                 }}
               >
-                Hosted Service (noverlink.com)
+                Hosted Service (truley-interview.com)
               </h2>
 
               <div className="space-y-6">
@@ -60,7 +60,7 @@ export default function TermsOfUsePage() {
                     Service Agreement
                   </h3>
                   <p>
-                    By using the hosted service at noverlink.com, you agree to
+                    By using the hosted service at truley-interview.com, you agree to
                     these terms. We provide tunnel services on a subscription
                     basis with different plans (Sandbox, Starter, Pro).
                   </p>
@@ -147,7 +147,7 @@ export default function TermsOfUsePage() {
                     License
                   </h3>
                   <p>
-                    Noverlink is free and open source software licensed under the{' '}
+                    Truley Interview is free and open source software licensed under the{' '}
                     <a
                       href="https://www.gnu.org/licenses/agpl-3.0.en.html"
                       target="_blank"
@@ -192,7 +192,7 @@ export default function TermsOfUsePage() {
               <p>
                 Questions? Open an issue on{' '}
                 <a
-                  href="https://github.com/noverwork/noverlink"
+                  href="https://github.com/noverwork/truley-interview"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#00ff00] hover:text-[#00cc00] underline"

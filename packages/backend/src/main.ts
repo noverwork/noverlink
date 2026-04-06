@@ -63,7 +63,7 @@ async function bootstrap() {
 
   await app.listen(port, host);
 
-  Logger.log(`🚀 Noverlink Backend running on: http://${host}:${port}`);
+  Logger.log(`🚀 Truley Interview Backend running on: http://${host}:${port}`);
   Logger.log(`📝 Environment: ${isProduction ? 'production' : 'development'}`);
 }
 

@@ -3,7 +3,7 @@
 import {
   EvaFlickerOverlay,
   EvaGrainOverlay,
-} from '@noverlink/ui-shared';
+} from '@truley-interview/ui-shared';
 
 export default function AuthLayout({
   children,

@@ -20,12 +20,4 @@ export enum EnvField {
   GithubCallbackUrl = 'GITHUB_CALLBACK_URL',
   // Frontend URL for OAuth redirects
   FrontendUrl = 'FRONTEND_URL',
-  // Tunnel/Relay
-  TicketSecret = 'TICKET_SECRET',
-  RelayUrl = 'RELAY_URL',
-  RelaySecret = 'RELAY_SECRET',
-  // Polar.sh
-  PolarWebhookSecret = 'POLAR_WEBHOOK_SECRET',
-  PolarStarterProductId = 'POLAR_STARTER_PRODUCT_ID',
-  PolarProProductId = 'POLAR_PRO_PRODUCT_ID',
 }

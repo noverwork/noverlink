@@ -105,7 +105,7 @@ function Masthead() {
           letterSpacing: '-0.02em',
         }}
       >
-        THE NOVERLINK DAILY
+        THE TRULEY-INTERVIEW DAILY
       </h1>
 
       {/* Subtitle */}
@@ -721,7 +721,7 @@ function NewspaperFooter() {
         className="text-xs mt-6"
         style={{ fontFamily: 'Georgia, serif', color: colors.inkMuted }}
       >
-        Copyright MMXXIV The Noverlink Daily. All Rights Reserved.
+        Copyright MMXXIV The Truley Interview Daily. All Rights Reserved.
       </p>
     </footer>
   );
@@ -760,7 +760,7 @@ export default function NewspaperPrototypePage() {
               subheadline="Revolutionary tunneling technology bridges the gap between development and deployment"
               byline="STAFF CORRESPONDENT"
               date={formatDate(new Date())}
-              content="In a development that promises to transform the landscape of local development, Noverlink has successfully established a secure tunnel connecting localhost to the global internet. The achievement, hailed by developers worldwide, represents a significant milestone in the ongoing effort to streamline the development workflow."
+              content="In a development that promises to transform the landscape of local development, Truley Interview has successfully established a secure tunnel connecting localhost to the global internet. The achievement, hailed by developers worldwide, represents a significant milestone in the ongoing effort to streamline the development workflow."
               imageCaption="An artist's rendition of data packets traversing the secure tunnel infrastructure"
             />
 
@@ -776,7 +776,7 @@ export default function NewspaperPrototypePage() {
                 <ArticleCard
                   category="INFRASTRUCTURE"
                   headline="Relay Servers Report Record Uptime"
-                  summary="The backbone of the Noverlink network continues its streak of 99.9% availability, officials report with satisfaction."
+                  summary="The backbone of the Truley Interview network continues its streak of 99.9% availability, officials report with satisfaction."
                   byline="Tech Desk"
                 />
                 <ArticleCard
@@ -794,7 +794,7 @@ export default function NewspaperPrototypePage() {
                 <ArticleCard
                   category="COMMUNITY"
                   headline="Developer Survey Shows High Satisfaction"
-                  summary="Nine in ten users report improved productivity after adopting Noverlink for their webhook testing needs."
+                  summary="Nine in ten users report improved productivity after adopting Truley Interview for their webhook testing needs."
                   byline="Community Editor"
                 />
               </div>
@@ -808,7 +808,7 @@ export default function NewspaperPrototypePage() {
                   name="api-gateway"
                   status="online"
                   localPort={3000}
-                  publicUrl="api.noverlink.com"
+                  publicUrl="api.truley-interview.com"
                   requests="12.4k"
                   latency="23ms"
                 />
@@ -816,7 +816,7 @@ export default function NewspaperPrototypePage() {
                   name="web-server"
                   status="online"
                   localPort={8080}
-                  publicUrl="app.noverlink.com"
+                  publicUrl="app.truley-interview.com"
                   requests="8.2k"
                   latency="31ms"
                 />
@@ -870,18 +870,18 @@ export default function NewspaperPrototypePage() {
               <SectionHeader>NOTICES & CLASSIFIEDS</SectionHeader>
               <ClassifiedAd
                 title="WEBHOOK TESTING"
-                content="Need to test webhooks locally? Noverlink provides instant public URLs. No signup required for basic usage."
-                contact="Visit noverlink.com"
+                content="Need to test webhooks locally? Truley Interview provides instant public URLs. No signup required for basic usage."
+                contact="Visit truley-interview.com"
               />
               <ClassifiedAd
                 title="CUSTOM DOMAINS"
                 content="Premium subscribers enjoy custom subdomain support. Make your tunnels professional and memorable."
-                contact="Upgrade at noverlink.com/pricing"
+                contact="Upgrade at truley-interview.com/pricing"
               />
               <ClassifiedAd
                 title="CLI AVAILABLE"
-                content="Command-line enthusiasts rejoice! The noverlink CLI tool supports all major platforms. Rust-powered for speed."
-                contact="cargo install noverlink"
+                content="Command-line enthusiasts rejoice! The truley-interview CLI tool supports all major platforms. Rust-powered for speed."
+                contact="cargo install truley-interview"
               />
               <ClassifiedAd
                 title="HELP WANTED"

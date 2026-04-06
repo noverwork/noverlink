@@ -1,6 +1,6 @@
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
-import { Plan } from '@noverlink/backend-shared';
+import { Plan } from '@truley-interview/backend-shared';
 
 // Domain configuration (required)
 const FREE_DOMAIN = process.env.FREE_DOMAIN;

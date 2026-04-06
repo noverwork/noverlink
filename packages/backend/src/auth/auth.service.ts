@@ -15,7 +15,7 @@ import {
   OAuthProvider,
   Plan,
   User,
-} from '@noverlink/backend-shared';
+} from '@truley-interview/backend-shared';
 import * as argon2 from 'argon2';
 
 import { AppConfigService } from '../app-config';

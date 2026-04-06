@@ -794,7 +794,7 @@ export default function ClaymationPrototypePage() {
                   textShadow: `3px 3px 0 ${colors.pinkLight}`,
                 }}
               >
-                NOVERLINK
+                TRULEY-INTERVIEW
               </h1>
               <p
                 className="text-sm font-medium"
@@ -922,7 +922,7 @@ export default function ClaymationPrototypePage() {
               name="api-gateway"
               status="connected"
               localPort={3000}
-              publicUrl="api.noverlink.com"
+              publicUrl="api.truley-interview.com"
               requests="12.4k"
               latency="23ms"
             />
@@ -930,7 +930,7 @@ export default function ClaymationPrototypePage() {
               name="web-server"
               status="connected"
               localPort={8080}
-              publicUrl="app.noverlink.com"
+              publicUrl="app.truley-interview.com"
               requests="8.2k"
               latency="31ms"
             />
@@ -1066,11 +1066,11 @@ export default function ClaymationPrototypePage() {
                 color: colors.mint,
               }}
             >
-              <pre>{`$ noverlink http 3000
+              <pre>{`$ truley-interview http 3000
 
   Tunnel created successfully!
 
-  Public URL: https://api.noverlink.com
+  Public URL: https://api.truley-interview.com
   Local:      http://localhost:3000
 
   Status: Connected

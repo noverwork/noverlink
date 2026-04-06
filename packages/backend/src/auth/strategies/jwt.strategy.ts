@@ -2,7 +2,7 @@ import type { Loaded } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { User } from '@noverlink/backend-shared';
+import { User } from '@truley-interview/backend-shared';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { AppConfigService } from '../../app-config';

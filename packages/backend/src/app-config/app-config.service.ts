@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Environment } from '@noverlink/shared';
+import { Environment } from '@truley-interview/shared';
 
 import { EnvField } from './env.constant';
 
@@ -38,10 +38,10 @@ export class AppConfigService {
       secret: this.configService.getOrThrow<string>(EnvField.JwtSecret),
       expiresIn: this.configService.getOrThrow<string>(EnvField.JwtExpiresIn),
       refreshSecret: this.configService.getOrThrow<string>(
-        EnvField.JwtRefreshSecret
+        EnvField.JwtRefreshSecret,
       ),
       refreshExpiresIn: this.configService.getOrThrow<string>(
-        EnvField.JwtRefreshExpiresIn
+        EnvField.JwtRefreshExpiresIn,
       ),
     };
   }
@@ -50,53 +50,26 @@ export class AppConfigService {
     return {
       google: {
         clientId: this.configService.getOrThrow<string>(
-          EnvField.GoogleClientId
+          EnvField.GoogleClientId,
         ),
         clientSecret: this.configService.getOrThrow<string>(
-          EnvField.GoogleClientSecret
+          EnvField.GoogleClientSecret,
         ),
         callbackUrl: this.configService.getOrThrow<string>(
-          EnvField.GoogleCallbackUrl
+          EnvField.GoogleCallbackUrl,
         ),
       },
       github: {
         clientId: this.configService.getOrThrow<string>(
-          EnvField.GithubClientId
+          EnvField.GithubClientId,
         ),
         clientSecret: this.configService.getOrThrow<string>(
-          EnvField.GithubClientSecret
+          EnvField.GithubClientSecret,
         ),
         callbackUrl: this.configService.getOrThrow<string>(
-          EnvField.GithubCallbackUrl
+          EnvField.GithubCallbackUrl,
         ),
       },
-    };
-  }
-
-  get tunnel() {
-    return {
-      ticketSecret: this.configService.getOrThrow<string>(
-        EnvField.TicketSecret
-      ),
-      relayUrl: this.configService.getOrThrow<string>(EnvField.RelayUrl),
-    };
-  }
-
-  get relay() {
-    return {
-      secret: this.configService.getOrThrow<string>(EnvField.RelaySecret),
-    };
-  }
-
-  get polar() {
-    return {
-      webhookSecret: this.configService.getOrThrow<string>(
-        EnvField.PolarWebhookSecret
-      ),
-      starterProductId: this.configService.get<string>(
-        EnvField.PolarStarterProductId
-      ),
-      proProductId: this.configService.get<string>(EnvField.PolarProProductId),
     };
   }
 }

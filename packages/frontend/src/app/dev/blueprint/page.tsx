@@ -487,7 +487,7 @@ function TunnelSchematic() {
           fontFamily="monospace"
           textAnchor="middle"
         >
-          api.noverlink.com
+          api.truley-interview.com
         </text>
         <text x="572" y="95" fill={colors.textMuted} fontSize="8" fontFamily="monospace">C</text>
       </g>
@@ -747,7 +747,7 @@ export default function BlueprintPrototypePage() {
             className="font-mono text-3xl tracking-widest"
             style={{ color: colors.textPrimary }}
           >
-            NOVERLINK
+            TRULEY-INTERVIEW
           </h1>
           <p
             className="font-mono text-xs uppercase tracking-[0.3em]"
@@ -802,7 +802,7 @@ export default function BlueprintPrototypePage() {
               name="api-gateway"
               status="online"
               localPort={3000}
-              publicUrl="api.noverlink.com"
+              publicUrl="api.truley-interview.com"
               latency="23ms"
               requests="12.4k"
             />
@@ -810,7 +810,7 @@ export default function BlueprintPrototypePage() {
               name="web-server"
               status="online"
               localPort={8080}
-              publicUrl="app.noverlink.com"
+              publicUrl="app.truley-interview.com"
               latency="31ms"
               requests="8.2k"
             />
@@ -878,12 +878,12 @@ export default function BlueprintPrototypePage() {
                 color: colors.success,
               }}
             >
-              <pre>{`$ noverlink http 3000
+              <pre>{`$ truley-interview http 3000
 [INFO] Initializing tunnel...
 [INFO] Establishing secure connection...
 [OK] Tunnel created successfully
 
-Endpoint: https://api.noverlink.com
+Endpoint: https://api.truley-interview.com
 Status: ONLINE
 Latency: 23ms`}</pre>
             </div>

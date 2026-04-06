@@ -38,7 +38,7 @@ export default defineConfig(() => ({
         index: 'src/index.ts',
         server: 'src/server.ts',
       },
-      name: '@noverlink/ui-shared',
+      name: '@truley-interview/ui-shared',
       fileName: (format, entryName) => `${entryName}.js`,
       // Change this to the formats you want to support.
       // Don't forget to update your package.json as well.

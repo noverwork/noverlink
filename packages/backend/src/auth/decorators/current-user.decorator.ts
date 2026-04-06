@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import type { User } from '@noverlink/backend-shared';
+import type { User } from '@truley-interview/backend-shared';
 import type { Request } from 'express';
 
 export const CurrentUser = createParamDecorator(

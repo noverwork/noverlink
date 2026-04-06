@@ -1,6 +1,6 @@
 'use client';
 
-import { EvaFlickerOverlay, EvaGrainOverlay } from '@noverlink/ui-shared';
+import { EvaFlickerOverlay, EvaGrainOverlay } from '@truley-interview/ui-shared';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
 

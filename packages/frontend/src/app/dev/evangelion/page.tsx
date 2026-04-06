@@ -482,7 +482,7 @@ export default function EvangelionPrototypePage() {
       {showTitle && (
         <EvaTitleCard
           number="壱"
-          title="NOVERLINK"
+          title="TRULEY-INTERVIEW"
           subtitle="Tunneling System"
         />
       )}
@@ -492,7 +492,7 @@ export default function EvangelionPrototypePage() {
         <>
           {/* Header */}
           <TextCard size="large" compressed>
-            NOVERLINK
+            TRULEY-INTERVIEW
           </TextCard>
 
           {/* Navigation */}
@@ -541,14 +541,14 @@ export default function EvangelionPrototypePage() {
                 id="01"
                 name="api-gateway"
                 port={3000}
-                url="api.noverlink.com"
+                url="api.truley-interview.com"
                 status="connected"
               />
               <TunnelCard
                 id="02"
                 name="web-server"
                 port={8080}
-                url="app.noverlink.com"
+                url="app.truley-interview.com"
                 status="connected"
               />
               <TunnelCard
@@ -583,10 +583,10 @@ export default function EvangelionPrototypePage() {
                   textShadow: '0 0 10px rgba(0,255,0,0.3)',
                 }}
               >
-                <div style={{ color: 'rgba(255,255,255,0.5)' }}># NOVERLINK SYSTEM v1.0.0</div>
+                <div style={{ color: 'rgba(255,255,255,0.5)' }}># TRULEY-INTERVIEW SYSTEM v1.0.0</div>
                 <div>&gt; Initializing...</div>
                 <div>&gt; Connection established</div>
-                <div>&gt; Tunnel: api-gateway → api.noverlink.com</div>
+                <div>&gt; Tunnel: api-gateway → api.truley-interview.com</div>
                 <div>&gt; Status: <span style={{ color: '#00FF00' }}>READY</span></div>
                 <div style={{ marginTop: '20px' }}>
                   <span style={{ color: '#fff' }}>$</span>{' '}

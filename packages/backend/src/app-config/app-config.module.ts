@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { Environment, validateObject } from '@noverlink/shared';
+import { Environment, validateObject } from '@truley-interview/shared';
 import path from 'path';
 
 import { PROJECT_ROOT } from '../app';

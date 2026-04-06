@@ -35,7 +35,7 @@ import {
   TunnelProgress,
   TunnelStats,
   TunnelTextarea,
-} from '@noverlink/ui-shared';
+} from '@truley-interview/ui-shared';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 
@@ -100,7 +100,7 @@ export default function DevPage() {
         {/* Header - EVA Compressed Style */}
         <header className="text-center space-y-4">
           <h1 className="font-mono uppercase tracking-[0.5em] text-white text-4xl font-bold">
-            NOVERLINK
+            TRULEY-INTERVIEW
           </h1>
           <div className="flex items-center justify-center gap-4">
             <div className="h-px w-16 bg-white/20" />
@@ -120,7 +120,7 @@ export default function DevPage() {
                   localLabel="Local"
                   localSublabel=":3000"
                   publicLabel="Public"
-                  publicSublabel="api.noverlink.com"
+                  publicSublabel="api.truley-interview.com"
                   status="connected"
                   tunnelName="api-gateway"
                   animated
@@ -157,7 +157,7 @@ export default function DevPage() {
 
             <ComponentGroup label="TunnelNode Variants">
               <TunnelNode variant="local" label="Local" sublabel=":3000" />
-              <TunnelNode variant="public" label="Public" sublabel=".noverlink.com" />
+              <TunnelNode variant="public" label="Public" sublabel=".truley-interview.com" />
               <TunnelNode variant="relay" label="Relay" sublabel="edge-01" />
             </ComponentGroup>
 
@@ -182,14 +182,14 @@ export default function DevPage() {
               status="online"
               name="api-gateway"
               localPort={3000}
-              publicUrl="api.noverlink.com"
+              publicUrl="api.truley-interview.com"
               stats="12.4k requests"
             />
             <TunnelCard
               status="online"
               name="web-server"
               localPort={8080}
-              publicUrl="app.noverlink.com"
+              publicUrl="app.truley-interview.com"
               stats="8.2k requests"
             />
             <TunnelCard

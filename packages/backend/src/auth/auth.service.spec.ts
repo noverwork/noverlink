@@ -11,7 +11,7 @@ import {
   OAuthProvider,
   Plan,
   User,
-} from '@noverlink/backend-shared';
+} from '@truley-interview/backend-shared';
 import * as argon2 from 'argon2';
 
 import { AppConfigService } from '../app-config';
@@ -27,7 +27,7 @@ describe('AuthService', () => {
   const mockPlan = {
     id: 'sandbox',
     name: 'Sandbox',
-    baseDomain: 'noverlink-free.app',
+    baseDomain: 'truley-interview-free.app',
     maxTunnels: 1,
     maxBandwidthMb: 1000,
   } as unknown as Plan;
@@ -63,7 +63,7 @@ describe('AuthService', () => {
         refreshExpiresIn: '7d',
       },
       app: {
-        frontendUrl: 'https://app.noverlink.io',
+        frontendUrl: 'https://app.truley-interview.io',
       },
     };
 
@@ -314,7 +314,7 @@ describe('AuthService', () => {
         expect(result).toHaveProperty('expires_in', 300);
         expect(result).toHaveProperty('interval', 5);
         expect(result.verification_uri).toBe(
-          'https://app.noverlink.io/auth/device'
+          'https://app.truley-interview.io/auth/device'
         );
       });
 

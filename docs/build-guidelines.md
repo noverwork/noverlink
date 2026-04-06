@@ -1,6 +1,6 @@
 # Build Guidelines
 
-This document provides comprehensive guidelines for building, configuring, and maintaining the Noverlink monorepo. All contributors must follow these rules to ensure consistency and maintainability.
+This document provides comprehensive guidelines for building, configuring, and maintaining the Truley Interview monorepo. All contributors must follow these rules to ensure consistency and maintainability.
 
 ---
 
@@ -30,7 +30,7 @@ This document provides comprehensive guidelines for building, configuring, and m
 ## Architecture Overview
 
 ```
-noverlink/
+truley-interview/
 ├── packages/
 │   ├── backend/        # NestJS API server (webpack)
 │   ├── frontend/       # Next.js dashboard (next.config.js)
@@ -61,7 +61,7 @@ noverlink/
 | `ui-shared` | Vite | `packages/ui-shared/dist/` | Library mode |
 | `backend-shared` | NONE | N/A | Uses src directly |
 | `relay` | Cargo | `target/release/relay` | Rust binary |
-| `cli` | Cargo | `target/release/noverlink-cli` | Rust binary |
+| `cli` | Cargo | `target/release/truley-interview-cli` | Rust binary |
 
 ---
 
@@ -144,7 +144,7 @@ noverlink/
     "moduleResolution": "nodenext",
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@noverlink/source"]
+    "customConditions": ["@truley-interview/source"]
   }
 }
 ```
@@ -214,14 +214,14 @@ tsconfig.base.json (root base config)
 
 ### Custom Conditions
 
-The `@noverlink/source` custom condition enables importing TypeScript source directly during development:
+The `@truley-interview/source` custom condition enables importing TypeScript source directly during development:
 
 ```json
 // package.json exports
 {
   "exports": {
     ".": {
-      "@noverlink/source": "./src/index.ts",
+      "@truley-interview/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
@@ -237,7 +237,7 @@ The `@noverlink/source` custom condition enables importing TypeScript source dir
 
 ```json
 {
-  "name": "@noverlink/package-name",
+  "name": "@truley-interview/package-name",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",
@@ -246,14 +246,14 @@ The `@noverlink/source` custom condition enables importing TypeScript source dir
   "exports": {
     "./package.json": "./package.json",
     ".": {
-      "@noverlink/source": "./src/index.ts",
+      "@truley-interview/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },
   "dependencies": {
-    "@noverlink/other-package": "*"
+    "@truley-interview/other-package": "*"
   }
 }
 ```
@@ -261,7 +261,7 @@ The `@noverlink/source` custom condition enables importing TypeScript source dir
 ### Rules
 
 1. **Internal dependencies**: Use `"*"` for workspace packages
-2. **Exports**: Always include `@noverlink/source` condition for dev imports
+2. **Exports**: Always include `@truley-interview/source` condition for dev imports
 3. **Private**: All packages must be `"private": true`
 4. **Version**: Use `"0.0.1"` for internal packages
 
@@ -269,7 +269,7 @@ The `@noverlink/source` custom condition enables importing TypeScript source dir
 
 ```json
 {
-  "name": "@noverlink/backend-shared",
+  "name": "@truley-interview/backend-shared",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -317,7 +317,7 @@ FROM dependencies AS builder
 COPY tsconfig.json ./
 COPY packages/PACKAGE ./packages/PACKAGE
 
-RUN npx nx sync --yes && NX_DAEMON=false npx nx run @noverlink/PACKAGE:build
+RUN npx nx sync --yes && NX_DAEMON=false npx nx run @truley-interview/PACKAGE:build
 
 # ===== Stage 3: Runner =====
 FROM node:22.14-slim AS runner
@@ -350,17 +350,17 @@ CMD ["node", "dist/main.js"]
 ```dockerfile
 # Copy node_modules then remove workspace packages
 COPY --from=dependencies /app/node_modules ./node_modules
-RUN rm -rf ./node_modules/@noverlink
+RUN rm -rf ./node_modules/@truley-interview
 
 # Copy built workspace modules individually
-COPY --from=builder /app/packages/interfaces/dist ./node_modules/@noverlink/interfaces/dist
-COPY --from=builder /app/packages/interfaces/package.json ./node_modules/@noverlink/interfaces/
-COPY --from=builder /app/packages/shared/dist ./node_modules/@noverlink/shared/dist
-COPY --from=builder /app/packages/shared/package.json ./node_modules/@noverlink/shared/
+COPY --from=builder /app/packages/interfaces/dist ./node_modules/@truley-interview/interfaces/dist
+COPY --from=builder /app/packages/interfaces/package.json ./node_modules/@truley-interview/interfaces/
+COPY --from=builder /app/packages/shared/dist ./node_modules/@truley-interview/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./node_modules/@truley-interview/shared/
 
 # backend-shared uses src directly (no build step)
-COPY --from=builder /app/packages/backend-shared/src ./node_modules/@noverlink/backend-shared/src
-COPY --from=builder /app/packages/backend-shared/package.json ./node_modules/@noverlink/backend-shared/
+COPY --from=builder /app/packages/backend-shared/src ./node_modules/@truley-interview/backend-shared/src
+COPY --from=builder /app/packages/backend-shared/package.json ./node_modules/@truley-interview/backend-shared/
 ```
 
 #### Frontend: Standalone Build
@@ -534,7 +534,7 @@ export default defineConfig(() => ({
         index: 'src/index.ts',
         server: 'src/server.ts',  // SSR entry if needed
       },
-      name: '@noverlink/ui-shared',
+      name: '@truley-interview/ui-shared',
       fileName: (format, entryName) => `${entryName}.js`,
       formats: ['es'],
     },
@@ -634,7 +634,7 @@ members = [
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-authors = ["Noverlink Team"]
+authors = ["Truley Interview Team"]
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
@@ -674,7 +674,7 @@ edition = "2021"
 workspace = true  # Inherit workspace lints
 
 [dependencies]
-noverlink-shared = { path = "../rs-shared", features = ["feature-name"] }
+truley-interview-shared = { path = "../rs-shared", features = ["feature-name"] }
 ```
 
 ### Critical Rules
@@ -726,7 +726,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 module.exports = {
-  displayName: '@noverlink/backend',
+  displayName: '@truley-interview/backend',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
@@ -751,7 +751,7 @@ import nextJest from 'next/jest.js';
 const createJestConfig = nextJest({ dir: './' });
 
 const config: Config = {
-  displayName: '@noverlink/frontend',
+  displayName: '@truley-interview/frontend',
   preset: '../../jest.preset.js',
   transform: {
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
@@ -840,16 +840,16 @@ These environment variables affect the build output and must be set before build
 ```bash
 # packages/cli/.env.example
 # Set BEFORE running cargo build, baked into the binary
-NOVERLINK_API_URL=http://localhost:3000   # Backend API URL
-NOVERLINK_VERSION=v1.0.0                  # Version string (injected by CI)
+TRULEY-INTERVIEW_API_URL=http://localhost:3000   # Backend API URL
+TRULEY-INTERVIEW_VERSION=v1.0.0                  # Version string (injected by CI)
 ```
 
 ### Frontend Build Variables (Docker)
 
 ```bash
 # Passed as --build-arg in Docker build
-NEXT_PUBLIC_API_URL=https://api.noverlink.com
-NEXT_PUBLIC_APP_URL=https://noverlink.com
+NEXT_PUBLIC_API_URL=https://api.truley-interview.com
+NEXT_PUBLIC_APP_URL=https://truley-interview.com
 NEXT_PUBLIC_POLAR_STARTER_PRODUCT_ID=xxx
 NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID=xxx
 ```
@@ -868,9 +868,9 @@ RELAY_VERSION=v1.0.0  # Injected by CI via --build-arg
 - name: Set version
   run: |
     if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-      echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+      echo "TRULEY-INTERVIEW_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
     else
-      echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+      echo "TRULEY-INTERVIEW_VERSION=${{ github.sha }}" >> $GITHUB_ENV
     fi
 
 # GitHub Actions - Frontend Docker
@@ -923,19 +923,19 @@ install → build-deps → [lint, typecheck, test] (parallel)
 
 ```yaml
 tags: |
-  ghcr.io/noverwork/noverlink-PACKAGE:${{ github.sha }}
-  ghcr.io/noverwork/noverlink-PACKAGE:latest
-  ${{ github.ref_type == 'tag' && format('ghcr.io/noverwork/noverlink-PACKAGE:{0}', github.ref_name) || '' }}
+  ghcr.io/noverwork/truley-interview-PACKAGE:${{ github.sha }}
+  ghcr.io/noverwork/truley-interview-PACKAGE:latest
+  ${{ github.ref_type == 'tag' && format('ghcr.io/noverwork/truley-interview-PACKAGE:{0}', github.ref_name) || '' }}
 ```
 
 ### Image Names
 
 | Package | Image |
 |---------|-------|
-| Backend | `ghcr.io/noverwork/noverlink-backend` |
-| Frontend | `ghcr.io/noverwork/noverlink-frontend` |
-| Migrator | `ghcr.io/noverwork/noverlink-migrator` |
-| Relay | `ghcr.io/noverwork/noverlink-relay` |
+| Backend | `ghcr.io/noverwork/truley-interview-backend` |
+| Frontend | `ghcr.io/noverwork/truley-interview-frontend` |
+| Migrator | `ghcr.io/noverwork/truley-interview-migrator` |
+| Relay | `ghcr.io/noverwork/truley-interview-relay` |
 
 ### Tag Types
 
@@ -954,8 +954,8 @@ tags: |
 npm run dev
 
 # Start individual services
-npx nx serve @noverlink/backend
-npx nx dev @noverlink/frontend
+npx nx serve @truley-interview/backend
+npx nx dev @truley-interview/frontend
 
 # Rust development
 cd packages/relay && cargo run
@@ -969,12 +969,12 @@ cd packages/cli && cargo run -- http 3000
 npx nx run-many --target=build --all
 
 # Build specific package
-npx nx build @noverlink/backend
-npx nx build @noverlink/frontend
+npx nx build @truley-interview/backend
+npx nx build @truley-interview/frontend
 
 # Build Rust
 cargo build --release --package relay
-cargo build --release --package noverlink-cli
+cargo build --release --package truley-interview-cli
 ```
 
 ### Testing
@@ -984,11 +984,11 @@ cargo build --release --package noverlink-cli
 npm run test
 
 # Specific package
-npx nx test @noverlink/backend
+npx nx test @truley-interview/backend
 
 # Rust tests
 cargo test --package relay
-cargo test --package noverlink-cli
+cargo test --package truley-interview-cli
 ```
 
 ### Linting
@@ -1008,15 +1008,15 @@ cargo clippy --all-targets --all-features
 
 ```bash
 # Build locally
-docker build -f packages/backend/Dockerfile -t noverlink-backend .
+docker build -f packages/backend/Dockerfile -t truley-interview-backend .
 docker build -f packages/frontend/Dockerfile \
   --build-arg NEXT_PUBLIC_API_URL=https://api.example.com \
-  -t noverlink-frontend .
+  -t truley-interview-frontend .
 
 # Build Relay with version
 docker build -f packages/relay/Dockerfile \
   --build-arg RELAY_VERSION=v1.0.0 \
-  -t noverlink-relay .
+  -t truley-interview-relay .
 ```
 
 ---
@@ -1028,7 +1028,7 @@ docker build -f packages/relay/Dockerfile \
 - [ ] Create `tsconfig.json` extending `../../tsconfig.base.json`
 - [ ] Create `tsconfig.lib.json` for build configuration
 - [ ] Configure `package.json` with proper exports
-- [ ] Add `@noverlink/source` condition for dev imports
+- [ ] Add `@truley-interview/source` condition for dev imports
 - [ ] Add reference in root `tsconfig.json`
 
 ### Dockerfile
@@ -1044,7 +1044,7 @@ docker build -f packages/relay/Dockerfile \
 
 - [ ] Add to workspace members in root `Cargo.toml`
 - [ ] Use `[lints] workspace = true`
-- [ ] Use workspace path dependencies for `noverlink-shared`
+- [ ] Use workspace path dependencies for `truley-interview-shared`
 - [ ] No unsafe code, no unwrap/expect
 
 ### Environment Variables
@@ -1057,7 +1057,7 @@ docker build -f packages/relay/Dockerfile \
 
 ## Troubleshooting
 
-### "Cannot find module @noverlink/..."
+### "Cannot find module @truley-interview/..."
 
 Run `npx nx sync` to update TypeScript project references.
 

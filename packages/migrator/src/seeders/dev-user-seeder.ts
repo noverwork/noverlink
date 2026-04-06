@@ -1,7 +1,7 @@
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
-import { Plan, User } from '@noverlink/backend-shared';
-import { Environment } from '@noverlink/shared';
+import { Plan, User } from '@truley-interview/backend-shared';
+import { Environment } from '@truley-interview/shared';
 
 const DEV_USER = {
   id: 'dev-user-00000000-0000-0000-0000-000000000001',
@@ -58,7 +58,7 @@ export class DevUserSeeder extends Seeder {
     console.log(`Email:      ${DEV_USER.email}`);
     console.log(`Auth Token: ${DEV_USER.authToken}`);
     console.log('');
-    console.log('To use with CLI, add to ~/.noverlink/config.toml:');
+    console.log('To use with CLI, add to ~/.truley-interview/config.toml:');
     console.log(`auth_token = "${DEV_USER.authToken}"`);
     console.log('');
     /* eslint-enable no-console */

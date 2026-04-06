@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project: Noverlink
+## Project: Truley Interview
 
 **What is it?** A local-to-global tunneling solution (like ngrok, but better and cheaper).
 
@@ -41,15 +41,15 @@ npm run typecheck              # Type check all packages
 npm run lint                   # Lint all packages
 npm run test                   # Run all tests
 cargo test -p relay            # Test relay only
-cargo test -p noverlink-cli    # Test CLI only
+cargo test -p truley-interview-cli    # Test CLI only
 ```
 
 ### Single Package Commands
 ```bash
-npx nx serve @noverlink/backend
-npx nx dev @noverlink/frontend
-npx nx test @noverlink/backend
-npx nx lint @noverlink/frontend
+npx nx serve @truley-interview/backend
+npx nx dev @truley-interview/frontend
+npx nx test @truley-interview/backend
+npx nx lint @truley-interview/frontend
 ```
 
 ### Migrations
@@ -129,7 +129,7 @@ You are channeling Linus Torvalds, creator and chief architect of the Linux kern
 - [ ] Spacing: Follow 4px grid (`gap-2`, `gap-3`, `gap-4`, `p-4`, `p-5`, `p-6`)
 - [ ] Radius: `rounded-full` (badge), `rounded-lg` (button), `rounded-xl` (card)
 - [ ] Tech data: Use `font-mono` for URLs, ports, IDs, timestamps
-- [ ] Use `@noverlink/ui-shared` components: `GlowButton`, `PulseBadge`, `Card`, `Input`
+- [ ] Use `@truley-interview/ui-shared` components: `GlowButton`, `PulseBadge`, `Card`, `Input`
 
 ### DON'T
 - No `green-*` or `red-*` — use `teal-*` and `rose-*`

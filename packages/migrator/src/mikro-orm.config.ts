@@ -2,7 +2,7 @@ import { defineConfig } from '@mikro-orm/core';
 import { Migrator } from '@mikro-orm/migrations';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { SeedManager } from '@mikro-orm/seeder';
-import { ENTITIES } from '@noverlink/backend-shared';
+import { ENTITIES } from '@truley-interview/backend-shared';
 import dotenv from 'dotenv';
 import path from 'path';
 

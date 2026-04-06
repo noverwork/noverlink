@@ -25,7 +25,7 @@ export class Plan {
   @Property({ type: 'string' })
   name!: string;
 
-  /** Base domain for tunnels on this plan (e.g., 'noverlink-free.app') */
+  /** Base domain for tunnels on this plan (e.g., 'truley-interview-free.app') */
   @Property({ type: 'string' })
   baseDomain!: string;
 

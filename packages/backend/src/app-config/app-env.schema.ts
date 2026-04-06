@@ -1,4 +1,4 @@
-import { Environment } from '@noverlink/shared';
+import { Environment } from '@truley-interview/shared';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
@@ -86,31 +86,4 @@ export class AppEnvSchema {
   // Frontend URL for OAuth redirects
   @IsUrl({ require_tld: false })
   [EnvField.FrontendUrl]!: string;
-
-  // Tunnel/Relay
-  @IsString()
-  @MinLength(16)
-  [EnvField.TicketSecret]!: string;
-
-  @IsUrl({ require_tld: false, protocols: ['ws', 'wss'] })
-  [EnvField.RelayUrl]!: string;
-
-  @IsString()
-  @MinLength(16)
-  [EnvField.RelaySecret]!: string;
-
-  // Polar.sh (optional for local dev)
-  @IsOptional()
-  @ValidateIf((o) => o[EnvField.PolarWebhookSecret]?.length > 0)
-  @IsString()
-  @MinLength(16)
-  [EnvField.PolarWebhookSecret]?: string;
-
-  @IsOptional()
-  @IsString()
-  [EnvField.PolarStarterProductId]?: string;
-
-  @IsOptional()
-  @IsString()
-  [EnvField.PolarProProductId]?: string;
 }

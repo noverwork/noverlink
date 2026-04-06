@@ -1,5 +1,5 @@
 {
-  "name": "@noverlink/backend",
+  "name": "@truley-interview/backend",
   "version": "0.0.1",
   "private": true,
   "nx": {
@@ -63,15 +63,15 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@noverlink/backend:build",
+          "buildTarget": "@truley-interview/backend:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@noverlink/backend:build:development"
+            "buildTarget": "@truley-interview/backend:build:development"
           },
           "production": {
-            "buildTarget": "@noverlink/backend:build:production"
+            "buildTarget": "@truley-interview/backend:build:production"
           }
         }
       },
@@ -83,8 +83,8 @@
     }
   },
   "dependencies": {
-    "@noverlink/backend-shared": "*",
-    "@noverlink/interfaces": "*",
-    "@noverlink/shared": "*"
+    "@truley-interview/backend-shared": "*",
+    "@truley-interview/interfaces": "*",
+    "@truley-interview/shared": "*"
   }
 }

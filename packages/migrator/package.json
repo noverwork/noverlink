@@ -1,5 +1,5 @@
 {
-  "name": "@noverlink/migrator",
+  "name": "@truley-interview/migrator",
   "version": "0.0.1",
   "private": true,
   "nx": {
@@ -46,22 +46,22 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@noverlink/migrator:build",
+          "buildTarget": "@truley-interview/migrator:build",
           "runBuildTargetDependencies": false,
           "watch": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@noverlink/migrator:build:development"
+            "buildTarget": "@truley-interview/migrator:build:development"
           },
           "production": {
-            "buildTarget": "@noverlink/migrator:build:production"
+            "buildTarget": "@truley-interview/migrator:build:production"
           }
         }
       }
     }
   },
   "dependencies": {
-    "@noverlink/shared": "*"
+    "@truley-interview/shared": "*"
   }
 }

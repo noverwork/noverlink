@@ -1,7 +1,7 @@
 import { apiClient, setTokenCallbacks } from './api';
 
-const ACCESS_TOKEN_KEY = 'noverlink_access_token';
-const REFRESH_TOKEN_KEY = 'noverlink_refresh_token';
+const ACCESS_TOKEN_KEY = 'truley-interview_access_token';
+const REFRESH_TOKEN_KEY = 'truley-interview_refresh_token';
 
 export const authStore = {
   getAccessToken(): string | null {

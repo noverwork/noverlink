@@ -121,8 +121,8 @@ info!("Connection closed cleanly");
 ## 5. Configuration Loading
 
 ```rust
-// CORRECT - Use noverlink_shared for config
-use noverlink_shared::RelayConfig;
+// CORRECT - Use truley-interview_shared for config
+use truley-interview_shared::RelayConfig;
 
 let config = RelayConfig::load()
     .map_err(|e| anyhow::anyhow!("{}", e))?;
@@ -140,14 +140,14 @@ let port = config.ws_port;
 
 ```rust
 // CORRECT - Use shared protocol types
-use noverlink_shared::WebSocketMessage;
+use truley-interview_shared::WebSocketMessage;
 
 let msg = WebSocketMessage::TunnelCreated {
     url: tunnel_url.clone(),
     subdomain: subdomain.clone(),
 };
 
-// All WebSocket messages should use noverlink_shared::WebSocketMessage enum
+// All WebSocket messages should use truley-interview_shared::WebSocketMessage enum
 ```
 
 ---
@@ -270,15 +270,15 @@ Suggested Fixes:
 ```bash
 # Check
 cargo check -p relay
-cargo check -p noverlink-cli
+cargo check -p truley-interview-cli
 
 # Lint (strict - matches CI)
 cargo clippy -p relay -- -D warnings
-cargo clippy -p noverlink-cli -- -D warnings
+cargo clippy -p truley-interview-cli -- -D warnings
 
 # Test
 cargo test -p relay
-cargo test -p noverlink-cli
+cargo test -p truley-interview-cli
 
 # Run relay
 cd packages/relay && cargo run

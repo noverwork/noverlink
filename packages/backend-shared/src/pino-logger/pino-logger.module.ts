@@ -5,7 +5,7 @@ import type {
   Type,
 } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import type { Environment } from '@noverlink/shared';
+import type { Environment } from '@truley-interview/shared';
 import type { IncomingMessage, ServerResponse } from 'http';
 import { LoggerModule } from 'nestjs-pino';
 

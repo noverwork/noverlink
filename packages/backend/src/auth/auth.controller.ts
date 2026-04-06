@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { OAuthProvider, type User } from '@noverlink/backend-shared';
+import { OAuthProvider, type User } from '@truley-interview/backend-shared';
 import type { Request, Response } from 'express';
 
 import { AppConfigService } from '../app-config';

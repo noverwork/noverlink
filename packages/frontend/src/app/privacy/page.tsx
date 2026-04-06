@@ -1,4 +1,4 @@
-import { EvaFlickerOverlay, EvaGrainOverlay } from '@noverlink/ui-shared';
+import { EvaFlickerOverlay, EvaGrainOverlay } from '@truley-interview/ui-shared';
 import Link from 'next/link';
 
 export default function PrivacyPolicyPage() {
@@ -42,10 +42,10 @@ export default function PrivacyPolicyPage() {
             {/* INTRO */}
             <section>
               <p>
-                Noverlink is open source. You can inspect exactly how your data is
+                Truley Interview is open source. You can inspect exactly how your data is
                 handled by reviewing our{' '}
                 <a
-                  href="https://github.com/noverwork/noverlink"
+                  href="https://github.com/noverwork/truley-interview"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#00ff00] hover:text-[#00cc00] underline"
@@ -68,7 +68,7 @@ export default function PrivacyPolicyPage() {
                   letterSpacing: '0.02em',
                 }}
               >
-                Hosted Service (noverlink.com)
+                Hosted Service (truley-interview.com)
               </h2>
 
               <div className="space-y-6">
@@ -194,7 +194,7 @@ export default function PrivacyPolicyPage() {
                     We Collect Nothing
                   </h3>
                   <p>
-                    When you self-host Noverlink, we have no access to your data.
+                    When you self-host Truley Interview, we have no access to your data.
                     Your instance runs entirely on your own infrastructure.
                   </p>
                 </section>
@@ -228,7 +228,7 @@ export default function PrivacyPolicyPage() {
               <p>
                 Privacy questions? Open an issue on{' '}
                 <a
-                  href="https://github.com/noverwork/noverlink"
+                  href="https://github.com/noverwork/truley-interview"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#00ff00] hover:text-[#00cc00] underline"

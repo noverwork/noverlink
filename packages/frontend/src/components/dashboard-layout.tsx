@@ -7,7 +7,7 @@ import {
   GlowButton,
   GridBackground,
   PulseBadge,
-} from '@noverlink/ui-shared';
+} from '@truley-interview/ui-shared';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -29,9 +29,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navItems = [
     { href: '/dashboard', label: 'DASHBOARD', icon: DashboardIcon },
-    { href: '/tunnels', label: 'TUNNELS', icon: TunnelIcon },
     { href: '/settings', label: 'SETTINGS', icon: SettingsIcon },
-    { href: '/billings', label: 'BILLING', icon: BillingIcon },
   ];
 
   return (
@@ -47,7 +45,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Link href="/dashboard" className="flex items-center gap-3">
               <Image
                 src="/logo.png"
-                alt="Noverlink"
+                alt="Truley Interview"
                 width={32}
                 height={32}
                 className="w-8 h-8"
@@ -61,7 +59,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   letterSpacing: '0.05em',
                 }}
               >
-                NOVERLINK
+                TRULEY-INTERVIEW
               </h1>
             </Link>
             <div className="flex items-center gap-4">
@@ -93,7 +91,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         'flex items-center gap-3 px-4 py-3 text-xs transition-all border-l-2',
                         isActive
                           ? 'text-[#00ff00] bg-[#00ff00]/10 border-[#00ff00]'
-                          : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent'
+                          : 'text-white/60 hover:text-white hover:bg-white/5 border-transparent',
                       )}
                       style={{
                         fontFamily: "'Helvetica Neue', Arial, sans-serif",
@@ -104,7 +102,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Icon
                         className={cn(
                           'w-5 h-5',
-                          isActive ? 'text-[#00ff00]' : ''
+                          isActive ? 'text-[#00ff00]' : '',
                         )}
                       />
                       {item.label}
@@ -187,42 +185,6 @@ function DashboardIcon({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-      />
-    </svg>
-  );
-}
-
-function TunnelIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-      />
-    </svg>
-  );
-}
-
-function BillingIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
       />
     </svg>
   );

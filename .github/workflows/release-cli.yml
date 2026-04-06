@@ -16,7 +16,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUST_VERSION: '1.83'
-  NOVERLINK_API_URL: ${{ vars.NOVERLINK_API_URL }}
+  TRULEY-INTERVIEW_API_URL: ${{ vars.TRULEY-INTERVIEW_API_URL }}
 
 jobs:
   build-linux-x64:
@@ -33,25 +33,25 @@ jobs:
       - name: Set version
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           else
-            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.sha }}" >> $GITHUB_ENV
           fi
 
       - name: Build
-        run: cargo build --release --package noverlink-cli --target x86_64-unknown-linux-gnu
+        run: cargo build --release --package truley-interview-cli --target x86_64-unknown-linux-gnu
 
       - name: Package
         run: |
           mkdir -p artifacts
-          cp target/x86_64-unknown-linux-gnu/release/noverlink-cli artifacts/noverlink
-          cd artifacts && tar czf noverlink-linux-x64.tar.gz noverlink && rm noverlink
+          cp target/x86_64-unknown-linux-gnu/release/truley-interview-cli artifacts/truley-interview
+          cd artifacts && tar czf truley-interview-linux-x64.tar.gz truley-interview && rm truley-interview
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: noverlink-linux-x64
-          path: artifacts/noverlink-linux-x64.tar.gz
+          name: truley-interview-linux-x64
+          path: artifacts/truley-interview-linux-x64.tar.gz
 
   build-linux-arm64:
     runs-on: ubuntu-latest
@@ -72,27 +72,27 @@ jobs:
       - name: Set version
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           else
-            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.sha }}" >> $GITHUB_ENV
           fi
 
       - name: Build
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
-        run: cargo build --release --package noverlink-cli --target aarch64-unknown-linux-gnu
+        run: cargo build --release --package truley-interview-cli --target aarch64-unknown-linux-gnu
 
       - name: Package
         run: |
           mkdir -p artifacts
-          cp target/aarch64-unknown-linux-gnu/release/noverlink-cli artifacts/noverlink
-          cd artifacts && tar czf noverlink-linux-arm64.tar.gz noverlink && rm noverlink
+          cp target/aarch64-unknown-linux-gnu/release/truley-interview-cli artifacts/truley-interview
+          cd artifacts && tar czf truley-interview-linux-arm64.tar.gz truley-interview && rm truley-interview
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: noverlink-linux-arm64
-          path: artifacts/noverlink-linux-arm64.tar.gz
+          name: truley-interview-linux-arm64
+          path: artifacts/truley-interview-linux-arm64.tar.gz
 
   build-darwin-x64:
     runs-on: macos-latest
@@ -108,25 +108,25 @@ jobs:
       - name: Set version
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           else
-            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.sha }}" >> $GITHUB_ENV
           fi
 
       - name: Build
-        run: cargo build --release --package noverlink-cli --target x86_64-apple-darwin
+        run: cargo build --release --package truley-interview-cli --target x86_64-apple-darwin
 
       - name: Package
         run: |
           mkdir -p artifacts
-          cp target/x86_64-apple-darwin/release/noverlink-cli artifacts/noverlink
-          cd artifacts && tar czf noverlink-darwin-x64.tar.gz noverlink && rm noverlink
+          cp target/x86_64-apple-darwin/release/truley-interview-cli artifacts/truley-interview
+          cd artifacts && tar czf truley-interview-darwin-x64.tar.gz truley-interview && rm truley-interview
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: noverlink-darwin-x64
-          path: artifacts/noverlink-darwin-x64.tar.gz
+          name: truley-interview-darwin-x64
+          path: artifacts/truley-interview-darwin-x64.tar.gz
 
   build-darwin-arm64:
     runs-on: macos-latest
@@ -142,25 +142,25 @@ jobs:
       - name: Set version
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           else
-            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.sha }}" >> $GITHUB_ENV
           fi
 
       - name: Build
-        run: cargo build --release --package noverlink-cli --target aarch64-apple-darwin
+        run: cargo build --release --package truley-interview-cli --target aarch64-apple-darwin
 
       - name: Package
         run: |
           mkdir -p artifacts
-          cp target/aarch64-apple-darwin/release/noverlink-cli artifacts/noverlink
-          cd artifacts && tar czf noverlink-darwin-arm64.tar.gz noverlink && rm noverlink
+          cp target/aarch64-apple-darwin/release/truley-interview-cli artifacts/truley-interview
+          cd artifacts && tar czf truley-interview-darwin-arm64.tar.gz truley-interview && rm truley-interview
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: noverlink-darwin-arm64
-          path: artifacts/noverlink-darwin-arm64.tar.gz
+          name: truley-interview-darwin-arm64
+          path: artifacts/truley-interview-darwin-arm64.tar.gz
 
   build-windows-x64:
     runs-on: windows-latest
@@ -177,27 +177,27 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "NOVERLINK_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           else
-            echo "NOVERLINK_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+            echo "TRULEY-INTERVIEW_VERSION=${{ github.sha }}" >> $GITHUB_ENV
           fi
 
       - name: Build
-        run: cargo build --release --package noverlink-cli --target x86_64-pc-windows-msvc
+        run: cargo build --release --package truley-interview-cli --target x86_64-pc-windows-msvc
 
       - name: Package
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path artifacts
-          Copy-Item target/x86_64-pc-windows-msvc/release/noverlink-cli.exe artifacts/noverlink.exe
-          Compress-Archive -Path artifacts/noverlink.exe -DestinationPath artifacts/noverlink-windows-x64.zip
-          Remove-Item artifacts/noverlink.exe
+          Copy-Item target/x86_64-pc-windows-msvc/release/truley-interview-cli.exe artifacts/truley-interview.exe
+          Compress-Archive -Path artifacts/truley-interview.exe -DestinationPath artifacts/truley-interview-windows-x64.zip
+          Remove-Item artifacts/truley-interview.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: noverlink-windows-x64
-          path: artifacts/noverlink-windows-x64.zip
+          name: truley-interview-windows-x64
+          path: artifacts/truley-interview-windows-x64.zip
 
   release:
     runs-on: ubuntu-latest
@@ -234,10 +234,10 @@ jobs:
           sha256sum * > checksums.txt
           cat checksums.txt
 
-          echo "sha256_darwin_arm64=$(sha256sum noverlink-darwin-arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "sha256_darwin_x64=$(sha256sum noverlink-darwin-x64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "sha256_linux_arm64=$(sha256sum noverlink-linux-arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "sha256_linux_x64=$(sha256sum noverlink-linux-x64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "sha256_darwin_arm64=$(sha256sum truley-interview-darwin-arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "sha256_darwin_x64=$(sha256sum truley-interview-darwin-x64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "sha256_linux_arm64=$(sha256sum truley-interview-linux-arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "sha256_linux_x64=$(sha256sum truley-interview-linux-x64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Create release
         uses: softprops/action-gh-release@v2
@@ -251,7 +251,7 @@ jobs:
 
             ### Homebrew (macOS/Linux)
             ```bash
-            brew install noverwork/noverlink/noverlink
+            brew install noverwork/truley-interview/truley-interview
             ```
 
             ### Manual Download
@@ -264,10 +264,10 @@ jobs:
     needs: release
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - name: Checkout homebrew-noverlink
+      - name: Checkout homebrew-truley-interview
         uses: actions/checkout@v4
         with:
-          repository: noverwork/homebrew-noverlink
+          repository: noverwork/homebrew-truley-interview
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 
       - name: Update Homebrew Formula
@@ -279,53 +279,53 @@ jobs:
           SHA_LINUX_X64: ${{ needs.release.outputs.sha256_linux_x64 }}
         run: |
           mkdir -p Formula
-          envsubst << 'FORMULA_EOF' > Formula/noverlink.rb
-          class Noverlink < Formula
+          envsubst << 'FORMULA_EOF' > Formula/truley-interview.rb
+          class Truley Interview < Formula
             desc "Local-to-global tunneling CLI - expose your localhost to the web"
-            homepage "https://github.com/noverwork/noverlink"
+            homepage "https://github.com/noverwork/truley-interview"
             version "$VERSION"
             license "AGPL-3.0-or-later"
 
             on_macos do
               on_arm do
-                url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-darwin-arm64.tar.gz"
+                url "https://github.com/noverwork/truley-interview/releases/download/$VERSION/truley-interview-darwin-arm64.tar.gz"
                 sha256 "$SHA_DARWIN_ARM64"
               end
 
               on_intel do
-                url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-darwin-x64.tar.gz"
+                url "https://github.com/noverwork/truley-interview/releases/download/$VERSION/truley-interview-darwin-x64.tar.gz"
                 sha256 "$SHA_DARWIN_X64"
               end
             end
 
             on_linux do
               on_arm do
-                url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-linux-arm64.tar.gz"
+                url "https://github.com/noverwork/truley-interview/releases/download/$VERSION/truley-interview-linux-arm64.tar.gz"
                 sha256 "$SHA_LINUX_ARM64"
               end
 
               on_intel do
-                url "https://github.com/noverwork/noverlink/releases/download/$VERSION/noverlink-linux-x64.tar.gz"
+                url "https://github.com/noverwork/truley-interview/releases/download/$VERSION/truley-interview-linux-x64.tar.gz"
                 sha256 "$SHA_LINUX_X64"
               end
             end
 
             def install
-              bin.install "noverlink"
+              bin.install "truley-interview"
             end
 
             test do
-              assert_match "noverlink", shell_output("#{bin}/noverlink --version")
+              assert_match "truley-interview", shell_output("#{bin}/truley-interview --version")
             end
           end
           FORMULA_EOF
-          sed -i 's/^          //' Formula/noverlink.rb
-          cat Formula/noverlink.rb
+          sed -i 's/^          //' Formula/truley-interview.rb
+          cat Formula/truley-interview.rb
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Formula/noverlink.rb
-          git diff --staged --quiet || git commit -m "Update noverlink to ${{ needs.release.outputs.version }}"
+          git add Formula/truley-interview.rb
+          git diff --staged --quiet || git commit -m "Update truley-interview to ${{ needs.release.outputs.version }}"
           git push

@@ -1,5 +1,5 @@
 {
-  "name": "@noverlink/frontend",
+  "name": "@truley-interview/frontend",
   "targets": {
     "dev": {
       "options": {

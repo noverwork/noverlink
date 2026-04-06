@@ -2,7 +2,7 @@ import 'reflect-metadata';
 
 import { MikroORM } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { Environment } from '@noverlink/shared';
+import { Environment } from '@truley-interview/shared';
 
 import { MIGRATION_ROOT } from './constant';
 import MikroOrmConfig from './mikro-orm.config';

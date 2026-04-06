@@ -35,10 +35,10 @@ Only internal workspace references:
 
 ```json
 {
-  "name": "@noverlink/backend",
+  "name": "@truley-interview/backend",
   "dependencies": {
-    "@noverlink/shared": "*",
-    "@noverlink/backend-shared": "*"
+    "@truley-interview/shared": "*",
+    "@truley-interview/backend-shared": "*"
   }
 }
 ```
@@ -85,7 +85,7 @@ This rule is designed for publishable libraries that need their own `package.jso
 
 ## Checklist: Adding Internal Package Reference
 
-1. [ ] Add `"@noverlink/<package>": "*"` to package's `dependencies`
+1. [ ] Add `"@truley-interview/<package>": "*"` to package's `dependencies`
 2. [ ] Run `npm install` to create symlink
 3. [ ] Import in your code
 
@@ -95,7 +95,7 @@ This rule is designed for publishable libraries that need their own `package.jso
 // BAD - Don't do this in packages/backend/package.json
 {
   "dependencies": {
-    "@noverlink/shared": "*",
+    "@truley-interview/shared": "*",
     "@nestjs/common": "^11.0.0"  // Should be in root only
   }
 }
@@ -103,7 +103,7 @@ This rule is designed for publishable libraries that need their own `package.jso
 // GOOD
 {
   "dependencies": {
-    "@noverlink/shared": "*"
+    "@truley-interview/shared": "*"
   }
 }
 ```
@@ -112,7 +112,7 @@ This rule is designed for publishable libraries that need their own `package.jso
 
 | Package | Name | Used By |
 |---------|------|---------|
-| packages/shared | @noverlink/shared | backend, frontend, migrator |
-| packages/backend-shared | @noverlink/backend-shared | backend |
-| packages/ui-shared | @noverlink/ui-shared | frontend |
-| packages/interfaces | @noverlink/interfaces | shared, backend, frontend |
+| packages/shared | @truley-interview/shared | backend, frontend, migrator |
+| packages/backend-shared | @truley-interview/backend-shared | backend |
+| packages/ui-shared | @truley-interview/ui-shared | frontend |
+| packages/interfaces | @truley-interview/interfaces | shared, backend, frontend |

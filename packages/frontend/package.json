@@ -1,13 +1,13 @@
 {
-  "name": "@noverlink/frontend",
+  "name": "@truley-interview/frontend",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@noverlink/interfaces": "*",
-    "@noverlink/shared": "*",
-    "@noverlink/ui-shared": "*"
+    "@truley-interview/interfaces": "*",
+    "@truley-interview/shared": "*",
+    "@truley-interview/ui-shared": "*"
   }
 }

@@ -664,7 +664,7 @@ export default function PostHogPrototypePage() {
                 className="text-4xl font-extrabold tracking-tight"
                 style={{ color: colors.black }}
               >
-                NOVERLINK
+                TRULEY-INTERVIEW
               </h1>
               <p className="font-mono text-sm" style={{ color: colors.gray[500] }}>
                 Local tunnels, global reach.
@@ -716,7 +716,7 @@ export default function PostHogPrototypePage() {
               name="api-gateway"
               status="connected"
               localPort={3000}
-              publicUrl="api.noverlink.com"
+              publicUrl="api.truley-interview.com"
               requests="12.4k"
               latency="23ms"
             />
@@ -724,7 +724,7 @@ export default function PostHogPrototypePage() {
               name="web-server"
               status="connected"
               localPort={8080}
-              publicUrl="app.noverlink.com"
+              publicUrl="app.truley-interview.com"
               requests="8.2k"
               latency="31ms"
             />
@@ -808,12 +808,12 @@ export default function PostHogPrototypePage() {
               border: `2px solid ${colors.black}`,
             }}
           >
-            <pre>{`$ noverlink http 3000
+            <pre>{`$ truley-interview http 3000
 ✓ Tunnel created
-→ https://api.noverlink.com
+→ https://api.truley-interview.com
 
 Forwarding:
-  https://api.noverlink.com → http://localhost:3000`}</pre>
+  https://api.truley-interview.com → http://localhost:3000`}</pre>
           </div>
         </Section>
 

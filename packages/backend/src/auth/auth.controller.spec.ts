@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OAuthProvider, Plan, User } from '@noverlink/backend-shared';
+import { OAuthProvider, Plan, User } from '@truley-interview/backend-shared';
 import type { Response } from 'express';
 
 import { AppConfigService } from '../app-config';
@@ -13,7 +13,7 @@ describe('AuthController', () => {
   const mockPlan = {
     id: 'sandbox',
     name: 'Sandbox',
-    baseDomain: 'noverlink-free.app',
+    baseDomain: 'truley-interview-free.app',
     maxTunnels: 1,
     maxBandwidthMb: 1000,
   } as unknown as Plan;

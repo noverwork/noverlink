@@ -1,4 +1,4 @@
-import { LogLevel } from '@noverlink/interfaces';
+import { LogLevel } from '@truley-interview/interfaces';
 
 // Hierarchical log level mapping (immutable)
 const LOG_LEVEL_MAP: Record<LogLevel, LogLevel[]> = {

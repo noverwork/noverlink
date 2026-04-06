@@ -3,7 +3,7 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata = {
-  title: 'Noverlink - Tunnel Management',
+  title: 'Truley Interview - Tunnel Management',
   description: 'Local-to-global tunneling solution',
 };
 

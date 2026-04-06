@@ -9,7 +9,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from '@noverlink/ui-shared';
+} from '@truley-interview/ui-shared';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -217,7 +217,7 @@ export default function LoginPage() {
         <Link href="/" className="flex items-center gap-3 mb-3">
           <Image
             src="/logo.png"
-            alt="Noverlink"
+            alt="Truley Interview"
             width={48}
             height={48}
             className="w-12 h-12"
@@ -232,7 +232,7 @@ export default function LoginPage() {
               textTransform: 'uppercase',
             }}
           >
-            Noverlink
+            Truley Interview
           </span>
         </Link>
         <p

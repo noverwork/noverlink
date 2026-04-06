@@ -77,7 +77,7 @@ export class SomeService {
 
 ```typescript
 // CORRECT - Import from shared lib
-import { User, Domain, TunnelSession } from '@noverlink/backend-shared';
+import { User, Domain, TunnelSession } from '@truley-interview/backend-shared';
 
 // WRONG - Relative path imports
 import { User } from '../../../libs/backend-shared/src/orm/entities';
@@ -117,5 +117,5 @@ Violations:
 Suggested Fixes:
 - Move business logic to Service
 - Use AppConfigService instead of process.env
-- Import from @noverlink/backend-shared
+- Import from @truley-interview/backend-shared
 ```

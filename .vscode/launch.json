@@ -4,9 +4,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @noverlink/backend with Nx",
+      "name": "Debug @truley-interview/backend with Nx",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "@noverlink/backend"],
+      "runtimeArgs": ["nx", "serve", "@truley-interview/backend"],
       "env": {
         "NODE_OPTIONS": "--inspect=9229"
       },
@@ -22,9 +22,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @noverlink/ss with Nx",
+      "name": "Debug @truley-interview/ss with Nx",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "@noverlink/ss"],
+      "runtimeArgs": ["nx", "serve", "@truley-interview/ss"],
       "env": {
         "NODE_OPTIONS": "--inspect=9230"
       },
@@ -40,9 +40,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @noverlink/ss with Nx",
+      "name": "Debug @truley-interview/ss with Nx",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "@noverlink/ss"],
+      "runtimeArgs": ["nx", "serve", "@truley-interview/ss"],
       "env": {
         "NODE_OPTIONS": "--inspect=9231"
       },
@@ -58,9 +58,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @noverlink/ss with Nx",
+      "name": "Debug @truley-interview/ss with Nx",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "@noverlink/ss"],
+      "runtimeArgs": ["nx", "serve", "@truley-interview/ss"],
       "env": {
         "NODE_OPTIONS": "--inspect=9232"
       },

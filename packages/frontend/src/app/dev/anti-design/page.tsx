@@ -576,7 +576,7 @@ export default function AntiDesignPrototypePage() {
         >
           <MarqueeText speed={8}>
             <span style={{ fontFamily: 'Comic Sans MS, cursive', fontSize: '20px', fontWeight: 'bold' }}>
-              🚧 UNDER CONSTRUCTION 🚧 WELCOME TO NOVERLINK 🚧 BEST VIEWED WITH NETSCAPE NAVIGATOR 🚧 SIGN MY GUESTBOOK 🚧
+              🚧 UNDER CONSTRUCTION 🚧 WELCOME TO TRULEY-INTERVIEW 🚧 BEST VIEWED WITH NETSCAPE NAVIGATOR 🚧 SIGN MY GUESTBOOK 🚧
             </span>
           </MarqueeText>
         </div>
@@ -602,7 +602,7 @@ export default function AntiDesignPrototypePage() {
           </div>
 
           <h1>
-            <RainbowText size="4rem">NOVERLINK</RainbowText>
+            <RainbowText size="4rem">TRULEY-INTERVIEW</RainbowText>
           </h1>
 
           <p
@@ -708,7 +708,7 @@ export default function AntiDesignPrototypePage() {
               name="api-gateway"
               status="connected"
               localPort={3000}
-              publicUrl="api.noverlink.com"
+              publicUrl="api.truley-interview.com"
               requests="12.4k"
               latency="23ms"
             />
@@ -716,7 +716,7 @@ export default function AntiDesignPrototypePage() {
               name="web-server"
               status="connected"
               localPort={8080}
-              publicUrl="app.noverlink.com"
+              publicUrl="app.truley-interview.com"
               requests="8.2k"
               latency="31ms"
             />
@@ -798,7 +798,7 @@ export default function AntiDesignPrototypePage() {
             }}
           >
             <pre style={{ margin: 0 }}>
-{`C:\\NOVERLINK> noverlink.exe http 3000
+{`C:\\TRULEY-INTERVIEW> truley-interview.exe http 3000
 
   ███╗   ██╗ ██████╗ ██╗   ██╗███████╗██████╗ ██╗     ██╗███╗   ██╗██╗  ██╗
   ████╗  ██║██╔═══██╗██║   ██║██╔════╝██╔══██╗██║     ██║████╗  ██║██║ ██╔╝
@@ -811,7 +811,7 @@ export default function AntiDesignPrototypePage() {
   [*] Connecting to relay server...
   [+] SUCCESS! Tunnel created!
 
-  > Public URL: https://api.noverlink.com
+  > Public URL: https://api.truley-interview.com
   > Forwarding: localhost:3000
 
   [!] READY TO ROCK AND ROLL!!!`}
@@ -843,7 +843,7 @@ export default function AntiDesignPrototypePage() {
             <MarqueeText speed={15}>
               <span style={{ fontFamily: 'Times New Roman, serif', fontSize: '14px', color: uglyColors.cyanBlue }}>
                 🔥 Anti-Design Prototype v6.9.0 🔥 Best viewed at 800x600 resolution 🔥 Netscape Navigator 4.0+ 🔥
-                IE 5.5 Compatible 🔥 This page is Y2K compliant 🔥 Webmaster: admin@noverlink.com 🔥
+                IE 5.5 Compatible 🔥 This page is Y2K compliant 🔥 Webmaster: admin@truley-interview.com 🔥
               </span>
             </MarqueeText>
           </div>

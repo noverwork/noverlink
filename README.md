@@ -1,12 +1,12 @@
-# Noverlink
+# Truley Interview
 
 > Local-to-global tunneling solution — like ngrok, but self-hosted and cost-effective
 
-Noverlink exposes your local services to the internet. Supports HTTP, WebSocket, and TCP tunneling with a high-performance Rust relay.
+Truley Interview exposes your local services to the internet. Supports HTTP, WebSocket, and TCP tunneling with a high-performance Rust relay.
 
-## Why Noverlink?
+## Why Truley Interview?
 
-ngrok's pricing doesn't scale for multiple tunnels. Noverlink gives you:
+ngrok's pricing doesn't scale for multiple tunnels. Truley Interview gives you:
 - **Unlimited tunnels** on your own infrastructure
 - **Full control** over your data
 - **Simple pricing** — host it yourself
@@ -116,7 +116,7 @@ WS_PORT=8444 HTTP_PORT=9444 BASE_DOMAIN=localhost cargo run
 
 ```bash
 cd packages/cli
-NOVERLINK_RELAY_URL=ws://localhost:8444 cargo run -- http 3000
+TRULEY-INTERVIEW_RELAY_URL=ws://localhost:8444 cargo run -- http 3000
 ```
 
 ## CLI Installation
@@ -125,44 +125,44 @@ NOVERLINK_RELAY_URL=ws://localhost:8444 cargo run -- http 3000
 
 ```bash
 # Install
-brew install noverwork/noverlink/noverlink
+brew install noverwork/truley-interview/truley-interview
 
 # Upgrade
-brew upgrade noverlink
+brew upgrade truley-interview
 
 # If upgrade doesn't work, force reinstall
-brew uninstall noverlink
-brew untap noverwork/noverlink
-brew tap noverwork/noverlink
-brew install noverlink
+brew uninstall truley-interview
+brew untap noverwork/truley-interview
+brew tap noverwork/truley-interview
+brew install truley-interview
 ```
 
 ### Manual Download
 
-Download the latest release from [GitHub Releases](https://github.com/noverwork/noverlink/releases/latest).
+Download the latest release from [GitHub Releases](https://github.com/noverwork/truley-interview/releases/latest).
 
 | Platform | File |
 |----------|------|
-| macOS (Apple Silicon) | `noverlink-darwin-arm64.tar.gz` |
-| macOS (Intel) | `noverlink-darwin-x64.tar.gz` |
-| Linux (x64) | `noverlink-linux-x64.tar.gz` |
-| Linux (ARM64) | `noverlink-linux-arm64.tar.gz` |
-| Windows | `noverlink-windows-x64.zip` |
+| macOS (Apple Silicon) | `truley-interview-darwin-arm64.tar.gz` |
+| macOS (Intel) | `truley-interview-darwin-x64.tar.gz` |
+| Linux (x64) | `truley-interview-linux-x64.tar.gz` |
+| Linux (ARM64) | `truley-interview-linux-arm64.tar.gz` |
+| Windows | `truley-interview-windows-x64.zip` |
 
 ## CLI Usage
 
 ```bash
 # Login first
-noverlink login
+truley-interview login
 
 # Check who you are
-noverlink whoami
+truley-interview whoami
 
 # Basic tunnel
-noverlink http 3000
+truley-interview http 3000
 
 # Custom subdomain
-noverlink http 3000 --subdomain myapp
+truley-interview http 3000 --subdomain myapp
 ```
 
 ## Environment Variables
@@ -178,8 +178,8 @@ BASE_DOMAIN=localhost  # Base domain for subdomains
 ### CLI
 
 ```bash
-NOVERLINK_RELAY_URL=ws://localhost:8444  # Relay WebSocket URL
-NOVERLINK_AUTH_TOKEN=xxx                 # User auth token
+TRULEY-INTERVIEW_RELAY_URL=ws://localhost:8444  # Relay WebSocket URL
+TRULEY-INTERVIEW_AUTH_TOKEN=xxx                 # User auth token
 ```
 
 ### Backend
@@ -192,7 +192,7 @@ POLAR_API_KEY=xxx      # Billing integration
 ## Project Structure
 
 ```
-noverlink/
+truley-interview/
 ├── packages/
 │   ├── relay/           # Rust relay server
 │   ├── cli/             # Rust CLI client

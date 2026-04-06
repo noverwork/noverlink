@@ -5,7 +5,7 @@ import {
   EvaGrainOverlay,
   GlowButton,
   TunnelConnection,
-} from '@noverlink/ui-shared';
+} from '@truley-interview/ui-shared';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -22,7 +22,7 @@ export default function Page() {
           <div className="flex items-center gap-2">
             <Image
               src="/logo.png"
-              alt="Noverlink"
+              alt="Truley Interview"
               width={32}
               height={32}
               className="w-8 h-8"
@@ -37,7 +37,7 @@ export default function Page() {
                 textTransform: 'uppercase',
               }}
             >
-              NOVERLINK
+              TRULEY-INTERVIEW
             </span>
           </div>
           <nav>
@@ -78,7 +78,7 @@ export default function Page() {
           </GlowButton>
           <GlowButton variant="secondary" size="lg" asChild>
             <a
-              href="https://github.com/noverwork/noverlink"
+              href="https://github.com/noverwork/truley-interview"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -102,7 +102,7 @@ export default function Page() {
 
             {/* Terminal Content */}
             <div className="p-6 font-mono text-[13px] text-left border-b border-white/10">
-              <p className="text-white/60">$ noverlink http 3000</p>
+              <p className="text-white/60">$ truley-interview http 3000</p>
               <p className="mt-2 text-[#00ff00]">OK TUNNEL ESTABLISHED</p>
             </div>
 
@@ -112,7 +112,7 @@ export default function Page() {
                 localLabel="Local"
                 localSublabel=":3000"
                 publicLabel="Public"
-                publicSublabel="myapp.noverlink.com"
+                publicSublabel="myapp.truley-interview.com"
                 status="connected"
                 tunnelName="tunnel-abc123"
                 animated
@@ -133,7 +133,7 @@ export default function Page() {
             letterSpacing: '0.03em',
           }}
         >
-          WHY NOVERLINK?
+          WHY TRULEY-INTERVIEW?
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
           <FeatureCard
@@ -198,7 +198,7 @@ export default function Page() {
             ]}
             cta={{
               label: 'View on GitHub',
-              href: 'https://github.com/noverwork/noverlink',
+              href: 'https://github.com/noverwork/truley-interview',
             }}
           />
           <PricingCard
@@ -268,7 +268,7 @@ export default function Page() {
           </GlowButton>
           <GlowButton variant="secondary" size="lg" asChild>
             <a
-              href="https://github.com/noverwork/noverlink"
+              href="https://github.com/noverwork/truley-interview"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -289,7 +289,7 @@ export default function Page() {
               textTransform: 'uppercase',
             }}
           >
-            2024 NOVERLINK. ALL RIGHTS RESERVED.
+            2024 TRULEY-INTERVIEW. ALL RIGHTS RESERVED.
           </p>
           <div
             className="flex items-center gap-6 text-[0.65rem] text-white/40"

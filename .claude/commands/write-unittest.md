@@ -251,14 +251,14 @@ For each function/method, test:
 npm run test
 
 # Run specific project
-npx nx test @noverlink/backend
-npx nx test @noverlink/frontend
+npx nx test @truley-interview/backend
+npx nx test @truley-interview/frontend
 
 # Run specific test file
-npx nx test @noverlink/backend -- --testNamePattern="BillingService"
+npx nx test @truley-interview/backend -- --testNamePattern="BillingService"
 
 # Run with coverage
-npx nx test @noverlink/backend --coverage
+npx nx test @truley-interview/backend --coverage
 ```
 
 ### Rust (relay & cli)
@@ -266,7 +266,7 @@ npx nx test @noverlink/backend --coverage
 ```bash
 # Run all Rust tests
 cargo test -p relay
-cargo test -p noverlink-cli
+cargo test -p truley-interview-cli
 
 # Run specific test
 cargo test -p relay test_valid_ticket

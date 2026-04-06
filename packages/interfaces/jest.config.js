@@ -10,7 +10,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 module.exports = {
-  displayName: '@noverlink/interfaces',
+  displayName: '@truley-interview/interfaces',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

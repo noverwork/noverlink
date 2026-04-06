@@ -1,6 +1,6 @@
 'use client';
 
-import { GlowButton, PulseBadge } from '@noverlink/ui-shared';
+import { GlowButton, PulseBadge } from '@truley-interview/ui-shared';
 import { useEffect, useState } from 'react';
 
 import { useProfile, useUpdateProfile } from '@/lib/hooks';
@@ -129,10 +129,10 @@ export function SettingsPage() {
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 px-4 py-3 bg-black border border-white/10 font-mono text-sm">
-                <div className="text-[#00ff00]">brew tap noverwork/noverlink</div>
-                <div className="text-white/60 mt-1">brew install noverlink</div>
+                <div className="text-[#00ff00]">brew tap noverwork/truley-interview</div>
+                <div className="text-white/60 mt-1">brew install truley-interview</div>
               </div>
-              <CopyButton text="brew tap noverwork/noverlink && brew install noverlink" />
+              <CopyButton text="brew tap noverwork/truley-interview && brew install truley-interview" />
             </div>
           </div>
 
@@ -149,9 +149,9 @@ export function SettingsPage() {
             </div>
             <div className="flex items-center gap-2">
               <code className="flex-1 px-4 py-3 bg-black border border-white/10 font-mono text-sm text-white/60">
-                noverlink login
+                truley-interview login
               </code>
-              <CopyButton text="noverlink login" />
+              <CopyButton text="truley-interview login" />
             </div>
           </div>
 
@@ -168,9 +168,9 @@ export function SettingsPage() {
             </div>
             <div className="flex items-center gap-2">
               <code className="flex-1 px-4 py-3 bg-black border border-white/10 font-mono text-sm text-white/60">
-                noverlink http 3000
+                truley-interview http 3000
               </code>
-              <CopyButton text="noverlink http 3000" />
+              <CopyButton text="truley-interview http 3000" />
             </div>
           </div>
         </div>

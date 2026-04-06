@@ -1,4 +1,4 @@
-# Noverlink API Design
+# Truley Interview API Design
 
 ## Overview
 
@@ -80,7 +80,7 @@
     {
       "id": "uuid",
       "subdomain": "happy-cat",
-      "publicUrl": "https://happy-cat.noverlink.dev",
+      "publicUrl": "https://happy-cat.truley-interview.dev",
       "localPort": 3000,
       "status": "active",
       "clientIp": "192.168.1.1",
@@ -110,7 +110,7 @@
 {
   "id": "uuid",
   "subdomain": "happy-cat",
-  "publicUrl": "https://happy-cat.noverlink.dev",
+  "publicUrl": "https://happy-cat.truley-interview.dev",
   "localPort": 3000,
   "status": "active",
   "clientIp": "192.168.1.1",
@@ -394,7 +394,7 @@
     {
       "id": "uuid",
       "hostname": "myapp",
-      "fullUrl": "https://myapp.noverlink.dev",
+      "fullUrl": "https://myapp.truley-interview.dev",
       "isReserved": true,
       "lastUsedAt": "2024-01-15T10:30:00Z",
       "createdAt": "2024-01-01T00:00:00Z"
@@ -423,7 +423,7 @@
 {
   "id": "uuid",
   "hostname": "myapp",
-  "fullUrl": "https://myapp.noverlink.dev",
+  "fullUrl": "https://myapp.truley-interview.dev",
   "isReserved": true,
   "createdAt": "2024-01-15T10:30:00Z"
 }

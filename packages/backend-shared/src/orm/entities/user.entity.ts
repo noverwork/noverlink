@@ -14,8 +14,6 @@ import { PgBaseEntity } from '../base-entities';
 import { Domain } from './domain.entity';
 import { OAuthConnection } from './oauth-connection.entity';
 import { Plan } from './plan.entity';
-import { Subscription } from './subscription.entity';
-import { UsageQuota } from './usage-quota.entity';
 
 /** Default plan ID for new users */
 export const DEFAULT_PLAN_ID = 'sandbox';
@@ -52,12 +50,6 @@ export class User extends PgBaseEntity {
   @OneToMany(() => Domain, (domain) => domain.user)
   domains = new Collection<Domain>(this);
 
-  @OneToMany(() => UsageQuota, (quota) => quota.user)
-  usageQuotas = new Collection<UsageQuota>(this);
-
   @OneToMany(() => OAuthConnection, (connection) => connection.user)
   oauthConnections = new Collection<OAuthConnection>(this);
-
-  @OneToMany(() => Subscription, (subscription) => subscription.user)
-  subscriptions = new Collection<Subscription>(this);
 }

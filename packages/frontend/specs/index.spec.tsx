@@ -22,9 +22,9 @@ describe('Landing Page', () => {
     expect(baseElement).toBeTruthy();
   });
 
-  it('should display the Noverlink brand', () => {
+  it('should display the Truley Interview brand', () => {
     render(<Page />);
-    expect(screen.getByText('NOVERLINK')).toBeTruthy();
+    expect(screen.getByText('TRULEY-INTERVIEW')).toBeTruthy();
   });
 
   it('should have a hero section with main heading', () => {
@@ -40,7 +40,7 @@ describe('Landing Page', () => {
 
   it('should display the tunnel demonstration', () => {
     render(<Page />);
-    expect(screen.getByText('$ noverlink http 3000')).toBeTruthy();
+    expect(screen.getByText('$ truley-interview http 3000')).toBeTruthy();
     expect(screen.getByText('OK TUNNEL ESTABLISHED')).toBeTruthy();
   });
 
@@ -71,7 +71,7 @@ describe('Landing Page', () => {
 
   it('should have footer with copyright', () => {
     render(<Page />);
-    expect(screen.getByText(/2024 NOVERLINK\. ALL RIGHTS RESERVED\./)).toBeTruthy();
+    expect(screen.getByText(/2024 TRULEY-INTERVIEW\. ALL RIGHTS RESERVED\./)).toBeTruthy();
   });
 
   it('should have footer links', () => {

@@ -1,4 +1,4 @@
-# Noverlink Design System
+# Truley Interview Design System
 
 > **Version:** 4.0 — Evangelion Title Card Style
 > **Last Updated:** 2025-01-03
@@ -190,7 +190,7 @@
   transform: 'scaleY(0.7) scaleX(0.85)',
   textShadow: '0 0 60px rgba(255,255,255,0.2)',
 }}>
-  NOVERLINK
+  TRULEY-INTERVIEW
 </h1>
 
 // Episode Header - 集數標題
@@ -554,10 +554,10 @@ function EvaNav({
   lineHeight: 1.8,
   textShadow: '0 0 10px rgba(0,255,0,0.3)',
 }}>
-  <div style={{ color: 'rgba(255,255,255,0.5)' }}># NOVERLINK SYSTEM v1.0.0</div>
+  <div style={{ color: 'rgba(255,255,255,0.5)' }}># TRULEY-INTERVIEW SYSTEM v1.0.0</div>
   <div>&gt; Initializing...</div>
   <div>&gt; Connection established</div>
-  <div>&gt; Tunnel: api-gateway → api.noverlink.com</div>
+  <div>&gt; Tunnel: api-gateway → api.truley-interview.com</div>
   <div>&gt; Status: <span style={{ color: '#00FF00' }}>READY</span></div>
 </div>
 ```

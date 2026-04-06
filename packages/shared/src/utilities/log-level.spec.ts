@@ -1,4 +1,4 @@
-import { LogLevel } from '@noverlink/interfaces';
+import { LogLevel } from '@truley-interview/interfaces';
 
 import { parseLogLevels } from './log-level';
 
