@@ -13,7 +13,7 @@ jest.mock('argon2');
 describe('AuthService', () => {
   let service: AuthService;
   let em: jest.Mocked<EntityManager>;
-  let jwtService: jest.Mocked<JwtService>;
+  let _jwtService: jest.Mocked<JwtService>;
 
   const mockUser = {
     id: 'user-123',
@@ -54,7 +54,7 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     em = module.get(EntityManager);
-    jwtService = module.get(JwtService);
+    _jwtService = module.get(JwtService);
   });
 
   afterEach(() => {
