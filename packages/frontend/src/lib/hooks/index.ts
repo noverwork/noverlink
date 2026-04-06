@@ -16,3 +16,10 @@ export {
   useSessions,
   useStats,
 } from './use-tunnels';
+export {
+  useDeleteVideo,
+  useUploadVideo,
+  useVideo,
+  useVideos,
+  VIDEOS_QUERY_KEY,
+} from './use-videos';

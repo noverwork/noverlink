@@ -8,6 +8,7 @@
   "dependencies": {
     "@truley-interview/interfaces": "*",
     "@truley-interview/shared": "*",
-    "@truley-interview/ui-shared": "*"
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1"
   }
 }

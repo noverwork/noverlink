@@ -1,173 +1,84 @@
 @import 'tailwindcss';
-@source "../../../../node_modules/@noverlink/ui-shared/src";
 
-/* Tailwind v4 移除了按鈕的 cursor: pointer 預設，這裡加回來 */
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
 @layer base {
-  button:not(:disabled),
-  [role='button']:not(:disabled) {
-    cursor: pointer;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   NOVERLINK v4.0 — Evangelion Title Card Style
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-@theme {
-  --radius-lg: 0.5rem;
-  --radius-md: calc(var(--radius-lg) - 2px);
-  --radius-sm: calc(var(--radius-lg) - 4px);
-
-  /* EVA Deep Gray Background */
-  --color-background: #0a0a0a;
-  --color-foreground: #ffffff;
-
-  /* Card surfaces */
-  --color-card: #0f0f0f;
-  --color-card-foreground: #ffffff;
-
-  /* Popover */
-  --color-popover: #0f0f0f;
-  --color-popover-foreground: #ffffff;
-
-  /* Primary - White for main actions */
-  --color-primary: #ffffff;
-  --color-primary-foreground: #0a0a0a;
-
-  /* Secondary - Muted white */
-  --color-secondary: rgba(255, 255, 255, 0.1);
-  --color-secondary-foreground: rgba(255, 255, 255, 0.8);
-
-  /* Muted text */
-  --color-muted: rgba(255, 255, 255, 0.05);
-  --color-muted-foreground: rgba(255, 255, 255, 0.5);
-
-  /* Accent */
-  --color-accent: rgba(255, 255, 255, 0.08);
-  --color-accent-foreground: #ffffff;
-
-  /* Status Colors - EVA palette */
-  --color-connected: #00ff00;
-  --color-warning: #ffb800;
-  --color-error: #ff0000;
-
-  /* Destructive */
-  --color-destructive: #ff0000;
-  --color-destructive-foreground: #ffffff;
-
-  /* Borders */
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-input: rgba(255, 255, 255, 0.1);
-  --color-ring: rgba(255, 255, 255, 0.3);
-}
-
-/* EVA Typography - Mechanical Compression */
-@layer utilities {
-  .eva-title {
-    font-family: 'Times New Roman', 'Georgia', serif;
-    font-weight: 900;
-    transform: scaleY(0.7) scaleX(0.85);
-    transform-origin: center center;
-    letter-spacing: 0.05em;
+  * {
+    @apply border-border;
   }
 
-  .eva-title-lg {
-    font-family: 'Times New Roman', 'Georgia', serif;
-    font-weight: 900;
-    transform: scaleY(0.7) scaleX(0.85);
-    transform-origin: center center;
-    letter-spacing: 0.05em;
-    text-shadow: 0 0 60px rgba(255, 255, 255, 0.2);
+  body {
+    @apply bg-background text-foreground;
   }
-
-  .eva-title-md {
-    font-family: 'Times New Roman', 'Georgia', serif;
-    font-weight: 700;
-    transform: scaleY(0.75) scaleX(0.9);
-    transform-origin: center center;
-    letter-spacing: 0.03em;
-  }
-
-  .eva-label {
-    font-family: 'Helvetica Neue', 'Arial', sans-serif;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-  }
-
-  /* Status glow effects */
-  .glow-connected {
-    color: #00ff00;
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5), 0 0 20px rgba(0, 255, 0, 0.3);
-  }
-
-  .glow-warning {
-    color: #ffb800;
-    text-shadow: 0 0 10px rgba(255, 184, 0, 0.5), 0 0 20px rgba(255, 184, 0, 0.3);
-  }
-
-  .glow-error {
-    color: #ff0000;
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5), 0 0 20px rgba(255, 0, 0, 0.3);
-  }
-
-  /* Border glow */
-  .border-glow-connected {
-    border-color: #00ff00;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.1);
-  }
-
-  .border-glow-warning {
-    border-color: #ffb800;
-    box-shadow: 0 0 10px rgba(255, 184, 0, 0.3), inset 0 0 10px rgba(255, 184, 0, 0.1);
-  }
-
-  .border-glow-error {
-    border-color: #ff0000;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.1);
-  }
-}
-
-/* Film Grain Animation */
-@keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -10%); }
-  20% { transform: translate(-15%, 5%); }
-  30% { transform: translate(7%, -25%); }
-  40% { transform: translate(-5%, 25%); }
-  50% { transform: translate(-15%, 10%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 15%); }
-  80% { transform: translate(3%, 35%); }
-  90% { transform: translate(-10%, 10%); }
-}
-
-/* Title reveal animation */
-@keyframes title-reveal {
-  0% {
-    opacity: 0;
-    transform: scaleY(0.7) scaleX(0.85);
-  }
-  100% {
-    opacity: 1;
-    transform: scaleY(0.7) scaleX(0.85);
-  }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Screen Flicker Animation */
-@keyframes flicker {
-  0%   { opacity: 0.97; }
-  5%   { opacity: 0.95; }
-  10%  { opacity: 0.97; }
-  15%  { opacity: 0.94; }
-  20%  { opacity: 0.98; }
-  50%  { opacity: 0.96; }
-  80%  { opacity: 0.97; }
-  90%  { opacity: 0.94; }
-  100% { opacity: 0.98; }
 }

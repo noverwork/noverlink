@@ -4,9 +4,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "nx run-many --target=serve --projects=@truley-interview/backend,@truley-interview/frontend --parallel=true --output-style=stream",
-    "backend:serve": "nx serve @truley-interview/backend",
+    "backend:dev": "nx serve @truley-interview/backend",
     "backend:build": "nx build @truley-interview/backend",
-    "frontend:serve": "nx dev @truley-interview/frontend",
+    "frontend:dev": "nx dev @truley-interview/frontend",
     "frontend:build": "nx build @truley-interview/frontend",
     "ui-shared:shadcn": "cd packages/ui-shared && npx shadcn@latest",
     "ms:start": "./scripts/start-ms.sh",
