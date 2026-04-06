@@ -1,13 +1,11 @@
-'use client';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { useRouter } from 'next/navigation';
-import { useRef,useState } from 'react';
-
-import { Button, Card,Progress } from '@/components/ui';
+import { Button, Card, Progress } from '@/components/ui';
 import { useUploadVideo } from '@/lib/hooks';
 
 export default function UploadVideoPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -55,11 +53,19 @@ export default function UploadVideoPage() {
       {
         onSuccess: () => {
           setUploadProgress(0);
-          router.push('/videos');
+          navigate('/videos');
         },
       },
     );
   };
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const formatFileSize = (bytes: number): string => {
     const k = 1024;

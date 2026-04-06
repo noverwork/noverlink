@@ -1,14 +1,12 @@
-'use client';
-
-import { useParams, useRouter } from 'next/navigation';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@/components/ui';
-import { useDeleteVideo,useVideo } from '@/lib/hooks';
+import { useDeleteVideo, useVideo } from '@/lib/hooks';
 
 export default function VideoDetailPage() {
   const params = useParams();
-  const router = useRouter();
-  const videoId = params.id as string;
+  const navigate = useNavigate();
+  const videoId = params.id ?? '';
 
   const { data: video, isLoading } = useVideo(videoId);
   const deleteMutation = useDeleteVideo();
@@ -31,6 +29,38 @@ export default function VideoDetailPage() {
     });
   };
 
+  const getStatusClassName = (status: string): string => {
+    if (status === 'ready') {
+      return 'bg-green-500/20 text-green-400';
+    }
+
+    if (status === 'uploading') {
+      return 'bg-blue-500/20 text-blue-400';
+    }
+
+    if (status === 'error') {
+      return 'bg-red-500/20 text-red-400';
+    }
+
+    return 'bg-yellow-500/20 text-yellow-400';
+  };
+
+  const getStatusLabel = (status: string): string => {
+    if (status === 'ready') {
+      return '就緒';
+    }
+
+    if (status === 'uploading') {
+      return '上傳中';
+    }
+
+    if (status === 'error') {
+      return '錯誤';
+    }
+
+    return '處理中';
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-6 py-8">
@@ -46,9 +76,7 @@ export default function VideoDetailPage() {
       <div className="container mx-auto px-6 py-8">
         <div className="text-center py-12">
           <p className="text-white/80 font-medium mb-4">影片不存在</p>
-          <Button variant="primary" onClick={() => router.push('/videos')}>
-            返回影片列表
-          </Button>
+          <Button onClick={() => navigate('/videos')}>返回影片列表</Button>
         </div>
       </div>
     );
@@ -57,7 +85,7 @@ export default function VideoDetailPage() {
   return (
     <div className="container mx-auto px-6 py-8">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => router.push('/videos')}>
+        <Button variant="ghost" onClick={() => navigate('/videos')}>
           ← 返回影片列表
         </Button>
       </div>
@@ -89,23 +117,9 @@ export default function VideoDetailPage() {
         <div className="flex items-center justify-between">
           <div>
             <span
-              className={`text-xs px-3 py-1 rounded-full ${
-                video.status === 'ready'
-                  ? 'bg-green-500/20 text-green-400'
-                  : video.status === 'uploading'
-                    ? 'bg-blue-500/20 text-blue-400'
-                    : video.status === 'error'
-                      ? 'bg-red-500/20 text-red-400'
-                      : 'bg-yellow-500/20 text-yellow-400'
-              }`}
+              className={`text-xs px-3 py-1 rounded-full ${getStatusClassName(video.status)}`}
             >
-              {video.status === 'ready'
-                ? '就緒'
-                : video.status === 'uploading'
-                  ? '上傳中'
-                  : video.status === 'error'
-                    ? '錯誤'
-                    : '處理中'}
+              {getStatusLabel(video.status)}
             </span>
           </div>
           <div className="flex gap-3">
@@ -113,7 +127,7 @@ export default function VideoDetailPage() {
               variant="ghost"
               onClick={() => {
                 deleteMutation.mutate(video.id, {
-                  onSuccess: () => router.push('/videos'),
+                  onSuccess: () => navigate('/videos'),
                 });
               }}
               disabled={deleteMutation.isPending}
