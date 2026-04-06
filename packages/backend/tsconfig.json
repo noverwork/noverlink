@@ -4,15 +4,6 @@
   "include": [],
   "references": [
     {
-      "path": "../shared"
-    },
-    {
-      "path": "../interfaces"
-    },
-    {
-      "path": "../backend-shared"
-    },
-    {
       "path": "./tsconfig.app.json"
     }
   ]
