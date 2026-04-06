@@ -7,6 +7,7 @@ Truley Interview exposes your local services to the internet. Supports HTTP, Web
 ## Why Truley Interview?
 
 ngrok's pricing doesn't scale for multiple tunnels. Truley Interview gives you:
+
 - **Unlimited tunnels** on your own infrastructure
 - **Full control** over your data
 - **Simple pricing** — host it yourself
@@ -41,20 +42,20 @@ ngrok's pricing doesn't scale for multiple tunnels. Truley Interview gives you:
                                           ▼
                                    ┌─────────────┐
                                    │  Frontend   │
-                                   │  (Next.js)  │
+                                   │ (React+Vite)│
                                    └─────────────┘
 ```
 
 ### Components
 
-| Package | Tech | Purpose |
-|---------|------|---------|
-| `relay` | Rust | High-performance traffic forwarding |
-| `cli` | Rust | Client tunnel agent |
-| `backend` | NestJS | API server, auth, billing |
-| `frontend` | Next.js | Control panel dashboard |
-| `backend-shared` | TypeScript | Shared entities and types |
-| `migrator` | MikroORM | Database migrations |
+| Package          | Tech         | Purpose                             |
+| ---------------- | ------------ | ----------------------------------- |
+| `relay`          | Rust         | High-performance traffic forwarding |
+| `cli`            | Rust         | Client tunnel agent                 |
+| `backend`        | NestJS       | API server, auth, billing           |
+| `frontend`       | React + Vite | Control panel dashboard             |
+| `backend-shared` | TypeScript   | Shared entities and types           |
+| `migrator`       | MikroORM     | Database migrations                 |
 
 ## Data Model
 
@@ -141,13 +142,13 @@ brew install truley-interview
 
 Download the latest release from [GitHub Releases](https://github.com/noverwork/truley-interview/releases/latest).
 
-| Platform | File |
-|----------|------|
+| Platform              | File                                   |
+| --------------------- | -------------------------------------- |
 | macOS (Apple Silicon) | `truley-interview-darwin-arm64.tar.gz` |
-| macOS (Intel) | `truley-interview-darwin-x64.tar.gz` |
-| Linux (x64) | `truley-interview-linux-x64.tar.gz` |
-| Linux (ARM64) | `truley-interview-linux-arm64.tar.gz` |
-| Windows | `truley-interview-windows-x64.zip` |
+| macOS (Intel)         | `truley-interview-darwin-x64.tar.gz`   |
+| Linux (x64)           | `truley-interview-linux-x64.tar.gz`    |
+| Linux (ARM64)         | `truley-interview-linux-arm64.tar.gz`  |
+| Windows               | `truley-interview-windows-x64.zip`     |
 
 ## CLI Usage
 
@@ -197,21 +198,20 @@ truley-interview/
 │   ├── relay/           # Rust relay server
 │   ├── cli/             # Rust CLI client
 │   ├── backend/         # NestJS API
-│   ├── frontend/        # Next.js dashboard
+│   ├── frontend/        # React + Vite dashboard
 │   ├── backend-shared/  # Shared entities
-│   ├── ui-shared/       # Shared UI components
 │   ├── shared/          # Shared utilities
 │   └── migrator/        # DB migrations
 ├── scripts/             # Dev scripts
-└── docker-compose.yml   # Local infrastructure
+└── dev-containers/      # Local infrastructure
 ```
 
 ## Scripts
 
 ```bash
 npm run dev              # Start backend + frontend
-npm run relay:serve      # Start relay
-npm run cli:serve        # Start CLI
+npm run frontend:dev     # Start the Vite frontend only
+npm run backend:dev      # Start the backend only
 npm run migrator:up      # Run migrations
 npm run migrator:down    # Rollback migrations
 npm run typecheck        # Type checking
