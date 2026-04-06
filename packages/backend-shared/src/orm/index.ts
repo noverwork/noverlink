@@ -1,5 +1,5 @@
-import { Domain, OAuthConnection, User } from './entities';
+import { User } from './entities';
 
 export * from './entities';
 
-export const ENTITIES = [User, Domain, OAuthConnection];
+export const ENTITIES = [User];

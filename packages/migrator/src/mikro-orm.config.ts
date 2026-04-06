@@ -15,6 +15,7 @@ dotenv.config({
 dotenv.config({
   path: path.resolve(PROJECT_ROOT, `.env`),
 });
+
 const config = defineConfig({
   debug: true,
   extensions: [Migrator, SeedManager],
@@ -39,9 +40,10 @@ const config = defineConfig({
   },
   seeder: {
     path: SEEDER_ROOT,
-    defaultSeeder: 'PlanSeeder',
+    defaultSeeder: 'DevUserSeeder',
     emit: 'ts',
     fileName: (className: string) => className,
   },
 });
+
 export default config;
