@@ -75,6 +75,26 @@
           }
         }
       },
+      "dev": {
+        "continuous": true,
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "@truley-interview/backend:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "@truley-interview/backend:build:development"
+          },
+          "production": {
+            "buildTarget": "@truley-interview/backend:build:production"
+          }
+        }
+      },
       "test": {
         "options": {
           "passWithNoTests": true

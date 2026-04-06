@@ -1,6 +1,5 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestApplication, NestFactory } from '@nestjs/core';
-import { Logger as PinoLogger } from 'nestjs-pino';
 
 import { AppModule } from './app/app.module';
 import { AppConfigService } from './app-config';
@@ -17,9 +16,6 @@ async function bootstrap() {
     env: { isProduction },
   } = appConfigService;
 
-  // Use Pino logger
-  app.useLogger(app.get(PinoLogger));
-
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -29,7 +25,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       forbidUnknownValues: true,
-    })
+    }),
   );
 
   // CORS configuration
@@ -40,7 +36,6 @@ async function bootstrap() {
     exposedHeaders: ['Location'],
     credentials: true,
   });
-
 
   // Enable graceful shutdown hooks
   app.enableShutdownHooks();

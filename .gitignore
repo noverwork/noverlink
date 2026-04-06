@@ -58,3 +58,7 @@ target/
 deploy/.env
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
+
+# Playwright
+playwright-report
+playwright/.cache
