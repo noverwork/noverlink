@@ -3,24 +3,31 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { Button, Card, Input } from '@/components/ui';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get('email') ?? '');
+    const nameValue = formData.get('name');
+    const fallbackName = email.split('@')[0] || 'user';
+    const name = String(nameValue ?? fallbackName);
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     localStorage.setItem(
       'user',
       JSON.stringify({
-        id: '1',
+        id: String(Date.now()),
         email,
-        name: email.split('@')[0],
+        name,
       }),
     );
+
     setIsLoading(false);
     navigate('/videos');
   };
@@ -29,11 +36,24 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-6 space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">登入</h1>
-          <p className="text-muted-foreground">歡迎回來</p>
+          <h1 className="text-2xl font-bold">建立帳戶</h1>
+          <p className="text-muted-foreground">開始上傳並管理您的影片</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium leading-none">
+              名稱
+            </label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="您的名稱"
+              required
+            />
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium leading-none">
               電子郵件
@@ -64,17 +84,17 @@ export default function LoginPage() {
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? '登入中...' : '登入'}
+            {isLoading ? '建立中...' : '建立帳戶'}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
-          還沒有帳戶？{' '}
+          已經有帳戶？{' '}
           <Link
-            to="/register"
+            to="/login"
             className="text-primary underline-offset-4 hover:underline"
           >
-            立即註冊
+            立即登入
           </Link>
         </p>
       </Card>

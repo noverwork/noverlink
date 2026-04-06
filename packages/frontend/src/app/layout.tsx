@@ -1,23 +1,14 @@
-import './globals.css';
+import { Outlet } from 'react-router-dom';
 
 import { Navbar } from '@/components/layout/navbar';
 
-import { Providers } from './providers';
-
-export const metadata = {
-  title: 'VideoHub - 影片上傳服務',
-  description: '簡單的视频上傳平台',
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout() {
   return (
-    <html lang="zh-TW">
-      <body>
-        <Providers>
-          <Navbar />
-          <main>{children}</main>
-        </Providers>
-      </body>
-    </html>
+    <>
+      <Navbar />
+      <main className="min-h-[calc(100vh-3.5rem)]">
+        <Outlet />
+      </main>
+    </>
   );
 }
