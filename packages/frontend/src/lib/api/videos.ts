@@ -1,4 +1,3 @@
-
 export interface Video {
   id: string;
   filename: string;
@@ -16,7 +15,7 @@ export async function uploadVideo(
   file: File,
   onProgress?: (progress: number) => void,
 ): Promise<Video> {
-  const videoId = `video-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  const videoId = `video-${crypto.randomUUID()}`;
 
   const video: Video = {
     id: videoId,

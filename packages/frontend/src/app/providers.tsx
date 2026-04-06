@@ -1,7 +1,5 @@
-'use client';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type ReactNode,useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 
 import { authStore } from '@/lib/auth-store';
 
@@ -15,7 +13,7 @@ export function Providers({ children }: { children: ReactNode }) {
             retry: 1,
           },
         },
-      })
+      }),
   );
 
   useEffect(() => {

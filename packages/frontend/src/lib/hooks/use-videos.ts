@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { type Video,videosApi } from '@/lib/api/videos';
+import { videosApi } from '@/lib/api/videos';
 
 export const VIDEOS_QUERY_KEY = ['videos'];
 
