@@ -76,10 +76,8 @@ jobs:
             ${{ env.IMAGE_PREFIX }}-frontend:latest
             ${{ github.ref_type == 'tag' && format('{0}-frontend:{1}', env.IMAGE_PREFIX, github.ref_name) || '' }}
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
-            NEXT_PUBLIC_POLAR_STARTER_PRODUCT_ID=${{ vars.NEXT_PUBLIC_POLAR_STARTER_PRODUCT_ID }}
-            NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID=${{ vars.NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID }}
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_APP_URL=${{ vars.VITE_APP_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

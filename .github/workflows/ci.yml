@@ -12,8 +12,8 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION: "1.83"
-  NODE_VERSION: "22"
+  RUST_VERSION: '1.83'
+  NODE_VERSION: '22'
 
 jobs:
   install:
@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
+          cache: 'npm'
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@master
@@ -75,7 +75,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
       - name: Build shared dependencies
-        run: npx nx run-many --target=build --projects=@truley-interview/ui-shared,@truley-interview/interfaces,shared
+        run: npx nx run-many --target=build --projects=@truley-interview/interfaces,shared,@truley-interview/backend-shared
 
       - name: Cache dist
         uses: actions/cache/save@v4
