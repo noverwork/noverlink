@@ -13,7 +13,6 @@ export interface UserProfile {
   email: string;
   emailVerified: boolean;
   plan: 'free' | 'starter' | 'pro';
-  maxTunnels: number;
   maxBandwidthMb: number;
   isActive: boolean;
   createdAt: string;

@@ -47,13 +47,6 @@ export class AppConfigService {
     };
   }
 
-  get tunnel() {
-    return {
-      ticketSecret: 'test-ticket-secret-key-for-testing-purposes-12345678',
-      relayUrl: 'wss://localhost:8443',
-    };
-  }
-
   get relay() {
     return {
       secret: 'test-relay-secret-key-for-testing-purposes-12345678',
