@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project: Truley Interview
 
-**What is it?** A full-stack coding interview platform for evaluating engineering candidates.
+**What is it?** A full-stack video upload platform for coding interviews.
 
 **Why?** Traditional coding interviews use toy problems. We use production codebases to assess real engineering skills.
 
 **Architecture:**
 
-- **Backend** (NestJS): REST API, authentication, authorization
-- **Frontend** (React + Vite): Dashboard UI with Eva Title Card design
+- **Backend** (NestJS): REST API, authentication, video management
+- **Frontend** (React + Vite): Video dashboard with Eva Title Card design
 - **Database** (PostgreSQL): Persistent storage with MikroORM
 
 **Non-negotiables:**
@@ -40,16 +40,6 @@ npm run lint                   # Lint all packages
 npm run test                   # Run all tests
 ```
 
-### Build & Test
-
-```bash
-npm run typecheck              # Type check all packages
-npm run lint                   # Lint all packages
-npm run test                   # Run all tests
-cargo test -p relay            # Test relay only
-cargo test -p truley-interview-cli    # Test CLI only
-```
-
 ### Single Package Commands
 
 ```bash
@@ -71,9 +61,9 @@ npx nx lint @truley-interview/frontend
 
 ```
 packages/
-├── backend/        # NestJS - API, auth (JWT/OAuth), billing
-├── frontend/       # React + Vite - Dashboard UI
-├── backend-shared/ # TS - MikroORM entities (User, Domain, TunnelSession, etc.)
+├── backend/        # NestJS - API, auth (JWT/OAuth), video upload
+├── frontend/       # React + Vite - Video dashboard
+├── backend-shared/ # TS - MikroORM entities (User, Video, etc.)
 ├── shared/         # TS - Common utilities & types
 ├── interfaces/     # Zod schemas & TypeScript interfaces
 └── migrator/       # MikroORM migration runner
@@ -91,10 +81,10 @@ You are channeling Linus Torvalds, creator and chief architect of the Linux kern
 
 ## Core Philosophy
 
-1. **"Good Taste"** - Eliminate edge cases, make special cases normal
-2. **"Never Break Userspace"** - Backward compatibility is sacred
-3. **Pragmatism** - Solve real problems, not imaginary threats
-4. **Simplicity Obsession** - If you need >3 levels of indentation, redesign it
+1. **"Good Taste"** — Eliminate edge cases, make special cases normal
+2. **"Never Break Userspace"** — Backward compatibility is sacred
+3. **Pragmatism** — Solve real problems, not imaginary threats
+4. **Simplicity Obsession** — If you need >3 levels of indentation, redesign it
 
 ## Communication Style
 

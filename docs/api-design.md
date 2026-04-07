@@ -40,38 +40,42 @@
 
 ## 新增 API (待實作)
 
-### 1. Tunnel Sessions API
+### 1. Videos API
 
-用於 Dashboard 和 Tunnels 頁面顯示活躍的 tunnel 連接。
+用於影片庫頁面顯示上傳的影片。
 
-#### `GET /api/tunnels/sessions`
+#### `GET /api/videos`
 
-列出當前用戶的所有 tunnel sessions。
+列出當前用戶的所有影片。
 
 **Auth:** JWT
 
 **Query Parameters:**
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
-| `status` | `active` \| `closed` \| `all` | `active` | 過濾狀態 |
+| `status` | `processing` \| `ready` \| `error` \| `all` | `ready` | 過濾狀態 |
 | `limit` | number | 20 | 每頁數量 (max: 100) |
 | `cursor` | string | - | 分頁游標 |
+| `sortBy` | `uploadDate` \| `views` \| `duration` | `uploadDate` | 排序欄位 |
+| `order` | `asc` \| `desc` | `desc` | 排序方向 |
 
 **Response:**
 
 ```json
 {
-  "sessions": [
+  "videos": [
     {
       "id": "uuid",
-      "name": "My Tunnel",
-      "localPort": 3000,
-      "status": "active",
-      "connectedAt": "2024-01-15T10:30:00Z",
-      "closedAt": null,
-      "bytesIn": 1024000,
-      "bytesOut": 2048000,
-      "requestCount": 150
+      "title": "My Video",
+      "description": "Video description",
+      "thumbnailUrl": "https://cdn.example.com/thumb.jpg",
+      "duration": 180,
+      "durationFormatted": "3:00",
+      "status": "ready",
+      "views": 1500,
+      "uploadDate": "2024-01-15T10:30:00Z",
+      "fileSize": 52428800,
+      "fileSizeFormatted": "50 MB"
     }
   ],
   "nextCursor": "eyJpZCI6Inh4eCJ9",
@@ -81,9 +85,9 @@
 
 ---
 
-#### `GET /api/tunnels/sessions/:id`
+#### `GET /api/videos/:id`
 
-獲取單一 session 的詳細資訊。
+獲取單一影片的詳細資訊。
 
 **Auth:** JWT
 
@@ -92,65 +96,87 @@
 ```json
 {
   "id": "uuid",
-  "name": "My Tunnel",
-  "localPort": 3000,
-  "status": "active",
-  "connectedAt": "2024-01-15T10:30:00Z",
-  "closedAt": null,
-  "bytesIn": 1024000,
-  "bytesOut": 2048000,
-  "requestCount": 150,
-  "stats": {
-    "avgLatency": 45,
-    "p95Latency": 120,
-    "successRate": 0.98
+  "title": "My Video",
+  "description": "Video description",
+  "thumbnailUrl": "https://cdn.example.com/thumb.jpg",
+  "videoUrl": "https://cdn.example.com/video.mp4",
+  "duration": 180,
+  "durationFormatted": "3:00",
+  "status": "ready",
+  "views": 1500,
+  "uploadDate": "2024-01-15T10:30:00Z",
+  "fileSize": 52428800,
+  "fileSizeFormatted": "50 MB",
+  "mimeType": "video/mp4",
+  "encoding": {
+    "codec": "h264",
+    "resolution": "1920x1080",
+    "bitrate": 5000000
   }
 }
 ```
 
 ---
 
-#### `GET /api/tunnels/sessions/:id/logs`
+#### `POST /api/videos/upload`
 
-獲取 session 的 HTTP 請求日誌（分頁）。
+上傳新影片。
 
 **Auth:** JWT
 
-**Query Parameters:**
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `limit` | number | 50 | 每頁數量 (max: 100) |
-| `cursor` | string | - | 分頁游標 |
-| `method` | string | - | 過濾 HTTP method |
-| `status` | string | - | 過濾狀態碼 (e.g., `2xx`, `4xx`, `500`) |
+**Request:** `multipart/form-data`
+
+| Field         | Type   | Required | Description               |
+| ------------- | ------ | -------- | ------------------------- |
+| `file`        | File   | Yes      | 影片檔案 (mp4, webm, mov) |
+| `title`       | string | Yes      | 影片標題                  |
+| `description` | string | No       | 影片描述                  |
 
 **Response:**
 
 ```json
 {
-  "logs": [
-    {
-      "id": "uuid",
-      "method": "GET",
-      "path": "/api/users",
-      "queryString": "page=1",
-      "status": 200,
-      "durationMs": 45,
-      "requestSize": 256,
-      "responseSize": 1024,
-      "timestamp": "2024-01-15T10:35:00Z"
-    }
-  ],
-  "nextCursor": "eyJpZCI6Inh4eCJ9",
-  "hasMore": true
+  "id": "uuid",
+  "title": "My Video",
+  "status": "processing",
+  "uploadProgress": 100,
+  "createdAt": "2024-01-15T10:30:00Z"
 }
 ```
 
 ---
 
-#### `DELETE /api/tunnels/sessions/:id`
+#### `PATCH /api/videos/:id`
 
-強制關閉一個活躍的 session。
+更新影片資訊。
+
+**Auth:** JWT
+
+**Request Body:**
+
+```json
+{
+  "title": "Updated Title",
+  "description": "Updated description"
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "uuid",
+  "title": "Updated Title",
+  "description": "Updated description",
+  "updatedAt": "2024-01-15T11:00:00Z"
+}
+```
+
+---
+
+#### `DELETE /api/videos/:id`
+
+刪除影片。
 
 **Auth:** JWT
 
@@ -164,43 +190,78 @@
 
 ---
 
-### 2. Tunnel Stats API
+### 2. Video Stats API
 
-用於 Dashboard 頁面的統計資料。
+用於影片分析頁面。
 
-#### `GET /api/tunnels/stats`
+#### `GET /api/videos/:id/stats`
 
-獲取用戶的 tunnel 統計摘要。
+獲取影片的統計數據。
 
 **Auth:** JWT
 
 **Query Parameters:**
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
-| `period` | `today` \| `week` \| `month` | `today` | 統計時間範圍 |
+| `period` | `today` \| `week` \| `month` \| `all` | `week` | 統計時間範圍 |
 
 **Response:**
 
 ```json
 {
-  "activeTunnels": 2,
-  "totalRequests": 15420,
-  "totalBandwidth": {
-    "in": 52428800,
-    "out": 104857600,
-    "formatted": "150 MB"
+  "videoId": "uuid",
+  "totalViews": 15420,
+  "uniqueViewers": 8500,
+  "watchTime": {
+    "total": 36000,
+    "formatted": "10h 0m"
   },
-  "avgLatency": 42,
+  "engagement": {
+    "avgWatchTime": 180,
+    "avgWatchTimeFormatted": "3:00",
+    "completionRate": 0.75
+  },
   "period": {
-    "start": "2024-01-15T00:00:00Z",
+    "start": "2024-01-08T00:00:00Z",
     "end": "2024-01-15T23:59:59Z"
-  }
+  },
+  "viewsByDay": [
+    {
+      "date": "2024-01-15",
+      "views": 2500
+    }
+  ]
 }
 ```
 
 ---
 
-### 3. API Keys Management
+### 3. Upload Progress API
+
+用於追蹤上傳進度。
+
+#### `GET /api/uploads/:id/progress`
+
+獲取上傳進度。
+
+**Auth:** JWT
+
+**Response:**
+
+```json
+{
+  "uploadId": "uuid",
+  "status": "processing" | "ready" | "error",
+  "progress": 75,
+  "stage": "uploading" | "encoding" | "thumbnail",
+  "message": "Encoding video...",
+  "estimatedTimeRemaining": 120
+}
+```
+
+---
+
+### 4. API Keys Management
 
 用於 Settings 頁面的 API Key 管理。
 
@@ -274,7 +335,7 @@
 
 ---
 
-### 4. Billing & Usage API
+### 5. Billing & Usage API
 
 用於 Billings 頁面。
 
@@ -292,150 +353,22 @@
     "start": "2024-01-01T00:00:00Z",
     "end": "2024-01-31T23:59:59Z"
   },
-  "tunnels": {
-    "used": 2,
-    "limit": 5
-  },
-  "bandwidth": {
+  "storage": {
     "used": 5368709120,
     "limit": 53687091200,
     "usedFormatted": "5 GB",
     "limitFormatted": "50 GB"
   },
-  "requests": {
-    "total": 125000
+  "bandwidth": {
+    "used": 10737418240,
+    "limit": 107374182400,
+    "usedFormatted": "10 GB",
+    "limitFormatted": "100 GB"
+  },
+  "videos": {
+    "uploaded": 25,
+    "limit": 100
   }
-}
-```
-
----
-
-#### `POST /api/billing/checkout`
-
-創建 Polar 結帳連結。
-
-**Auth:** JWT
-
-**Request Body:**
-
-```json
-{
-  "productId": "hobbyist_monthly"
-}
-```
-
-**Response:**
-
-```json
-{
-  "checkoutUrl": "https://polar.sh/checkout/..."
-}
-```
-
----
-
-#### `GET /api/billing/invoices`
-
-獲取發票/付款歷史。
-
-**Auth:** JWT
-
-**Query Parameters:**
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `limit` | number | 10 | 每頁數量 |
-| `cursor` | string | - | 分頁游標 |
-
-**Response:**
-
-```json
-{
-  "invoices": [
-    {
-      "id": "inv_xxx",
-      "amount": 1200,
-      "currency": "USD",
-      "status": "paid",
-      "paidAt": "2024-01-01T00:00:00Z",
-      "description": "Hobbyist Plan - January 2024",
-      "invoiceUrl": "https://polar.sh/invoice/..."
-    }
-  ],
-  "nextCursor": null,
-  "hasMore": false
-}
-```
-
----
-
-### 5. Domains API (Optional)
-
-用於管理保留的子域名。
-
-#### `GET /api/domains`
-
-列出用戶保留的域名。
-
-**Auth:** JWT
-
-**Response:**
-
-```json
-{
-  "domains": [
-    {
-      "id": "uuid",
-      "hostname": "myapp",
-      "fullUrl": "https://myapp.truley-interview.dev",
-      "isReserved": true,
-      "lastUsedAt": "2024-01-15T10:30:00Z",
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  ]
-}
-```
-
----
-
-#### `POST /api/domains`
-
-保留一個子域名。
-
-**Auth:** JWT
-
-**Request Body:**
-
-```json
-{
-  "hostname": "myapp"
-}
-```
-
-**Response:**
-
-```json
-{
-  "id": "uuid",
-  "hostname": "myapp",
-  "fullUrl": "https://myapp.truley-interview.dev",
-  "isReserved": true,
-  "createdAt": "2024-01-15T10:30:00Z"
-}
-```
-
----
-
-#### `DELETE /api/domains/:id`
-
-釋放一個保留的域名。
-
-**Auth:** JWT
-
-**Response:**
-
-```json
-{
-  "success": true
 }
 ```
 
@@ -443,44 +376,15 @@
 
 ## 頁面與 API 對應表
 
-| 頁面              | 需要的 API                                                                                           |
-| ----------------- | ---------------------------------------------------------------------------------------------------- |
-| **Dashboard**     | `GET /tunnels/sessions?status=active`, `GET /tunnels/stats`                                          |
-| **Tunnels**       | `GET /tunnels/sessions`, `GET /tunnels/sessions/:id`                                                 |
-| **Tunnel Detail** | `GET /tunnels/sessions/:id`, `GET /tunnels/sessions/:id/logs`                                        |
-| **Settings**      | `GET /auth/me`, `GET /auth/api-keys`, `POST /auth/api-keys`, `DELETE /auth/api-keys/:id`             |
-| **Billings**      | `GET /billing/usage`, `GET /billing/subscription`, `POST /billing/checkout`, `GET /billing/invoices` |
-| **Device Auth**   | `POST /auth/device/approve`, `POST /auth/device/deny` (已存在)                                       |
-
----
-
-## 實作優先順序
-
-### Phase 1: Core (Dashboard & Tunnels)
-
-1. `GET /api/tunnels/sessions` - 列出 sessions
-2. `GET /api/tunnels/sessions/:id` - Session 詳情
-3. `GET /api/tunnels/sessions/:id/logs` - 請求日誌
-4. `GET /api/tunnels/stats` - 統計摘要
-
-### Phase 2: Settings
-
-5. `GET /api/auth/api-keys` - 列出 API Keys
-6. `POST /api/auth/api-keys` - 創建 API Key
-7. `DELETE /api/auth/api-keys/:id` - 刪除 API Key
-
-### Phase 3: Billing
-
-8. `GET /api/billing/usage` - 使用量
-9. `POST /api/billing/checkout` - 創建結帳
-10. `GET /api/billing/invoices` - 發票歷史
-
-### Phase 4: Optional
-
-11. `GET /api/domains` - 列出域名
-12. `POST /api/domains` - 保留域名
-13. `DELETE /api/domains/:id` - 釋放域名
-14. `DELETE /api/tunnels/sessions/:id` - 強制關閉 session
+| 頁面              | 需要的 API                                                               |
+| ----------------- | ------------------------------------------------------------------------ |
+| **Dashboard**     | `GET /videos?status=ready`, `GET /videos/:id/stats`                      |
+| **Video Library** | `GET /videos`, `GET /videos/:id`                                         |
+| **Upload**        | `POST /videos/upload`, `GET /uploads/:id/progress`                       |
+| **Video Detail**  | `GET /videos/:id`, `PATCH /videos/:id`, `DELETE /videos/:id`             |
+| **Analytics**     | `GET /videos/:id/stats`                                                  |
+| **Settings**      | `GET /auth/api-keys`, `POST /auth/api-keys`, `DELETE /auth/api-keys/:id` |
+| **Billings**      | `GET /billing/usage`, `GET /billing/subscription`                        |
 
 ---
 
@@ -495,8 +399,8 @@
   "error": "Bad Request",
   "details": [
     {
-      "field": "email",
-      "message": "Invalid email format"
+      "field": "title",
+      "message": "Title is required"
     }
   ]
 }
@@ -504,12 +408,41 @@
 
 ### Common Error Codes
 
-| Status | Error                 | Description               |
-| ------ | --------------------- | ------------------------- |
-| 400    | Bad Request           | 請求參數無效              |
-| 401    | Unauthorized          | 未認證或 token 過期       |
-| 403    | Forbidden             | 無權限訪問資源            |
-| 404    | Not Found             | 資源不存在                |
-| 409    | Conflict              | 資源衝突 (如域名已被使用) |
-| 429    | Too Many Requests     | 請求頻率過高              |
-| 500    | Internal Server Error | 伺服器錯誤                |
+| Status | Error                  | Description         |
+| ------ | ---------------------- | ------------------- |
+| 400    | Bad Request            | 請求參數無效        |
+| 401    | Unauthorized           | 未認證或 token 過期 |
+| 403    | Forbidden              | 無權限訪問資源      |
+| 404    | Not Found              | 資源不存在          |
+| 413    | Payload Too Large      | 檔案超過大小限制    |
+| 415    | Unsupported Media Type | 不支持的影片格式    |
+| 429    | Too Many Requests      | 請求頻率過高        |
+| 500    | Internal Server Error  | 伺服器錯誤          |
+
+---
+
+## File Upload Specifications
+
+### Supported Formats
+
+| Format        | Extensions              | Max Size |
+| ------------- | ----------------------- | -------- |
+| **Video**     | `.mp4`, `.webm`, `.mov` | 100 MB   |
+| **Thumbnail** | `.jpg`, `.png`, `.webp` | 5 MB     |
+
+### Upload Limits
+
+| Plan       | Max File Size | Monthly Uploads | Storage |
+| ---------- | ------------- | --------------- | ------- |
+| Free       | 50 MB         | 10              | 1 GB    |
+| Hobbyist   | 100 MB        | 50              | 10 GB   |
+| Pro        | 500 MB        | 500             | 100 GB  |
+| Enterprise | 2 GB          | Unlimited       | 1 TB    |
+
+### Encoding Presets
+
+| Quality   | Resolution | Bitrate   | Codec |
+| --------- | ---------- | --------- | ----- |
+| **1080p** | 1920x1080  | 5000 kbps | H.264 |
+| **720p**  | 1280x720   | 2500 kbps | H.264 |
+| **480p**  | 854x480    | 1000 kbps | H.264 |

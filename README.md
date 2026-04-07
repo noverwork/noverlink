@@ -11,7 +11,7 @@
 
 ## 📋 Overview
 
-Truley Interview is a **full-stack web application** built as a comprehensive coding interview environment. Candidates can demonstrate their skills across:
+Truley Interview is a **full-stack video upload platform** built as a comprehensive coding interview environment. Candidates can demonstrate their skills across:
 
 - **Backend Development** — NestJS API with MikroORM
 - **Frontend Development** — React + Vite with Eva Title Card design system
@@ -46,14 +46,14 @@ Traditional coding interviews use toy problems that don't reflect real work. Tru
 
 ### Package Structure
 
-| Package          | Tech         | Purpose                 | Build         |
-| ---------------- | ------------ | ----------------------- | ------------- |
-| `frontend`       | React + Vite | Dashboard UI            | Vite          |
-| `backend`        | NestJS       | REST API, Auth, Billing | Webpack       |
-| `backend-shared` | TypeScript   | MikroORM Entities       | None (source) |
-| `migrator`       | MikroORM     | Database Migrations     | Webpack       |
-| `interfaces`     | Zod + TS     | Shared Type Schemas     | tsc           |
-| `shared`         | TypeScript   | Common Utilities        | tsc           |
+| Package          | Tech         | Purpose                      | Build         |
+| ---------------- | ------------ | ---------------------------- | ------------- |
+| `frontend`       | React + Vite | Video dashboard UI           | Vite          |
+| `backend`        | NestJS       | REST API, Auth, Video Upload | Webpack       |
+| `backend-shared` | TypeScript   | MikroORM Entities            | None (source) |
+| `migrator`       | MikroORM     | Database Migrations          | Webpack       |
+| `interfaces`     | Zod + TS     | Shared Type Schemas          | tsc           |
+| `shared`         | TypeScript   | Common Utilities             | tsc           |
 
 ---
 
@@ -140,23 +140,23 @@ npx nx graph
 
 Candidates choose **ONE** task to complete in **1 hour**:
 
-#### Option A: Tunnel Sessions Dashboard
+#### Option A: Video Library Dashboard
 
-- Implement `GET /api/tunnels/sessions` API
-- Build frontend list view with status indicators
-- Include: subdomain, local port, traffic stats, connection time
+- Implement `GET /api/videos` API with pagination
+- Build frontend grid view with video cards
+- Include: thumbnail, title, duration, upload date, views
 
-#### Option B: API Key Management
+#### Option B: Video Upload Flow
 
-- Full CRUD: list, create, delete API keys
-- Frontend form with confirmation dialogs
-- Display full key once on creation (security pattern)
+- Implement `POST /api/videos/upload` endpoint
+- Frontend drag-and-drop upload with progress
+- Handle file validation, size limits, error states
 
-#### Option C: Usage Statistics
+#### Option C: Video Analytics
 
-- Implement `GET /api/tunnels/stats` API
-- Dashboard with metric cards
-- Include loading/error states
+- Implement `GET /api/videos/:id/stats` API
+- Dashboard with view metrics, engagement charts
+- Include loading/error states, period filters
 
 ### Evaluation Criteria
 
@@ -198,7 +198,7 @@ Inspired by Neon Genesis Evangelion's iconic title cards — **stark, compressed
 1. **Mechanical Compression** — `transform: scaleY(0.7) scaleX(0.85)`
 2. **Deep Dark Backgrounds** — `#0a0a0a` (not pure black)
 3. **Status Colors Only** — Green/Amber/Red with glow effects
-4. **Episode Format** — `TUNNEL.01`, `STATUS.00`
+4. **Episode Format** — `VIDEO.01`, `UPLOAD.00`
 
 #### Quick Reference
 
@@ -211,7 +211,7 @@ Inspired by Neon Genesis Evangelion's iconic title cards — **stark, compressed
   transform: 'scaleY(0.7) scaleX(0.85)',
   color: '#fff',
 }}>
-  TUNNEL ACTIVE
+  VIDEO LIBRARY
 </h1>
 
 // UI Label (wide sans-serif)
@@ -222,7 +222,7 @@ Inspired by Neon Genesis Evangelion's iconic title cards — **stark, compressed
   textTransform: 'uppercase',
   color: 'rgba(255,255,255,0.6)',
 }}>
-  ACTIVE TUNNELS
+  RECENT UPLOADS
 </span>
 
 // Status Badge (with glow)
@@ -232,7 +232,7 @@ Inspired by Neon Genesis Evangelion's iconic title cards — **stark, compressed
   border: '1px solid #00FF00',
   padding: '4px 12px',
 }}>
-  CONNECTED
+  PROCESSING
 </span>
 ```
 
@@ -271,6 +271,10 @@ GITHUB_CLIENT_ID=your-client-id
 
 # Frontend URL for OAuth redirects
 FRONTEND_URL=http://localhost:4200
+
+# File Upload
+UPLOAD_DIR=./uploads
+MAX_FILE_SIZE=104857600  # 100MB
 ```
 
 ### Frontend (`.env`)
@@ -313,7 +317,7 @@ npx nx test @truley-interview/frontend
 - **PostgreSQL 17** — Primary database
 - **Passport** — JWT + OAuth (Google/GitHub)
 - **Pino** — High-performance logging
-- **Polar.sh** — Subscription billing
+- **Multer** — File upload handling
 
 ### Frontend Stack
 

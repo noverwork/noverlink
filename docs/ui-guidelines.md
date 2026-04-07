@@ -42,7 +42,7 @@
 #### 1. Title Card Hierarchy (標題卡層級)
 
 - **大字報優先：** 重要資訊用超大壓縮文字
-- **Episode 格式：** `TUNNEL.01`、`STATUS.00` 這種編號方式
+- **Episode 格式：** `VIDEO.01`、`STATUS.00` 這種編號方式
 - **少即是多：** 每個畫面只傳達一個核心訊息
 
 #### 2. Mechanical Compression (機械壓縮)
@@ -196,7 +196,7 @@
 // Episode Header - 集數標題
 <div style={{ borderLeft: '4px solid #00FF00', padding: '30px 40px' }}>
   <span style={{ fontWeight: 900, transform: 'scaleY(0.75) scaleX(0.9)' }}>
-    TUNNEL<span style={{ color: '#00FF00' }}>.01</span>
+    VIDEO<span style={{ color: '#00FF00' }}>.01</span>
   </span>
 </div>
 
@@ -208,7 +208,7 @@
   textTransform: 'uppercase',
   color: 'rgba(255,255,255,0.6)',
 }}>
-  ACTIVE TUNNELS
+  ACTIVE VIDEOS
 </span>
 
 // Mono - 技術數據
@@ -239,7 +239,7 @@ EVA 風格強調大量留白和居中構圖。
   alignItems: 'center',
   backgroundColor: '#0a0a0a',
 }}>
-  <h1 className="eva-title">TUNNEL ACTIVE</h1>
+  <h1 className="eva-title">VIDEO ACTIVE</h1>
 </div>
 ```
 
@@ -311,7 +311,7 @@ function TitleCard({ title, subtitle }: { title: string; subtitle?: string }) {
 
 ### 2. Episode Header（集數標題）
 
-`TUNNEL.01` 格式的標題。
+`VIDEO.01` 格式的標題。
 
 ```tsx
 function EpisodeHeader({
@@ -416,7 +416,7 @@ function StatusRow({
 }
 ```
 
-### 4. Tunnel Card（隧道卡片）
+### 4. Video Card（影片卡片）
 
 ```tsx
 function TunnelCard({
@@ -557,7 +557,7 @@ function EvaNav({
   <div style={{ color: 'rgba(255,255,255,0.5)' }}># TRULEY-INTERVIEW SYSTEM v1.0.0</div>
   <div>&gt; Initializing...</div>
   <div>&gt; Connection established</div>
-  <div>&gt; Tunnel: api-gateway → api.truley-interview.com</div>
+  <div>&gt; Video: my-video.mp4 → encoding</div>
   <div>&gt; Status: <span style={{ color: '#00FF00' }}>READY</span></div>
 </div>
 ```
@@ -689,7 +689,7 @@ EVA 風格的動畫應該**克制且有目的**。
 3. **深灰背景** — `#0a0a0a` 而非純黑，更舒適
 4. **狀態發光** — 彩色只用於狀態，且帶發光
 5. **寬字距 UI 文字** — `letter-spacing: 0.2em`
-6. **集數格式** — `TUNNEL.01` 這種命名
+6. **集數格式** — `VIDEO.01` 這種命名
 7. **極簡構圖** — 一個畫面一個重點
 8. **等寬字體顯示技術數據** — ports, URLs, IPs
 

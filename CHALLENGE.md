@@ -23,24 +23,24 @@
 
 ## 🎯 Challenge Options
 
-### Option A: Tunnel Sessions Dashboard
+### Option A: Video Library Dashboard
 
-**Goal:** Build a dashboard showing active tunnel connections.
+**Goal:** Build a dashboard displaying uploaded videos with pagination.
 
 #### Backend Tasks
 
-- [ ] Implement `GET /api/tunnels/sessions` endpoint
-- [ ] Query `TunnelSession` entities with pagination
-- [ ] Calculate bandwidth metrics (bytesIn + bytesOut)
-- [ ] Filter by status (`active`, `closed`, `all`)
+- [ ] Implement `GET /api/videos` endpoint
+- [ ] Query `Video` entities with pagination
+- [ ] Include: title, description, duration, views, uploadDate
+- [ ] Support filtering by status (`processing`, `ready`, `error`)
 
 **API Spec:**
 
 ```typescript
-GET /api/tunnels/sessions?status=active&limit=20&cursor=xxx
+GET /api/videos?status=ready&limit=20&cursor=xxx
 
 Response: {
-  sessions: TunnelSession[],
+  videos: Video[],
   nextCursor: string | null,
   hasMore: boolean
 }
@@ -48,15 +48,15 @@ Response: {
 
 #### Frontend Tasks
 
-- [ ] Create `TunnelList` component
-- [ ] Display: name, localPort, status, bytes transferred, connectedAt
-- [ ] Implement status badge (connected = green, closed = gray)
+- [ ] Create `VideoGrid` component
+- [ ] Display: thumbnail, title, duration, views, upload date
+- [ ] Implement status badge (ready = green, processing = amber, error = red)
 - [ ] Add loading and empty states
 - [ ] Follow Eva Title Card design (see `docs/ui-guidelines.md`)
 
 **Success Criteria:**
 
-- ✅ List displays real data from database
+- ✅ Grid displays real data from database
 - ✅ Pagination works (load more button or infinite scroll)
 - ✅ Status indicators are clear
 - ✅ UI matches design guidelines
@@ -65,85 +65,86 @@ Response: {
 
 ---
 
-### Option B: API Key Management
+### Option B: Video Upload Flow
 
-**Goal:** Implement full CRUD for user API keys.
+**Goal:** Implement complete video upload with progress tracking.
 
 #### Backend Tasks
 
-- [ ] Implement `GET /api/auth/api-keys` — list all keys
-- [ ] Implement `POST /api/auth/api-keys` — create new key
-- [ ] Implement `DELETE /api/auth/api-keys/:id` — delete key
-- [ ] Generate secure random key (prefix `nv_` + 32 chars)
-- [ ] Store hashed key (like password), return plain key **once**
+- [ ] Implement `POST /api/videos/upload` endpoint
+- [ ] Handle multipart/form-data with Multer
+- [ ] Validate file type (mp4, webm, mov) and size (max 100MB)
+- [ ] Create `Video` entity with `processing` status
+- [ ] Return video metadata with upload progress
 
 **API Spec:**
 
 ```typescript
-// Create
-POST /api/auth/api-keys
-Body: { name: string }
+POST /api/videos/upload
+Content-Type: multipart/form-data
+
+Body: {
+  file: File,
+  title: string,
+  description?: string
+}
 
 Response: {
   id: string,
-  name: string,
-  key: "nv_xxx...",  // ONLY returned once
-  prefix: "nv_xxx",
+  title: string,
+  status: 'processing' | 'ready' | 'error',
+  uploadProgress: number,
   createdAt: string
-}
-
-// List
-GET /api/auth/api-keys
-
-Response: {
-  keys: [{ id, name, prefix, lastUsedAt?, createdAt }]
 }
 ```
 
 #### Frontend Tasks
 
-- [ ] Create `ApiKeyList` component
-- [ ] Create `CreateKeyModal` with name input
-- [ ] Show new key in modal with copy button (one-time display)
-- [ ] Add delete confirmation dialog
-- [ ] Display key prefix in list (e.g., `nv_abc1...`)
+- [ ] Create `UploadDropzone` component with drag-and-drop
+- [ ] Display upload progress bar (0-100%)
+- [ ] Show file validation errors (type, size)
+- [ ] Implement success/error states
+- [ ] Add metadata form (title, description)
 
 **Success Criteria:**
 
-- ✅ Can create, list, delete keys
-- ✅ New key shown only once (security pattern)
-- ✅ Delete requires confirmation
-- ✅ Proper error handling (duplicate names, etc.)
+- ✅ Drag-and-drop works
+- ✅ Progress bar updates during upload
+- ✅ File validation with clear error messages
+- ✅ Success state shows uploaded video info
 
 **Estimated Time:** 50-60 minutes
 
 ---
 
-### Option C: Usage Statistics Dashboard
+### Option C: Video Analytics Dashboard
 
-**Goal:** Build a metrics dashboard with charts/cards.
+**Goal:** Build a metrics dashboard showing video performance.
 
 #### Backend Tasks
 
-- [ ] Implement `GET /api/tunnels/stats` endpoint
-- [ ] Calculate: active tunnels, total requests, bandwidth used
+- [ ] Implement `GET /api/videos/:id/stats` endpoint
+- [ ] Calculate: total views, unique viewers, watch time
 - [ ] Aggregate by period (`today`, `week`, `month`)
-- [ ] Format large numbers (e.g., `1.5 GB`, `15.2K requests`)
+- [ ] Return engagement metrics (avg watch time, completion rate)
 
 **API Spec:**
 
 ```typescript
-GET /api/tunnels/stats?period=week
+GET /api/videos/:id/stats?period=week
 
 Response: {
-  activeTunnels: number,
-  totalRequests: number,
-  totalBandwidth: {
-    in: number,
-    out: number,
-    formatted: "150 MB"
+  videoId: string,
+  totalViews: number,
+  uniqueViewers: number,
+  watchTime: {
+    total: 36000,  // seconds
+    formatted: "10h 0m"
   },
-  avgLatency?: number,
+  engagement: {
+    avgWatchTime: 180,  // seconds
+    completionRate: 0.75
+  },
   period: {
     start: string,
     end: string
@@ -154,7 +155,7 @@ Response: {
 #### Frontend Tasks
 
 - [ ] Create `StatsCard` component (reusable)
-- [ ] Display 4 metrics: tunnels, requests, bandwidth, latency
+- [ ] Display 4 metrics: views, viewers, watch time, engagement
 - [ ] Add period selector (today/week/month)
 - [ ] Implement loading skeleton
 - [ ] Handle empty/error states
@@ -162,7 +163,7 @@ Response: {
 **Success Criteria:**
 
 - ✅ Metrics display correctly
-- ✅ Numbers formatted nicely (KB/MB/GB)
+- ✅ Numbers formatted nicely (1.5K views, 10h watch time)
 - ✅ Period selector updates data
 - ✅ Loading states implemented
 
@@ -238,8 +239,10 @@ Before coding:
 
    ```typescript
    // packages/interfaces/src/
-   export interface CreateApiKeyDto {
-     name: string;
+   export interface CreateVideoDto {
+     title: string;
+     description?: string;
+     file?: Express.Multer.File;
    }
    ```
 
@@ -247,10 +250,10 @@ Before coding:
 
    ```typescript
    // packages/backend/src/app/
-   export class ApiKeyService {
-     constructor(@InjectRepository() private repo: EntityRepository<ApiKey>) {}
+   export class VideoService {
+     constructor(@InjectRepository() private repo: EntityRepository<Video>) {}
 
-     async create(userId: string, name: string): Promise<ApiKey> {
+     async findAll(filters: VideoFilters): Promise<Paginated<Video>> {
        // Your implementation
      }
    }
@@ -259,10 +262,10 @@ Before coding:
 3. **Create controller endpoint**
 
    ```typescript
-   @Controller('/api/auth/api-keys')
-   export class ApiKeyController {
-     @Post()
-     async create(@Body() dto: CreateApiKeyDto) {
+   @Controller('/api/videos')
+   export class VideoController {
+     @Get()
+     async list(@Query() filters: VideoFilters) {
        // Your implementation
      }
    }
@@ -270,10 +273,8 @@ Before coding:
 
 4. **Test with curl or Postman**
    ```bash
-   curl -X POST http://localhost:3000/api/auth/api-keys \
-     -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{"name":"My Key"}'
+   curl http://localhost:3000/api/videos \
+     -H "Authorization: Bearer YOUR_JWT_TOKEN"
    ```
 
 ### Step 3: Frontend (20-25 minutes)
@@ -282,22 +283,18 @@ Before coding:
 
    ```bash
    packages/frontend/src/app/
-   ├── api-keys/
+   ├── videos/
    │   ├── page.tsx          # Route page
-   │   ├── api-key-list.tsx  # List component
-   │   └── create-modal.tsx  # Modal component
+   │   ├── video-grid.tsx    # Grid component
+   │   └── video-card.tsx    # Individual card
    ```
 
 2. **Implement API client**
 
    ```typescript
    // packages/frontend/src/lib/api.ts
-   export async function createApiKey(name: string) {
-     const res = await fetch('/api/auth/api-keys', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({ name }),
-     });
+   export async function getVideos(params: VideoParams) {
+     const res = await fetch(`/api/videos?${new URLSearchParams(params)}`);
      return res.json();
    }
    ```
@@ -317,7 +314,7 @@ npx nx test @truley-interview/backend
 npx nx test @truley-interview/frontend
 
 # Or add a quick test file
-touch packages/backend/src/app/api-keys/api-key.controller.spec.ts
+touch packages/backend/src/app/videos/video.controller.spec.ts
 ```
 
 **Minimum test coverage:**
@@ -462,23 +459,23 @@ try {
    ```markdown
    # My Solution
 
-   ## Challenge: Option B (API Key Management)
+   ## Challenge: Option B (Video Upload)
 
    ## What I Implemented
 
-   - [x] Create API key
-   - [x] List API keys
-   - [x] Delete API key
-   - [ ] Last used tracking (ran out of time)
+   - [x] Upload endpoint with Multer
+   - [x] Drag-and-drop frontend
+   - [x] Progress bar
+   - [ ] File type validation (ran out of time)
 
    ## Known Issues
 
-   - Delete confirmation could be prettier
+   - Progress bar could be smoother
    - No unit tests for edge cases
 
    ## Questions
 
-   - Should API keys expire automatically?
+   - Should we generate thumbnails automatically?
    ```
 
 ### Git Best Practices
@@ -486,9 +483,9 @@ try {
 ```bash
 # Commit frequently with clear messages
 git add .
-git commit -m "feat: implement api key creation endpoint"
-git commit -m "feat: add api key list view"
-git commit -m "fix: handle duplicate key names"
+git commit -m "feat: implement video upload endpoint"
+git commit -m "feat: add drag-and-drop upload UI"
+git commit -m "fix: handle large file errors"
 
 # Push your branch
 git push origin challenge/my-name-option-b
