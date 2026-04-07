@@ -12,18 +12,11 @@ This document provides comprehensive guidelines for building, configuring, and m
 4. [TypeScript Configuration](#typescript-configuration)
 5. [Package Structure](#package-structure)
 6. [Dockerfile Guidelines](#dockerfile-guidelines)
-7. [Docker Ignore](#docker-ignore)
-8. [Webpack Configuration](#webpack-configuration)
-9. [Vite Configuration](#vite-configuration)
-10. [Next.js Configuration](#nextjs-configuration)
-11. [PostCSS / Tailwind Configuration](#postcss--tailwind-configuration)
-12. [Rust/Cargo Configuration](#rustcargo-configuration)
-13. [Jest Configuration](#jest-configuration)
-14. [SWC Configuration](#swc-configuration)
-15. [Environment Variables (Build-time)](#environment-variables-build-time)
-16. [CI/CD Pipeline](#cicd-pipeline)
-17. [Docker Image Tagging](#docker-image-tagging)
-18. [Common Commands](#common-commands)
+7. [Webpack Configuration](#webpack-configuration)
+8. [Vite Configuration](#vite-configuration)
+9. [Jest Configuration](#jest-configuration)
+10. [Environment Variables](#environment-variables)
+11. [Common Commands](#common-commands)
 
 ---
 
@@ -33,17 +26,12 @@ This document provides comprehensive guidelines for building, configuring, and m
 truley-interview/
 ├── packages/
 │   ├── backend/        # NestJS API server (webpack)
-│   ├── frontend/       # Next.js dashboard (next.config.js)
-│   ├── relay/          # Rust WebSocket relay (Cargo)
-│   ├── cli/            # Rust CLI client (Cargo)
-│   ├── rs-shared/      # Shared Rust types
+│   ├── frontend/       # React dashboard (vite)
 │   ├── migrator/       # MikroORM migrations (webpack)
 │   ├── backend-shared/ # MikroORM entities (NO build step)
 │   ├── shared/         # TS utilities (tsc)
-│   ├── interfaces/     # Zod schemas (tsc)
-│   └── ui-shared/      # React components (vite)
+│   └── interfaces/     # Zod schemas (tsc)
 ├── .github/workflows/  # CI/CD pipelines
-├── Cargo.toml          # Rust workspace root
 ├── package.json        # Node.js workspace root
 ├── nx.json             # Nx configuration
 └── tsconfig.base.json  # Base TypeScript config
@@ -51,17 +39,14 @@ truley-interview/
 
 ### Build Tool Matrix
 
-| Package | Build Tool | Output | Notes |
-|---------|------------|--------|-------|
-| `backend` | Webpack | `packages/backend/dist/` | NxAppWebpackPlugin |
-| `frontend` | Next.js | `packages/frontend/.next/` | Standalone output |
-| `migrator` | Webpack | `dist/apps/migrator/` | NxAppWebpackPlugin |
-| `shared` | tsc | `packages/shared/dist/` | @nx/js:tsc |
-| `interfaces` | tsc | `packages/interfaces/dist/` | @nx/js:tsc |
-| `ui-shared` | Vite | `packages/ui-shared/dist/` | Library mode |
-| `backend-shared` | NONE | N/A | Uses src directly |
-| `relay` | Cargo | `target/release/relay` | Rust binary |
-| `cli` | Cargo | `target/release/truley-interview-cli` | Rust binary |
+| Package          | Build Tool | Output                      | Notes              |
+| ---------------- | ---------- | --------------------------- | ------------------ |
+| `backend`        | Webpack    | `packages/backend/dist/`    | NxAppWebpackPlugin |
+| `frontend`       | Vite       | `packages/frontend/dist/`   | Library mode       |
+| `migrator`       | Webpack    | `dist/apps/migrator/`       | NxAppWebpackPlugin |
+| `shared`         | tsc        | `packages/shared/dist/`     | @nx/js:tsc         |
+| `interfaces`     | tsc        | `packages/interfaces/dist/` | @nx/js:tsc         |
+| `backend-shared` | NONE       | N/A                         | Uses src directly  |
 
 ---
 
@@ -69,18 +54,16 @@ truley-interview/
 
 **CRITICAL: These versions MUST be used across all environments.**
 
-| Tool | Version | Notes |
-|------|---------|-------|
-| Node.js | 22.14 | LTS version, used in Dockerfiles |
-| Rust | 1.83 | Specified in CI workflows |
-| npm | (bundled) | Use `npm ci` only |
-| Nx | 21.6.x | Workspace orchestration |
+| Tool    | Version   | Notes                            |
+| ------- | --------- | -------------------------------- |
+| Node.js | 22.14     | LTS version, used in Dockerfiles |
+| npm     | (bundled) | Use `npm ci` only                |
+| Nx      | 22.6.x    | Workspace orchestration          |
 
 ### Version Enforcement
 
 - **Dockerfiles**: Always use `node:22.14-slim` as base image
-- **CI**: Set `NODE_VERSION: "22"` and `RUST_VERSION: "1.83"` in workflow env
-- **Local**: Ensure `.nvmrc` or equivalent matches
+- **Local**: Ensure Node.js version matches via `.nvmrc` or `volta`
 
 ---
 
@@ -95,7 +78,6 @@ truley-interview/
     "@nx/webpack/plugin",
     "@nx/eslint/plugin",
     "@nx/jest/plugin",
-    "@nx/next/plugin",
     "@nx/vite/plugin"
   ],
   "targetDefaults": {
@@ -119,12 +101,6 @@ truley-interview/
 ### Special Cases
 
 - **backend-shared**: Excluded from `@nx/js/typescript` build plugin (uses source directly)
-  ```json
-  {
-    "plugin": "@nx/js/typescript",
-    "exclude": ["packages/backend-shared/*"]
-  }
-  ```
 
 ---
 
@@ -158,75 +134,6 @@ tsconfig.base.json (root base config)
 │   ├── packages/*/tsconfig.lib.json (library build config)
 │   ├── packages/*/tsconfig.app.json (app build config)
 │   └── packages/*/tsconfig.spec.json (test config)
-```
-
-### Package-Specific Rules
-
-#### Library Packages (`shared`, `interfaces`)
-```json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-    "emitDeclarationOnly": false
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
-}
-```
-
-#### NestJS Backend
-```json
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "target": "es2021"
-  }
-}
-```
-
-#### Next.js Frontend
-```json
-{
-  "compilerOptions": {
-    "jsx": "preserve",
-    "noEmit": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "paths": { "@/*": ["./src/*"] }
-  }
-}
-```
-
-#### UI Library (Vite)
-```json
-{
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"]
-  }
-}
-```
-
-### Custom Conditions
-
-The `@truley-interview/source` custom condition enables importing TypeScript source directly during development:
-
-```json
-// package.json exports
-{
-  "exports": {
-    ".": {
-      "@truley-interview/source": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  }
-}
 ```
 
 ---
@@ -343,126 +250,6 @@ CMD ["node", "dist/main.js"]
 5. **Non-root user**: Always create and switch to non-root user
 6. **NODE_ENV=production**: Always set in runner stage
 
-### Package-Specific Patterns
-
-#### Backend/Migrator: Copy Workspace Modules
-
-```dockerfile
-# Copy node_modules then remove workspace packages
-COPY --from=dependencies /app/node_modules ./node_modules
-RUN rm -rf ./node_modules/@truley-interview
-
-# Copy built workspace modules individually
-COPY --from=builder /app/packages/interfaces/dist ./node_modules/@truley-interview/interfaces/dist
-COPY --from=builder /app/packages/interfaces/package.json ./node_modules/@truley-interview/interfaces/
-COPY --from=builder /app/packages/shared/dist ./node_modules/@truley-interview/shared/dist
-COPY --from=builder /app/packages/shared/package.json ./node_modules/@truley-interview/shared/
-
-# backend-shared uses src directly (no build step)
-COPY --from=builder /app/packages/backend-shared/src ./node_modules/@truley-interview/backend-shared/src
-COPY --from=builder /app/packages/backend-shared/package.json ./node_modules/@truley-interview/backend-shared/
-```
-
-#### Frontend: Standalone Build
-
-```dockerfile
-# Next.js standalone output
-COPY --from=builder --chown=nextjs:nodejs /app/packages/frontend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/packages/frontend/public ./packages/frontend/public
-COPY --from=builder --chown=nextjs:nodejs /app/packages/frontend/.next/static ./packages/frontend/.next/static
-
-# Build-time args for NEXT_PUBLIC_* variables
-ARG NEXT_PUBLIC_API_URL=http://localhost:3000
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
-CMD ["node", "packages/frontend/server.js"]
-```
-
-#### Relay (Rust): Dependency Caching
-
-```dockerfile
-FROM rust:1.83-bookworm AS builder
-
-# Version injection
-ARG RELAY_VERSION
-ENV RELAY_VERSION=${RELAY_VERSION}
-
-# Copy manifests first (cache dependencies)
-COPY Cargo.toml Cargo.lock ./
-COPY packages/rs-shared ./packages/rs-shared
-COPY packages/relay/Cargo.toml ./packages/relay/Cargo.toml
-
-# Create dummy source for dependency caching
-RUN mkdir -p packages/relay/src && echo "fn main() {}" > packages/relay/src/main.rs
-RUN cargo build --release --package relay 2>/dev/null || true
-RUN rm -rf target/release/.fingerprint/relay-*
-
-# Copy real source and build
-COPY packages/relay ./packages/relay
-RUN cargo build --release --package relay
-
-# Runtime: minimal image
-FROM debian:bookworm-slim
-COPY --from=builder /app/target/release/relay /usr/local/bin/relay
-```
-
-### Healthcheck (Frontend)
-
-```dockerfile
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:4200', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
-```
-
----
-
-## Docker Ignore
-
-### Configuration (`.dockerignore`)
-
-```text
-# Dependencies (installed fresh in container)
-node_modules
-packages/*/node_modules
-
-# Build outputs (will be rebuilt)
-dist
-packages/*/dist
-.next
-packages/*/.next
-out-tsc
-target
-
-# Development files
-.env
-.env.*
-!.env.example
-
-# IDE and cache
-.idea
-.vscode
-.nx
-.git
-
-# Tests (not needed for production build)
-coverage
-test-output
-*.test.ts
-*.spec.ts
-
-# Documentation
-docs
-*.md
-!README.md
-```
-
-### Key Patterns
-
-1. **Exclude node_modules**: Dependencies installed fresh via `npm ci`
-2. **Exclude build outputs**: Rebuilt inside container
-3. **Include Cargo.lock**: Required for reproducible Rust builds
-4. **Exclude tests**: Not needed in production images
-5. **Keep .env.example**: Template files are useful
-
 ---
 
 ## Webpack Configuration
@@ -476,10 +263,6 @@ const { join } = require('path');
 module.exports = {
   output: {
     path: join(__dirname, 'dist'),
-    // Source maps for development only
-    ...(process.env.NODE_ENV !== 'production' && {
-      devtoolModuleFilenameTemplate: '[absolute-resource-path]',
-    }),
   },
   plugins: [
     new NxAppWebpackPlugin({
@@ -502,15 +285,12 @@ module.exports = {
 2. **Compiler**: Use `'tsc'` for NestJS (decorator metadata)
 3. **Optimization**: Set to `false` for Node.js backends
 4. **generatePackageJson**: Enable for Docker deployments
-5. **Output path**:
-   - Backend: `packages/backend/dist/`
-   - Migrator: `dist/apps/migrator/`
 
 ---
 
 ## Vite Configuration
 
-### UI Library Pattern
+### Frontend Library Pattern
 
 ```typescript
 import react from '@vitejs/plugin-react';
@@ -532,26 +312,14 @@ export default defineConfig(() => ({
     lib: {
       entry: {
         index: 'src/index.ts',
-        server: 'src/server.ts',  // SSR entry if needed
       },
-      name: '@truley-interview/ui-shared',
+      name: '@truley-interview/frontend',
       fileName: (format, entryName) => `${entryName}.js`,
       formats: ['es'],
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        'clsx',
-        'tailwind-merge',
-      ],
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
 }));
 ```
@@ -561,129 +329,6 @@ export default defineConfig(() => ({
 1. **Format**: Use `'es'` only (ESM)
 2. **External**: Externalize React and peer dependencies
 3. **DTS plugin**: Generate declaration files from tsconfig.lib.json
-4. **Multiple entries**: Support both client and server exports
-
----
-
-## Next.js Configuration
-
-```javascript
-const { composePlugins, withNx } = require('@nx/next');
-
-const nextConfig = {
-  nx: {
-    svgr: false,  // Disable deprecated NX SVGR
-  },
-  output: 'standalone',  // Required for Docker
-};
-
-module.exports = composePlugins(withNx)(nextConfig);
-```
-
-### Rules
-
-1. **Standalone output**: ALWAYS enable for Docker deployment
-2. **SVGR**: Disabled by default, configure manually if needed
-3. **Environment variables**: Use build args for NEXT_PUBLIC_* in Docker
-
----
-
-## PostCSS / Tailwind Configuration
-
-### Configuration (`postcss.config.mjs`)
-
-```javascript
-const config = {
-  plugins: {
-    "@tailwindcss/postcss": {},
-  },
-};
-
-export default config;
-```
-
-### Key Points
-
-1. **Tailwind CSS v4**: Uses `@tailwindcss/postcss` plugin (not legacy `tailwindcss`)
-2. **No tailwind.config.js**: Tailwind v4 uses CSS-based configuration
-3. **CSS file**: Styles defined in `src/styles.css` with `@import "tailwindcss"`
-
-### Package Usage
-
-| Package | PostCSS | Notes |
-|---------|---------|-------|
-| `frontend` | Yes | Next.js with Tailwind |
-| `ui-shared` | Yes | Vite library with Tailwind |
-
----
-
-## Rust/Cargo Configuration
-
-### Workspace Configuration (`Cargo.toml`)
-
-```toml
-[workspace]
-resolver = "2"
-members = [
-    "packages/cli",
-    "packages/relay",
-    "packages/rs-shared",
-]
-
-[workspace.package]
-version = "0.1.0"
-edition = "2021"
-license = "MIT"
-authors = ["Truley Interview Team"]
-
-[workspace.lints.rust]
-unsafe_code = "forbid"
-missing_docs = "warn"
-unused_must_use = "deny"
-unused_variables = "deny"
-dead_code = "deny"
-unused_imports = "deny"
-
-[workspace.lints.clippy]
-all = { level = "warn", priority = -2 }
-pedantic = { level = "warn", priority = -1 }
-nursery = { level = "warn", priority = -1 }
-correctness = { level = "deny", priority = -1 }
-suspicious = { level = "deny", priority = -1 }
-unwrap_used = "deny"
-expect_used = "deny"
-todo = "deny"
-dbg_macro = "deny"
-
-[profile.release]
-opt-level = 3
-lto = true
-codegen-units = 1
-strip = true
-```
-
-### Package Configuration
-
-```toml
-[package]
-name = "package-name"
-version = "0.1.0"
-edition = "2021"
-
-[lints]
-workspace = true  # Inherit workspace lints
-
-[dependencies]
-truley-interview-shared = { path = "../rs-shared", features = ["feature-name"] }
-```
-
-### Critical Rules
-
-1. **unsafe_code = "forbid"**: No unsafe code allowed
-2. **unwrap_used = "deny"**: No `.unwrap()` - use proper error handling
-3. **expect_used = "deny"**: No `.expect()` - use `?` operator
-4. **Workspace lints**: All packages inherit workspace lints
-5. **Release profile**: Enable LTO and strip symbols
 
 ---
 
@@ -707,13 +352,11 @@ const nxPreset = require('@nx/jest/preset').default;
 
 module.exports = {
   ...nxPreset,
-  forceExit: true,  // Required to prevent hanging tests
+  forceExit: true, // Required to prevent hanging tests
 };
 ```
 
-### Package-Specific Configurations
-
-#### Backend (NestJS with SWC)
+### Backend Test Configuration (with SWC)
 
 ```javascript
 // packages/backend/jest.config.js
@@ -721,7 +364,7 @@ const { readFileSync } = require('fs');
 const path = require('path');
 
 const swcJestConfig = JSON.parse(
-  readFileSync(path.join(__dirname, '.spec.swcrc'), 'utf-8')
+  readFileSync(path.join(__dirname, '.spec.swcrc'), 'utf-8'),
 );
 swcJestConfig.swcrc = false;
 
@@ -735,33 +378,7 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: 'test-output/jest/coverage',
   setupFiles: ['<rootDir>/jest.setup.ts'],
-  moduleNameMapper: {
-    '^../app-config$': '<rootDir>/src/__mocks__/app-config.ts',
-  },
 };
-```
-
-#### Frontend (Next.js)
-
-```typescript
-// packages/frontend/jest.config.ts
-import type { Config } from 'jest';
-import nextJest from 'next/jest.js';
-
-const createJestConfig = nextJest({ dir: './' });
-
-const config: Config = {
-  displayName: '@truley-interview/frontend',
-  preset: '../../jest.preset.js',
-  transform: {
-    '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
-  },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/packages/frontend',
-  testEnvironment: 'jsdom',
-};
-
-export default createJestConfig(config);
 ```
 
 ### Rules
@@ -769,8 +386,7 @@ export default createJestConfig(config);
 1. **Preset**: Always extend `../../jest.preset.js`
 2. **forceExit**: Required to prevent hanging async operations
 3. **SWC**: Use for backend (faster than ts-jest with decorators)
-4. **Next.js**: Use `next/jest` for proper Next.js integration
-5. **Test environment**: `node` for backend, `jsdom` for frontend
+4. **Test environment**: `node` for backend, `jsdom` for frontend
 
 ---
 
@@ -813,135 +429,34 @@ SWC is used for fast TypeScript compilation in Jest tests, especially for NestJS
 4. **keepClassNames: true**: Preserve class names for dependency injection
 5. **target: es2017**: Target ES2017 for Node.js compatibility
 
-### Usage
-
-Reference in Jest config:
-```javascript
-const swcJestConfig = JSON.parse(
-  readFileSync(path.join(__dirname, '.spec.swcrc'), 'utf-8')
-);
-swcJestConfig.swcrc = false;  // Don't look for .swcrc, use this config
-
-module.exports = {
-  transform: {
-    '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
-  },
-};
-```
-
 ---
 
-## Environment Variables (Build-time)
+## Environment Variables
 
-These environment variables affect the build output and must be set before building.
-
-### CLI Build Variables
+### Backend (`.env`)
 
 ```bash
-# packages/cli/.env.example
-# Set BEFORE running cargo build, baked into the binary
-TRULEY-INTERVIEW_API_URL=http://localhost:3000   # Backend API URL
-TRULEY-INTERVIEW_VERSION=v1.0.0                  # Version string (injected by CI)
+# Database
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/app
+
+# JWT Auth
+JWT_SECRET=your-super-secret-jwt-key-at-least-32-chars
+JWT_EXPIRES_IN=15m
+
+# OAuth (optional)
+GOOGLE_CLIENT_ID=your-client-id
+GITHUB_CLIENT_ID=your-client-id
+
+# Frontend URL
+FRONTEND_URL=http://localhost:4200
 ```
 
-### Frontend Build Variables (Docker)
+### Frontend (`.env`)
 
 ```bash
-# Passed as --build-arg in Docker build
-NEXT_PUBLIC_API_URL=https://api.truley-interview.com
-NEXT_PUBLIC_APP_URL=https://truley-interview.com
-NEXT_PUBLIC_POLAR_STARTER_PRODUCT_ID=xxx
-NEXT_PUBLIC_POLAR_PRO_PRODUCT_ID=xxx
+VITE_API_URL=http://localhost:3000
+VITE_APP_URL=http://localhost:4200
 ```
-
-### Relay Build Variables
-
-```bash
-# packages/relay - version injected at build time
-RELAY_VERSION=v1.0.0  # Injected by CI via --build-arg
-```
-
-### CI Build Variable Injection
-
-```yaml
-# GitHub Actions - CLI
-- name: Set version
-  run: |
-    if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-      echo "TRULEY-INTERVIEW_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
-    else
-      echo "TRULEY-INTERVIEW_VERSION=${{ github.sha }}" >> $GITHUB_ENV
-    fi
-
-# GitHub Actions - Frontend Docker
-- name: Build frontend
-  uses: docker/build-push-action@v6
-  with:
-    build-args: |
-      NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-      NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
-```
-
----
-
-## CI/CD Pipeline
-
-### Workflow Triggers
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `ci.yml` | push/PR to main | Lint, typecheck, test |
-| `build.yml` | push to main, tags | Build Docker images |
-| `release-cli.yml` | push to main, tags | Build CLI binaries |
-
-### CI Pipeline Order
-
-```
-install → build-deps → [lint, typecheck, test] (parallel)
-```
-
-### Docker Build Triggers
-
-- **main branch**: Builds with `latest` and `<sha>` tags
-- **v* tags**: Builds with `latest`, `<sha>`, and `<tag>` tags
-
-### CLI Release Targets
-
-| Platform | Target | Output |
-|----------|--------|--------|
-| Linux x64 | `x86_64-unknown-linux-gnu` | `.tar.gz` |
-| Linux ARM64 | `aarch64-unknown-linux-gnu` | `.tar.gz` |
-| macOS x64 | `x86_64-apple-darwin` | `.tar.gz` |
-| macOS ARM64 | `aarch64-apple-darwin` | `.tar.gz` |
-| Windows x64 | `x86_64-pc-windows-msvc` | `.zip` |
-
----
-
-## Docker Image Tagging
-
-### Tag Strategy
-
-```yaml
-tags: |
-  ghcr.io/noverwork/truley-interview-PACKAGE:${{ github.sha }}
-  ghcr.io/noverwork/truley-interview-PACKAGE:latest
-  ${{ github.ref_type == 'tag' && format('ghcr.io/noverwork/truley-interview-PACKAGE:{0}', github.ref_name) || '' }}
-```
-
-### Image Names
-
-| Package | Image |
-|---------|-------|
-| Backend | `ghcr.io/noverwork/truley-interview-backend` |
-| Frontend | `ghcr.io/noverwork/truley-interview-frontend` |
-| Migrator | `ghcr.io/noverwork/truley-interview-migrator` |
-| Relay | `ghcr.io/noverwork/truley-interview-relay` |
-
-### Tag Types
-
-1. **SHA tag**: Every build gets a commit SHA tag
-2. **latest**: Updated on every main push and tag push
-3. **Version tag**: Only created when pushing `v*` tags
 
 ---
 
@@ -956,10 +471,6 @@ npm run dev
 # Start individual services
 npx nx serve @truley-interview/backend
 npx nx dev @truley-interview/frontend
-
-# Rust development
-cd packages/relay && cargo run
-cd packages/cli && cargo run -- http 3000
 ```
 
 ### Building
@@ -971,10 +482,6 @@ npx nx run-many --target=build --all
 # Build specific package
 npx nx build @truley-interview/backend
 npx nx build @truley-interview/frontend
-
-# Build Rust
-cargo build --release --package relay
-cargo build --release --package truley-interview-cli
 ```
 
 ### Testing
@@ -985,10 +492,6 @@ npm run test
 
 # Specific package
 npx nx test @truley-interview/backend
-
-# Rust tests
-cargo test --package relay
-cargo test --package truley-interview-cli
 ```
 
 ### Linting
@@ -997,26 +500,8 @@ cargo test --package truley-interview-cli
 # All lints
 npm run lint
 
-# Rust formatting
-cargo fmt --all -- --check
-
-# Rust clippy
-cargo clippy --all-targets --all-features
-```
-
-### Docker
-
-```bash
-# Build locally
-docker build -f packages/backend/Dockerfile -t truley-interview-backend .
-docker build -f packages/frontend/Dockerfile \
-  --build-arg NEXT_PUBLIC_API_URL=https://api.example.com \
-  -t truley-interview-frontend .
-
-# Build Relay with version
-docker build -f packages/relay/Dockerfile \
-  --build-arg RELAY_VERSION=v1.0.0 \
-  -t truley-interview-relay .
+# Specific package
+npx nx lint @truley-interview/frontend
 ```
 
 ---
@@ -1035,23 +520,16 @@ docker build -f packages/relay/Dockerfile \
 
 - [ ] Use `node:22.14-slim` base image
 - [ ] Follow 3-stage build pattern
-- [ ] Copy package manifests before source (caching)
+- [ ] Copy package.json files before source (caching)
 - [ ] Run `npx nx sync --yes && NX_DAEMON=false npx nx run ...`
 - [ ] Create non-root user
 - [ ] Set `NODE_ENV=production`
-
-### Rust Package
-
-- [ ] Add to workspace members in root `Cargo.toml`
-- [ ] Use `[lints] workspace = true`
-- [ ] Use workspace path dependencies for `truley-interview-shared`
-- [ ] No unsafe code, no unwrap/expect
 
 ### Environment Variables
 
 - [ ] Create `.env.example` with all required variables
 - [ ] Document each variable with comments
-- [ ] Add to `deploy/.env.example` if needed for production
+- [ ] Add to deployment configuration
 
 ---
 
@@ -1068,7 +546,3 @@ Ensure package.json files are copied before source files in Dockerfile.
 ### Nx daemon issues in Docker
 
 Always use `NX_DAEMON=false` environment variable.
-
-### Rust dependency caching not working
-
-Use dummy source file pattern to build dependencies first, then clean fingerprints before copying real source.

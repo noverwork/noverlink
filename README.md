@@ -1,224 +1,399 @@
 # Truley Interview
 
-> Local-to-global tunneling solution — like ngrok, but self-hosted and cost-effective
+> **Live Coding Interview Platform** — A production-ready monorepo for evaluating engineering candidates
 
-Truley Interview exposes your local services to the internet. Supports HTTP, WebSocket, and TCP tunneling with a high-performance Rust relay.
+[![Nx](https://img.shields.io/badge/Nx-22.6.4-1430AD?logo=nx&logoColor=white)](https://nx.dev)
+[![Node](https://img.shields.io/badge/Node-22.14-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![License](https://img.shields.io/badge/License-AGPL--3.0-orange)](LICENSE)
 
-## Why Truley Interview?
+---
 
-ngrok's pricing doesn't scale for multiple tunnels. Truley Interview gives you:
+## 📋 Overview
 
-- **Unlimited tunnels** on your own infrastructure
-- **Full control** over your data
-- **Simple pricing** — host it yourself
+Truley Interview is a **full-stack web application** built as a comprehensive coding interview environment. Candidates can demonstrate their skills across:
 
-## Features
+- **Backend Development** — NestJS API with MikroORM
+- **Frontend Development** — React + Vite with Eva Title Card design system
+- **Database Design** — PostgreSQL with type-safe migrations
 
-- **HTTP/WebSocket Proxy** — Full HTTP and WebSocket support
-- **TCP Tunneling** — Raw TCP forwarding for any protocol
-- **Custom Subdomains** — Reserve `myapp.yourdomain.com`
-- **Real-time Dashboard** — Monitor active tunnels and traffic
-- **Request Inspector** — View HTTP request/response details
-- **Usage Tracking** — Bandwidth and request metrics
-- **Multi-plan Support** — Free, Hobbyist, Pro, Enterprise tiers
-- **OAuth Login** — Social authentication support
-- **Subscription Billing** — Polar integration
+### Why This Exists
 
-## Architecture
+Traditional coding interviews use toy problems that don't reflect real work. Truley Interview provides:
 
-```
-┌─────────────┐                    ┌─────────────┐                    ┌─────────────┐
-│   Browser   │ ───── HTTP ──────► │    Relay    │ ◄──── WebSocket ── │     CLI     │
-│             │                    │   (Rust)    │                    │   (Rust)    │
-└─────────────┘                    └─────────────┘                    └─────────────┘
-                                          │                                  │
-                                          │                                  │
-                                          ▼                                  ▼
-                                   ┌─────────────┐                    ┌─────────────┐
-                                   │   Backend   │                    │  localhost  │
-                                   │  (NestJS)   │                    │   :3000     │
-                                   └─────────────┘                    └─────────────┘
-                                          │
-                                          ▼
-                                   ┌─────────────┐
-                                   │  Frontend   │
-                                   │ (React+Vite)│
-                                   └─────────────┘
-```
+1. **Production codebase** — Real architecture, real constraints, real tradeoffs
+2. **Full-stack evaluation** — Assess both frontend and backend skills
+3. **1-hour challenges** — Scoped tasks that fit interview timelines
+4. **Clear evaluation criteria** — Objective scoring across dimensions
 
-### Components
+---
 
-| Package          | Tech         | Purpose                             |
-| ---------------- | ------------ | ----------------------------------- |
-| `relay`          | Rust         | High-performance traffic forwarding |
-| `cli`            | Rust         | Client tunnel agent                 |
-| `backend`        | NestJS       | API server, auth, billing           |
-| `frontend`       | React + Vite | Control panel dashboard             |
-| `backend-shared` | TypeScript   | Shared entities and types           |
-| `migrator`       | MikroORM     | Database migrations                 |
-
-## Data Model
+## 🏗️ Architecture
 
 ```
-User
-├── authToken          # CLI authentication
-├── plan               # free / hobbyist / pro / enterprise
-├── maxTunnels         # Tunnel limit per plan
-├── maxBandwidthMb     # Monthly bandwidth limit
-│
-├── Domain[]           # Reserved subdomains
-│   ├── hostname       # e.g., "myapp" or "tunnel.mycompany.com"
-│   ├── isReserved     # User reserved this subdomain
-│   └── TunnelSession[]
-│       ├── protocol   # http / tcp
-│       ├── status     # active / closed
-│       ├── bytesIn/Out
-│       └── HttpRequest[]  # Request/response logs
-│
-├── Subscription[]     # Polar billing
-├── UsageQuota[]       # Monthly usage tracking
-└── OAuthConnection[]  # Social logins
+┌─────────────┐                    ┌─────────────┐
+│   Browser   │ ───── HTTP ──────► │   Backend   │
+│  (React)    │                    │  (NestJS)   │
+└─────────────┘                    └─────────────┘
+       │                                  │
+       │                                  │
+       ▼                                  ▼
+┌─────────────┐                    ┌─────────────┐
+│  Frontend   │                    │  PostgreSQL │
+│  (Vite:4200)│                    │  (Docker)   │
+└─────────────┘                    └─────────────┘
 ```
 
-## Quick Start
+### Package Structure
+
+| Package          | Tech         | Purpose                 | Build         |
+| ---------------- | ------------ | ----------------------- | ------------- |
+| `frontend`       | React + Vite | Dashboard UI            | Vite          |
+| `backend`        | NestJS       | REST API, Auth, Billing | Webpack       |
+| `backend-shared` | TypeScript   | MikroORM Entities       | None (source) |
+| `migrator`       | MikroORM     | Database Migrations     | Webpack       |
+| `interfaces`     | Zod + TS     | Shared Type Schemas     | tsc           |
+| `shared`         | TypeScript   | Common Utilities        | tsc           |
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Rust 1.70+
-- Node.js 20+
-- PostgreSQL 15+
-
-### 1. Start Infrastructure
-
 ```bash
-npm run ms:start  # Start PostgreSQL via Docker
+# Required
+Node.js 22.14+
+Docker (for PostgreSQL)
 ```
 
-### 2. Run Migrations
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Start PostgreSQL
+
+```bash
+npm run ms:start
+```
+
+### 3. Run Migrations
 
 ```bash
 npm run migrator:up
 ```
 
-### 3. Start Development Servers
+### 4. Start Development Servers
 
 ```bash
-npm run dev  # Starts backend + frontend
+# Starts backend + frontend in parallel
+npm run dev
 ```
 
-### 4. Start Relay
+Access:
+
+- **Frontend**: http://localhost:4200
+- **Backend API**: http://localhost:3000
+
+---
+
+## 📦 Available Scripts
+
+| Command                          | Description                         |
+| -------------------------------- | ----------------------------------- |
+| `npm run dev`                    | Start backend + frontend (parallel) |
+| `npm run backend:dev`            | Start backend only                  |
+| `npm run frontend:dev`           | Start frontend only                 |
+| `npm run ms:start`               | Start PostgreSQL (Docker)           |
+| `npm run ms:stop`                | Stop PostgreSQL                     |
+| `npm run migrator:up`            | Run database migrations             |
+| `npm run migrator:down`          | Rollback migrations                 |
+| `npm run migrator:create <name>` | Create new migration                |
+| `npm run typecheck`              | Type check all packages             |
+| `npm run lint`                   | Lint all packages                   |
+| `npm run test`                   | Run all tests                       |
+
+### Nx Commands
 
 ```bash
-cd packages/relay
-WS_PORT=8444 HTTP_PORT=9444 BASE_DOMAIN=localhost cargo run
+# Build specific package
+npx nx build @truley-interview/backend
+npx nx build @truley-interview/frontend
+
+# Test specific package
+npx nx test @truley-interview/backend
+
+# Lint specific package
+npx nx lint @truley-interview/frontend
+
+# Visualize dependency graph
+npx nx graph
 ```
 
-### 5. Connect CLI
+---
+
+## 🎯 Interview Challenges
+
+### Challenge Format
+
+Candidates choose **ONE** task to complete in **1 hour**:
+
+#### Option A: Tunnel Sessions Dashboard
+
+- Implement `GET /api/tunnels/sessions` API
+- Build frontend list view with status indicators
+- Include: subdomain, local port, traffic stats, connection time
+
+#### Option B: API Key Management
+
+- Full CRUD: list, create, delete API keys
+- Frontend form with confirmation dialogs
+- Display full key once on creation (security pattern)
+
+#### Option C: Usage Statistics
+
+- Implement `GET /api/tunnels/stats` API
+- Dashboard with metric cards
+- Include loading/error states
+
+### Evaluation Criteria
+
+| Dimension         | Weight | What We Assess                         |
+| ----------------- | ------ | -------------------------------------- |
+| **Functionality** | 40%    | Does it work end-to-end?               |
+| **Code Quality**  | 30%    | Type safety, error handling, structure |
+| **UI/UX**         | 20%    | Follows design guidelines, usability   |
+| **Testing**       | 10%    | Basic unit/integration tests           |
+
+### Success Indicators
+
+✅ **Strong Candidate:**
+
+- Completes full feature with edge cases
+- Clean TypeScript with proper types
+- Follows existing patterns (CLAUDE.md, docs/)
+- Handles errors gracefully
+- Writes meaningful tests
+
+⚠️ **Needs Improvement:**
+
+- Incomplete feature (missing CRUD operations)
+- Type errors suppressed with `as any`
+- Ignores existing conventions
+- No error handling
+- No tests
+
+---
+
+## 🎨 Design System
+
+### Eva Title Card Aesthetic
+
+Inspired by Neon Genesis Evangelion's iconic title cards — **stark, compressed, cinematic**.
+
+#### Core Principles
+
+1. **Mechanical Compression** — `transform: scaleY(0.7) scaleX(0.85)`
+2. **Deep Dark Backgrounds** — `#0a0a0a` (not pure black)
+3. **Status Colors Only** — Green/Amber/Red with glow effects
+4. **Episode Format** — `TUNNEL.01`, `STATUS.00`
+
+#### Quick Reference
+
+```tsx
+// Title (compressed serif)
+<h1 style={{
+  fontFamily: "'Times New Roman', Georgia, serif",
+  fontWeight: 900,
+  fontSize: 'clamp(4rem, 10vw, 8rem)',
+  transform: 'scaleY(0.7) scaleX(0.85)',
+  color: '#fff',
+}}>
+  TUNNEL ACTIVE
+</h1>
+
+// UI Label (wide sans-serif)
+<span style={{
+  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+  fontSize: '0.8rem',
+  letterSpacing: '0.2em',
+  textTransform: 'uppercase',
+  color: 'rgba(255,255,255,0.6)',
+}}>
+  ACTIVE TUNNELS
+</span>
+
+// Status Badge (with glow)
+<span style={{
+  color: '#00FF00',
+  textShadow: '0 0 10px rgba(0, 255, 0, 0.5)',
+  border: '1px solid #00FF00',
+  padding: '4px 12px',
+}}>
+  CONNECTED
+</span>
+```
+
+**Full documentation**: [`docs/ui-guidelines.md`](docs/ui-guidelines.md)
+
+---
+
+## 📚 Documentation
+
+| Document                                                   | Purpose                         |
+| ---------------------------------------------------------- | ------------------------------- |
+| [`CLAUDE.md`](CLAUDE.md)                                   | AI assistant context & commands |
+| [`AGENTS.md`](AGENTS.md)                                   | Agent behavior guidelines       |
+| [`docs/api-design.md`](docs/api-design.md)                 | API endpoint specifications     |
+| [`docs/ui-guidelines.md`](docs/ui-guidelines.md)           | Eva Title Card design system    |
+| [`docs/build-guidelines.md`](docs/build-guidelines.md)     | Build configuration reference   |
+| [`docs/mikroorm-relations.md`](docs/mikroorm-relations.md) | ORM patterns                    |
+
+---
+
+## 🔧 Environment Configuration
+
+### Backend (`.env`)
 
 ```bash
-cd packages/cli
-TRULEY-INTERVIEW_RELAY_URL=ws://localhost:8444 cargo run -- http 3000
+# Database
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/app
+
+# JWT Auth
+JWT_SECRET=your-super-secret-jwt-key-at-least-32-chars
+JWT_EXPIRES_IN=15m
+
+# OAuth (optional)
+GOOGLE_CLIENT_ID=your-client-id
+GITHUB_CLIENT_ID=your-client-id
+
+# Frontend URL for OAuth redirects
+FRONTEND_URL=http://localhost:4200
 ```
 
-## CLI Installation
-
-### macOS / Linux (Homebrew)
+### Frontend (`.env`)
 
 ```bash
-# Install
-brew install noverwork/truley-interview/truley-interview
-
-# Upgrade
-brew upgrade truley-interview
-
-# If upgrade doesn't work, force reinstall
-brew uninstall truley-interview
-brew untap noverwork/truley-interview
-brew tap noverwork/truley-interview
-brew install truley-interview
+VITE_API_URL=http://localhost:3000
+VITE_APP_URL=http://localhost:4200
 ```
 
-### Manual Download
-
-Download the latest release from [GitHub Releases](https://github.com/noverwork/truley-interview/releases/latest).
-
-| Platform              | File                                   |
-| --------------------- | -------------------------------------- |
-| macOS (Apple Silicon) | `truley-interview-darwin-arm64.tar.gz` |
-| macOS (Intel)         | `truley-interview-darwin-x64.tar.gz`   |
-| Linux (x64)           | `truley-interview-linux-x64.tar.gz`    |
-| Linux (ARM64)         | `truley-interview-linux-arm64.tar.gz`  |
-| Windows               | `truley-interview-windows-x64.zip`     |
-
-## CLI Usage
+Copy from `.env.example` before running:
 
 ```bash
-# Login first
-truley-interview login
-
-# Check who you are
-truley-interview whoami
-
-# Basic tunnel
-truley-interview http 3000
-
-# Custom subdomain
-truley-interview http 3000 --subdomain myapp
+cp packages/backend/.env.example packages/backend/.env
+cp packages/frontend/.env.example packages/frontend/.env
 ```
 
-## Environment Variables
+---
 
-### Relay
+## 🧪 Testing
 
 ```bash
-WS_PORT=8444           # WebSocket control port
-HTTP_PORT=9444         # HTTP proxy port
-BASE_DOMAIN=localhost  # Base domain for subdomains
+# All tests
+npm run test
+
+# Backend tests only
+npx nx test @truley-interview/backend
+
+# Frontend tests only
+npx nx test @truley-interview/frontend
 ```
 
-### CLI
+---
 
-```bash
-TRULEY-INTERVIEW_RELAY_URL=ws://localhost:8444  # Relay WebSocket URL
-TRULEY-INTERVIEW_AUTH_TOKEN=xxx                 # User auth token
-```
+## 📝 Key Technologies
 
-### Backend
+### Backend Stack
 
-```bash
-DATABASE_URL=postgresql://...
-POLAR_API_KEY=xxx      # Billing integration
-```
+- **NestJS 11** — Modular Node.js framework
+- **MikroORM 6** — TypeScript ORM with entity patterns
+- **PostgreSQL 17** — Primary database
+- **Passport** — JWT + OAuth (Google/GitHub)
+- **Pino** — High-performance logging
+- **Polar.sh** — Subscription billing
 
-## Project Structure
+### Frontend Stack
 
-```
-truley-interview/
-├── packages/
-│   ├── relay/           # Rust relay server
-│   ├── cli/             # Rust CLI client
-│   ├── backend/         # NestJS API
-│   ├── frontend/        # React + Vite dashboard
-│   ├── backend-shared/  # Shared entities
-│   ├── shared/          # Shared utilities
-│   └── migrator/        # DB migrations
-├── scripts/             # Dev scripts
-└── dev-containers/      # Local infrastructure
-```
+- **React 19** — UI library
+- **Vite 7** — Build tool
+- **React Router 7** — Client-side routing
+- **TanStack Query** — Server state management
+- **Tailwind CSS 4** — Utility-first styling
+- **shadcn/ui** — Component primitives
+- **Zod** — Runtime type validation
 
-## Scripts
+### Infrastructure
 
-```bash
-npm run dev              # Start backend + frontend
-npm run frontend:dev     # Start the Vite frontend only
-npm run backend:dev      # Start the backend only
-npm run migrator:up      # Run migrations
-npm run migrator:down    # Rollback migrations
-npm run typecheck        # Type checking
-npm run lint             # Linting
-npm run test             # Run tests
-```
+- **Nx** — Monorepo orchestration
+- **Docker** — PostgreSQL containerization
+- **GitHub Actions** — CI/CD pipelines
 
-## License
+---
 
-[AGPL-3.0](LICENSE)
+## 🎓 For Candidates
+
+### Before You Start
+
+1. **Read CLAUDE.md** — Understand project conventions
+2. **Check docs/api-design.md** — See API specifications
+3. **Review docs/ui-guidelines.md** — Follow design patterns
+4. **Run existing tests** — Understand testing patterns
+
+### During Implementation
+
+1. **Start with TypeScript types** — Define interfaces first
+2. **Follow existing patterns** — Match code style
+3. **Handle errors explicitly** — No silent failures
+4. **Write tests as you go** — Don't leave for the end
+
+### Common Pitfalls
+
+❌ Don't:
+
+- Suppress type errors with `as any`
+- Ignore existing folder structure
+- Skip error handling
+- Use random color values
+- Leave console.log in production code
+
+✅ Do:
+
+- Ask clarifying questions early
+- Reference existing similar code
+- Commit frequently with clear messages
+- Test edge cases (empty state, errors)
+
+---
+
+## 🤝 Contributing
+
+This is an interview platform — contributions should maintain:
+
+1. **Production quality** — Real-world patterns, not toy examples
+2. **Clear boundaries** — 1-hour achievable scope
+3. **Objective evaluation** — Clear success criteria
+4. **Tech diversity** — Backend, frontend, database options
+
+---
+
+## 📄 License
+
+[AGPL-3.0](LICENSE) — Open source with copyleft provisions
+
+---
+
+## 🎯 Philosophy
+
+> "Good engineers don't solve toy problems perfectly. They solve real problems pragmatically."
+
+Truley Interview evaluates **practical engineering judgment**, not algorithmic memorization. We assess:
+
+- **Code organization** — Can they structure maintainable code?
+- **Error handling** — Do they anticipate failure modes?
+- **Pattern matching** — Can they read and follow conventions?
+- **Communication** — Do they ask clarifying questions?
+
+The best candidates don't write the most code — they write the **right** code.

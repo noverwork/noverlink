@@ -49,9 +49,6 @@ test-output
 .next
 out
 
-# Rust
-target/
-
 # Environment variables
 .env
 .env.local

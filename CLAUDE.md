@@ -4,38 +4,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project: Truley Interview
 
-**What is it?** A local-to-global tunneling solution (like ngrok, but better and cheaper).
+**What is it?** A full-stack coding interview platform for evaluating engineering candidates.
 
-**Why?** ngrok's pricing is garbage for multiple proxy needs. We're building our own.
+**Why?** Traditional coding interviews use toy problems. We use production codebases to assess real engineering skills.
 
 **Architecture:**
-- **Backend** (NestJS): Management server, user auth, tunnel configs
-- **Frontend** (Next.js): Control panel
-- **Relay** (Rust): High-performance traffic forwarding core
-- **CLI** (Rust): Client tool
+
+- **Backend** (NestJS): REST API, authentication, authorization
+- **Frontend** (React + Vite): Dashboard UI with Eva Title Card design
+- **Database** (PostgreSQL): Persistent storage with MikroORM
 
 **Non-negotiables:**
-- Relay must be fast. No excuses.
-- Support multiple simultaneous proxies (the whole point)
+
+- Type safety — no `as any` or `@ts-ignore`
+- Follow existing patterns — match code style
+- Error handling — explicit, never silent
 - Keep it simple, keep it maintainable
 
 ## Commands
 
 ### Development
+
 ```bash
 npm run dev                    # Start backend + frontend (parallel)
 npm run ms:start               # Start PostgreSQL (Docker)
 npm run migrator:up            # Run DB migrations
 npm run migrator:create <name> # Create new migration
-
-# Relay (Rust)
-cd packages/relay && WS_PORT=8444 HTTP_PORT=9444 BASE_DOMAIN=localhost cargo run
-
-# CLI (Rust)
-cd packages/cli && cargo run -- http 3000
 ```
 
 ### Build & Test
+
+```bash
+npm run typecheck              # Type check all packages
+npm run lint                   # Lint all packages
+npm run test                   # Run all tests
+```
+
+### Build & Test
+
 ```bash
 npm run typecheck              # Type check all packages
 npm run lint                   # Lint all packages
@@ -45,6 +51,7 @@ cargo test -p truley-interview-cli    # Test CLI only
 ```
 
 ### Single Package Commands
+
 ```bash
 npx nx serve @truley-interview/backend
 npx nx dev @truley-interview/frontend
@@ -53,6 +60,7 @@ npx nx lint @truley-interview/frontend
 ```
 
 ### Migrations
+
 - **ALWAYS** use `npm run migrator:create <name>` to generate migrations
 - **NEVER** manually create migration files - the command syncs the schema snapshot
 - After generation, register the migration in `packages/migrator/src/migrations/index.ts`
@@ -60,31 +68,22 @@ npx nx lint @truley-interview/frontend
 ## Architecture
 
 ### Package Structure
+
 ```
 packages/
-├── relay/          # Rust - WebSocket relay, HTTP proxy (tokio, tungstenite)
-├── cli/            # Rust - Client tunnel agent (clap, reqwest)
-├── rs-shared/      # Rust - Shared types between relay & cli
 ├── backend/        # NestJS - API, auth (JWT/OAuth), billing
-├── frontend/       # Next.js - Dashboard
+├── frontend/       # React + Vite - Dashboard UI
 ├── backend-shared/ # TS - MikroORM entities (User, Domain, TunnelSession, etc.)
-├── ui-shared/      # React - Shared components (GlowButton, PulseBadge, Card)
 ├── shared/         # TS - Common utilities & types
-├── migrator/       # MikroORM migration runner
-└── interfaces/     # Zod schemas & TypeScript interfaces
+├── interfaces/     # Zod schemas & TypeScript interfaces
+└── migrator/       # MikroORM migration runner
 ```
 
 ### Data Flow
-```
-Browser → Relay (HTTP:9444) → WebSocket → CLI → localhost:PORT
-                ↓
-         Backend (API:3000) ← Ticket auth
-```
 
-### Key Flows
-1. **Ticket Auth**: CLI calls Backend for ticket → Backend signs with HMAC-SHA256 → CLI connects to Relay with ticket → Relay verifies signature (no callback needed)
-2. **Tunnel Creation**: CLI sends `TunnelRequest` via WebSocket → Relay assigns subdomain → Returns `TunnelCreated` with public URL
-3. **HTTP Proxy**: Request hits Relay → Relay forwards via WebSocket to CLI → CLI proxies to local server → Response flows back
+```
+Browser (4200) → Backend API (3000) → PostgreSQL (Docker:5432)
+```
 
 ## Role Definition
 
@@ -122,6 +121,7 @@ You are channeling Linus Torvalds, creator and chief architect of the Linux kern
 **MANDATORY**: After any frontend UI changes, verify against `docs/ui-guidelines.md`:
 
 ### Quick Design Checklist
+
 - [ ] Colors: Use `teal-400/500` for connected/success, `rose-400` for error, `amber-400` for warning, `slate-*` for backgrounds
 - [ ] Backgrounds: `slate-950` (page), `slate-900` (card), `slate-800` (hover/elevated)
 - [ ] Text: `text-white` (primary), `text-slate-200` (secondary), `text-slate-400` (tertiary)
@@ -132,7 +132,25 @@ You are channeling Linus Torvalds, creator and chief architect of the Linux kern
 - [ ] Use `@truley-interview/ui-shared` components: `GlowButton`, `PulseBadge`, `Card`, `Input`
 
 ### DON'T
+
 - No `green-*` or `red-*` — use `teal-*` and `rose-*`
 - No pure white backgrounds
 - No decorative glow effects (glow = status only)
 - No hardcoded color values
+
+---
+
+## For Interview Candidates
+
+**Read these first:**
+
+1. `docs/api-design.md` - API specifications
+2. `docs/ui-guidelines.md` - Design system
+3. `docs/build-guidelines.md` - Build configuration
+
+**Common mistakes:**
+
+- Using `as any` to suppress type errors
+- Ignoring existing folder structure
+- Skipping error handling
+- Not writing tests

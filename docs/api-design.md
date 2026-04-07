@@ -6,11 +6,9 @@
 
 ### Authentication Methods
 
-| 方法 | Header | 用途 |
-|------|--------|------|
-| JWT | `Authorization: Bearer <accessToken>` | Web 前端 |
-| CLI Token | `Authorization: Bearer nv_<token>` | CLI 工具 |
-| Relay Secret | `X-Relay-Secret: <secret>` | Relay 服務 |
+| 方法 | Header                                | 用途     |
+| ---- | ------------------------------------- | -------- |
+| JWT  | `Authorization: Bearer <accessToken>` | Web 前端 |
 
 ---
 
@@ -18,39 +16,25 @@
 
 ### Auth Module
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/auth/register` | - | 用戶註冊 |
-| POST | `/api/auth/login` | - | 用戶登入 |
-| POST | `/api/auth/refresh` | - | 刷新 Token |
-| GET | `/api/auth/google` | - | Google OAuth |
-| GET | `/api/auth/github` | - | GitHub OAuth |
-| POST | `/api/auth/device` | - | 開始設備授權流程 |
-| POST | `/api/auth/device/poll` | - | 輪詢設備授權狀態 |
-| POST | `/api/auth/device/approve` | JWT | 批准設備授權 |
-| POST | `/api/auth/device/deny` | JWT | 拒絕設備授權 |
-| GET | `/api/auth/me` | JWT | 獲取當前用戶資訊 |
-
-### Tunnels Module
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/tunnels/ticket` | CLI Token | 獲取 Relay 連接票據 |
-
-### Relay Module (Internal)
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/relay/sessions` | Relay Secret | 創建 Tunnel Session |
-| PATCH | `/api/relay/sessions/:id/close` | Relay Secret | 關閉 Session |
-| POST | `/api/relay/sessions/:id/requests` | Relay Secret | 儲存 HTTP 請求日誌 |
+| Method | Endpoint                   | Auth | Description      |
+| ------ | -------------------------- | ---- | ---------------- |
+| POST   | `/api/auth/register`       | -    | 用戶註冊         |
+| POST   | `/api/auth/login`          | -    | 用戶登入         |
+| POST   | `/api/auth/refresh`        | -    | 刷新 Token       |
+| GET    | `/api/auth/google`         | -    | Google OAuth     |
+| GET    | `/api/auth/github`         | -    | GitHub OAuth     |
+| POST   | `/api/auth/device`         | -    | 開始設備授權流程 |
+| POST   | `/api/auth/device/poll`    | -    | 輪詢設備授權狀態 |
+| POST   | `/api/auth/device/approve` | JWT  | 批准設備授權     |
+| POST   | `/api/auth/device/deny`    | JWT  | 拒絕設備授權     |
+| GET    | `/api/auth/me`             | JWT  | 獲取當前用戶資訊 |
 
 ### Billing Module
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/billing/subscription` | JWT | 獲取訂閱資訊 |
-| POST | `/api/billing/webhook/*` | Webhook | Polar 回調 |
+| Method | Endpoint                    | Auth    | Description  |
+| ------ | --------------------------- | ------- | ------------ |
+| GET    | `/api/billing/subscription` | JWT     | 獲取訂閱資訊 |
+| POST   | `/api/billing/webhook/*`    | Webhook | Polar 回調   |
 
 ---
 
@@ -74,17 +58,15 @@
 | `cursor` | string | - | 分頁游標 |
 
 **Response:**
+
 ```json
 {
   "sessions": [
     {
       "id": "uuid",
-      "subdomain": "happy-cat",
-      "publicUrl": "https://happy-cat.truley-interview.dev",
+      "name": "My Tunnel",
       "localPort": 3000,
       "status": "active",
-      "clientIp": "192.168.1.1",
-      "clientVersion": "0.1.0",
       "connectedAt": "2024-01-15T10:30:00Z",
       "closedAt": null,
       "bytesIn": 1024000,
@@ -106,15 +88,13 @@
 **Auth:** JWT
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
-  "subdomain": "happy-cat",
-  "publicUrl": "https://happy-cat.truley-interview.dev",
+  "name": "My Tunnel",
   "localPort": 3000,
   "status": "active",
-  "clientIp": "192.168.1.1",
-  "clientVersion": "0.1.0",
   "connectedAt": "2024-01-15T10:30:00Z",
   "closedAt": null,
   "bytesIn": 1024000,
@@ -145,6 +125,7 @@
 | `status` | string | - | 過濾狀態碼 (e.g., `2xx`, `4xx`, `500`) |
 
 **Response:**
+
 ```json
 {
   "logs": [
@@ -174,6 +155,7 @@
 **Auth:** JWT
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -198,6 +180,7 @@
 | `period` | `today` \| `week` \| `month` | `today` | 統計時間範圍 |
 
 **Response:**
+
 ```json
 {
   "activeTunnels": 2,
@@ -228,6 +211,7 @@
 **Auth:** JWT
 
 **Response:**
+
 ```json
 {
   "keys": [
@@ -251,6 +235,7 @@
 **Auth:** JWT
 
 **Request Body:**
+
 ```json
 {
   "name": "My Laptop"
@@ -258,6 +243,7 @@
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -279,6 +265,7 @@
 **Auth:** JWT
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -298,6 +285,7 @@
 **Auth:** JWT
 
 **Response:**
+
 ```json
 {
   "period": {
@@ -329,6 +317,7 @@
 **Auth:** JWT
 
 **Request Body:**
+
 ```json
 {
   "productId": "hobbyist_monthly"
@@ -336,6 +325,7 @@
 ```
 
 **Response:**
+
 ```json
 {
   "checkoutUrl": "https://polar.sh/checkout/..."
@@ -357,6 +347,7 @@
 | `cursor` | string | - | 分頁游標 |
 
 **Response:**
+
 ```json
 {
   "invoices": [
@@ -388,6 +379,7 @@
 **Auth:** JWT
 
 **Response:**
+
 ```json
 {
   "domains": [
@@ -412,6 +404,7 @@
 **Auth:** JWT
 
 **Request Body:**
+
 ```json
 {
   "hostname": "myapp"
@@ -419,6 +412,7 @@
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -438,6 +432,7 @@
 **Auth:** JWT
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -448,36 +443,40 @@
 
 ## 頁面與 API 對應表
 
-| 頁面 | 需要的 API |
-|------|-----------|
-| **Dashboard** | `GET /tunnels/sessions?status=active`, `GET /tunnels/stats` |
-| **Tunnels** | `GET /tunnels/sessions`, `GET /tunnels/sessions/:id` |
-| **Tunnel Detail** | `GET /tunnels/sessions/:id`, `GET /tunnels/sessions/:id/logs` |
-| **Settings** | `GET /auth/me`, `GET /auth/api-keys`, `POST /auth/api-keys`, `DELETE /auth/api-keys/:id` |
-| **Billings** | `GET /billing/usage`, `GET /billing/subscription`, `POST /billing/checkout`, `GET /billing/invoices` |
-| **Device Auth** | `POST /auth/device/approve`, `POST /auth/device/deny` (已存在) |
+| 頁面              | 需要的 API                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| **Dashboard**     | `GET /tunnels/sessions?status=active`, `GET /tunnels/stats`                                          |
+| **Tunnels**       | `GET /tunnels/sessions`, `GET /tunnels/sessions/:id`                                                 |
+| **Tunnel Detail** | `GET /tunnels/sessions/:id`, `GET /tunnels/sessions/:id/logs`                                        |
+| **Settings**      | `GET /auth/me`, `GET /auth/api-keys`, `POST /auth/api-keys`, `DELETE /auth/api-keys/:id`             |
+| **Billings**      | `GET /billing/usage`, `GET /billing/subscription`, `POST /billing/checkout`, `GET /billing/invoices` |
+| **Device Auth**   | `POST /auth/device/approve`, `POST /auth/device/deny` (已存在)                                       |
 
 ---
 
 ## 實作優先順序
 
 ### Phase 1: Core (Dashboard & Tunnels)
+
 1. `GET /api/tunnels/sessions` - 列出 sessions
 2. `GET /api/tunnels/sessions/:id` - Session 詳情
 3. `GET /api/tunnels/sessions/:id/logs` - 請求日誌
 4. `GET /api/tunnels/stats` - 統計摘要
 
 ### Phase 2: Settings
+
 5. `GET /api/auth/api-keys` - 列出 API Keys
 6. `POST /api/auth/api-keys` - 創建 API Key
 7. `DELETE /api/auth/api-keys/:id` - 刪除 API Key
 
 ### Phase 3: Billing
+
 8. `GET /api/billing/usage` - 使用量
 9. `POST /api/billing/checkout` - 創建結帳
 10. `GET /api/billing/invoices` - 發票歷史
 
 ### Phase 4: Optional
+
 11. `GET /api/domains` - 列出域名
 12. `POST /api/domains` - 保留域名
 13. `DELETE /api/domains/:id` - 釋放域名
@@ -505,12 +504,12 @@
 
 ### Common Error Codes
 
-| Status | Error | Description |
-|--------|-------|-------------|
-| 400 | Bad Request | 請求參數無效 |
-| 401 | Unauthorized | 未認證或 token 過期 |
-| 403 | Forbidden | 無權限訪問資源 |
-| 404 | Not Found | 資源不存在 |
-| 409 | Conflict | 資源衝突 (如域名已被使用) |
-| 429 | Too Many Requests | 請求頻率過高 |
-| 500 | Internal Server Error | 伺服器錯誤 |
+| Status | Error                 | Description               |
+| ------ | --------------------- | ------------------------- |
+| 400    | Bad Request           | 請求參數無效              |
+| 401    | Unauthorized          | 未認證或 token 過期       |
+| 403    | Forbidden             | 無權限訪問資源            |
+| 404    | Not Found             | 資源不存在                |
+| 409    | Conflict              | 資源衝突 (如域名已被使用) |
+| 429    | Too Many Requests     | 請求頻率過高              |
+| 500    | Internal Server Error | 伺服器錯誤                |
