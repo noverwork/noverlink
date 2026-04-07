@@ -6,7 +6,6 @@ import { Environment } from '@truley-interview/shared';
 
 import { MIGRATION_ROOT } from './constant';
 import MikroOrmConfig from './mikro-orm.config';
-import { DevUserSeeder } from './seeders';
 
 const log = {
   error: (...args: unknown[]) => process.stderr.write(args.join(' ') + '\n'),
@@ -48,13 +47,6 @@ export const refreshSchema = async () => {
   await orm.close(true);
 };
 
-export const seed = async () => {
-  const orm = await MikroORM.init<PostgreSqlDriver>({ ...MikroOrmConfig });
-  const seeder = orm.getSeeder();
-  await seeder.seed(DevUserSeeder);
-  await orm.close();
-};
-
 const command = process.env.MIGRATOR_COMMAND || process.argv[2];
 
 if (command === 'create') {
@@ -70,11 +62,9 @@ if (command === 'create') {
   void down();
 } else if (command === 'refresh') {
   void refreshSchema();
-} else if (command === 'seed') {
-  void seed();
 } else if (command) {
   log.error(
-    `Error: Invalid command '${command}'. Valid commands: up, down, refresh, create <name>, seed`,
+    `Error: Invalid command '${command}'. Valid commands: up, down, refresh, create <name>`,
   );
   process.exit(1);
 }
