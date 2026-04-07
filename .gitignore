@@ -62,3 +62,6 @@ vitest.config.*.timestamp*
 # Playwright
 playwright-report
 playwright/.cache
+
+# TypeScript build info
+**/tsconfig.tsbuildinfo
